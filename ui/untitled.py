@@ -20,6 +20,7 @@ class Ui_Form(object):
         self.toolButton.setObjectName("toolButton")
 
         self.retranslateUi(Form)
+        self.toolButton.clicked.connect(Form.close)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):

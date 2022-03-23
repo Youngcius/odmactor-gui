@@ -1,6 +1,6 @@
 import sys
-from PyQt5 import QtWidgets
 from ui import odmactor_window
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 
 class OdmactorWindow(QtWidgets.QMainWindow):
@@ -9,10 +9,11 @@ class OdmactorWindow(QtWidgets.QMainWindow):
         self.ui = odmactor_window.Ui_OdmactorMainWindow()
         self.ui.setupUi(self)
 
+        # self.scheduler =
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-
     window = OdmactorWindow()
     window.show()
     sys.exit(app.exec())
