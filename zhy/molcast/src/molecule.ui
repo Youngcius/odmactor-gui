@@ -1,0 +1,944 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>948</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>分子属性预测系统</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_9">
+    <item row="0" column="0">
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QToolBox" name="toolBox">
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="page">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>313</width>
+          <height>833</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Molecule</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QGroupBox" name="groupBoxMolecule">
+           <property name="title">
+            <string>Molecule</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="pushButtonWebView">
+              <property name="text">
+               <string>浏览器中打开（观察交互图形）</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelNo">
+              <property name="text">
+               <string>所观察分子：NO.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="spinBoxNo"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBoxDataset">
+           <property name="title">
+            <string>Dataset</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelHistType">
+              <property name="text">
+               <string>统计信息</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxHistType">
+              <item>
+               <property name="text">
+                <string>旋转常量 A</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>旋转常量 B</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>旋转常量 C</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>偶极矩</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>各向同性极化率</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>HOMO</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>LUMO</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>带隙</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>空间最概然位置</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>零点振动能</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>内能(0K)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>内能(RT)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>焓(RT)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gibbs自由能(RT)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>热容(RT)</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelSplit">
+              <property name="text">
+               <string>Train:Total</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="doubleSpinBoxSplit"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="title">
+            <string>Molecule Manipulation</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>功能改进中...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>313</width>
+          <height>833</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Model</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>Model Setting</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>模型选择</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxModelSelect">
+              <item>
+               <property name="text">
+                <string>GraphSAGE</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>GCN</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>MPNN</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>RandomForest</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>XGBoost</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>预测属性</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="comboBoxPropertyPredict">
+              <item>
+               <property name="text">
+                <string>偶极矩</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>各向同性极化率</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>HOMO</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>LUMO</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>带隙</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>空间最概然位置</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>零点振动能</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>内能(0K)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>内能(RT)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>焓(RT)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gibbs自由能(RT)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>热容(RT)</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string>New or Existed</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_16">
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="checkBoxUseNew">
+              <property name="text">
+               <string>基于数据集重新训练</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="checkBoxUseExisted">
+              <property name="text">
+               <string>基于已有模型预测</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>Parameter Regulation</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_3">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>功能改进中...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>分子信息</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_13">
+         <item row="0" column="0" rowspan="2">
+          <widget class="QGroupBox" name="groupBoxGraph2D">
+           <property name="title">
+            <string>分子图结构</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_12">
+            <item row="0" column="0">
+             <widget class="QScrollArea" name="scrollArea1">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_2">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>301</width>
+                 <height>196</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_15">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelFigure1">
+                  <property name="layoutDirection">
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="text">
+                   <string>Figure1</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QScrollArea" name="scrollArea2">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_3">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>301</width>
+                 <height>196</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_7">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelFigure2">
+                  <property name="text">
+                   <string>Figure2</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QScrollArea" name="scrollArea1_2">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_4">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>301</width>
+                 <height>196</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_14">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelFigure1_2">
+                  <property name="text">
+                   <string>Figure1</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QScrollArea" name="scrollArea2_2">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_5">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>301</width>
+                 <height>196</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_11">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelFigure2_2">
+                  <property name="text">
+                   <string>Figure2</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QGroupBox" name="groupBoxMoleculeInfo">
+           <property name="title">
+            <string>分子属性信息</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Smiles表示</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="pushButtonPositions">
+              <property name="text">
+               <string>原子空间位置(...)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEditSmiles"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineEditInChI"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>InChI表示</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="pushButtonCharges">
+              <property name="text">
+               <string>原子核电荷数(...)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="3">
+             <widget class="QTableWidget" name="tableWidgetProperties">
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>90</number>
+              </attribute>
+              <attribute name="horizontalHeaderMinimumSectionSize">
+               <number>90</number>
+              </attribute>
+              <attribute name="verticalHeaderDefaultSectionSize">
+               <number>20</number>
+              </attribute>
+              <attribute name="verticalHeaderMinimumSectionSize">
+               <number>19</number>
+              </attribute>
+              <row>
+               <property name="text">
+                <string>旋转常量 A</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>旋转常量 B</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>旋转常量 C</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>偶极矩</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>各向同性极化率</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>HOMO</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>LUMO</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>带隙</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>空间最概然位置</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>零点振动能</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>内能(0K)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>内能(RT)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>焓(RT)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Gibbs自由能(RT)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>热容(RT)</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Value</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Unit</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QGroupBox" name="groupBoxGraph3D">
+           <property name="title">
+            <string>三维结构</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_10">
+            <item row="0" column="0">
+             <widget class="QScrollArea" name="scrollArea3">
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>313</width>
+                 <height>384</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_8">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelFigure3">
+                  <property name="text">
+                   <string>Figure3</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>数据集信息</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <widget class="QGroupBox" name="groupBoxStatistics">
+           <property name="title">
+            <string>属性统计图</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBoxStatDesc">
+           <property name="title">
+            <string>统计描述</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_17">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>功能改进中...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>网络模型</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <widget class="QGroupBox" name="groupBoxModelView">
+           <property name="title">
+            <string>模型视图</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>功能改进中...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBoxResult">
+           <property name="title">
+            <string>预测结果</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_F">
+    <property name="title">
+     <string>文件(&amp;F)</string>
+    </property>
+    <addaction name="actionOpenFile"/>
+    <addaction name="actionOpenFolder"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menu_M">
+    <property name="title">
+     <string>模型(&amp;M)</string>
+    </property>
+    <widget class="QMenu" name="menu">
+     <property name="title">
+      <string>模型说明</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../icons/图神经网络.svg</normaloff>../icons/图神经网络.svg</iconset>
+     </property>
+     <addaction name="actionGraphSAGE"/>
+     <addaction name="actionGCN"/>
+     <addaction name="actionXGBoost"/>
+    </widget>
+    <addaction name="actionTrain"/>
+    <addaction name="actionPredict"/>
+    <addaction name="menu"/>
+   </widget>
+   <widget class="QMenu" name="menu_A">
+    <property name="title">
+     <string>关于(&amp;A)</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAboutQT"/>
+   </widget>
+   <addaction name="menu_F"/>
+   <addaction name="menu_M"/>
+   <addaction name="menu_A"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpenFile">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/文档.svg</normaloff>../icons/文档.svg</iconset>
+   </property>
+   <property name="text">
+    <string>打开文件</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionOpenFolder">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/文件.svg</normaloff>../icons/文件.svg</iconset>
+   </property>
+   <property name="text">
+    <string>打开目录</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/退出.svg</normaloff>../icons/退出.svg</iconset>
+   </property>
+   <property name="text">
+    <string>退出</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/保存.svg</normaloff>../icons/保存.svg</iconset>
+   </property>
+   <property name="text">
+    <string>保存</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/另存为.svg</normaloff>../icons/另存为.svg</iconset>
+   </property>
+   <property name="text">
+    <string>另存为</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionTrain">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/训练.svg</normaloff>../icons/训练.svg</iconset>
+   </property>
+   <property name="text">
+    <string>训练</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionPredict">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/测试.svg</normaloff>../icons/测试.svg</iconset>
+   </property>
+   <property name="text">
+    <string>预测</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/帮助.svg</normaloff>../icons/帮助.svg</iconset>
+   </property>
+   <property name="text">
+    <string>帮助</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/关于.svg</normaloff>../icons/关于.svg</iconset>
+   </property>
+   <property name="text">
+    <string>关于</string>
+   </property>
+  </action>
+  <action name="actionAboutQT">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons/qt.svg</normaloff>../icons/qt.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Qt Info</string>
+   </property>
+  </action>
+  <action name="actionGraphSAGE">
+   <property name="text">
+    <string>GraphSAGE</string>
+   </property>
+  </action>
+  <action name="actionGCN">
+   <property name="text">
+    <string>GCN</string>
+   </property>
+  </action>
+  <action name="actionXGBoost">
+   <property name="text">
+    <string>XGBoost</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
