@@ -10,4 +10,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.ui = odmactor_window.Ui_OdmactorMainWindow()
         self.ui.setupUi(self)
 
+
+        # self._builUI()
+
         # self.scheduler =
+
+    def _buildUI(self):
+        self.setCentralWidget(self.ui.Splitter)

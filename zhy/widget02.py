@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import Qt, pyqtSlot
 from ui import ui02
 
@@ -10,7 +10,6 @@ class MyWidget(QtWidgets.QWidget):
         super(MyWidget, self).__init__()
         self.ui = ui02.Ui_Form()
         self.ui.setupUi(self)
-
 
     # @QtCore.pyqtSlot()
     # def on_toolButton_clicked(self):
