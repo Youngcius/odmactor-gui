@@ -174,7 +174,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionHelp_triggered(self):
-        txt = 'Please contact the author whose email is on the "About" page.'
+
+        manual_website = 'https://github.com/Youngcius/odmactor/three/master/asset/doc/manual.md'
+        txt = 'Please refer the <a href = {}>online user manual</a>. ' \
+              'Or contact the author whose email is on the "About" page.'.format(manual_website)
         QtWidgets.QMessageBox.about(self, 'Help', txt)
 
     @pyqtSlot()
@@ -188,7 +191,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     # @pyqtSlot()
     # def on_spinBoxBinwidth_valueChange
     # TODO: on/off 切换状态时候
-    @pyqtSlot()
+    @pyqtSlot(bool)
     def on_pushButtonPhotonCountOnOff_clicked(self, checked):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
