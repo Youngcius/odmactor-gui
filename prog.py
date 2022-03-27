@@ -29,7 +29,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # self.scheduler =
         self.initSequenceFigure()
-        self.initPhotonCountFigure()
+        self.initPhotonCountChart()
 
         # Initialize hardware resources
         # self.asg = ASG()
@@ -42,6 +42,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         }
         # self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
         # self.counter.stop()
+
+
 
     def _buildUI(self):
         # self.setCentralWidget(self.ui.Splitter)
@@ -64,6 +66,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # ASG sequence table
         # self.ui.tableWidgetSequence .... 初始化
 
+
     def initSequenceFigure(self):
         seq_data = [
             [10, 20, 30, 10],
@@ -76,6 +79,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.seq_fig_canvas = FigureCanvas(self.seq_fig)
         # FigureCanvas.
         self.seq_fig_canvas.setParent(self.ui.groupBoxSequenceVisualization)
+
+        # self.seq_fig_canvas.setParent
         # add_axes_to_fig(seq_data, self.seq_fig, 1, 1,1)
         # ax1 = self.seq_fig.add_subplot(1, 1, 1)
         # xmax = 5
@@ -109,12 +114,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     ########################
     # Photon counting
-    def initPhotonCountFigure(self):
+    def initPhotonCountChart(self):
         """
         Demo
         """
         chart = QChart()
-        chartView = QChartView(self.ui.scrollArea3)
+        # chartView = QChartView(self.ui.scrollArea3)
+        chartView = self.ui.chartviewPhotonCount
         chartView.setChart(chart)
 
         # 创建曲线序列
