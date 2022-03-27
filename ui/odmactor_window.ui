@@ -38,8 +38,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>420</width>
-          <height>691</height>
+          <width>472</width>
+          <height>762</height>
          </rect>
         </property>
         <attribute name="label">
@@ -697,9 +697,9 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-95</y>
-          <width>403</width>
-          <height>858</height>
+          <y>0</y>
+          <width>472</width>
+          <height>962</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1198,8 +1198,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>420</width>
-          <height>691</height>
+          <width>472</width>
+          <height>670</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1209,7 +1209,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabPhotonCount">
         <attribute name="title">
@@ -1752,21 +1752,21 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_15">
             <item row="0" column="0">
-             <widget class="QPushButton" name="pushButton_6">
+             <widget class="QPushButton" name="pushButtonODMRFrequencyInterrupt">
               <property name="text">
                <string>Interrupt</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QPushButton" name="pushButton_7">
+             <widget class="QPushButton" name="pushButtonODMRFrequencySave">
               <property name="text">
                <string>Save</string>
               </property>
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QRadioButton" name="radioButton">
+             <widget class="QRadioButton" name="radioButtonODMRFrequencyShowCount">
               <property name="text">
                <string>Show count</string>
               </property>
@@ -1776,7 +1776,7 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QPushButton" name="pushButton_5">
+             <widget class="QPushButton" name="pushButtonODMRFrequencyFit">
               <property name="text">
                <string>Fit</string>
               </property>
@@ -1790,7 +1790,7 @@
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QRadioButton" name="radioButton_2">
+             <widget class="QRadioButton" name="radioButtonODMRFrequencyShowContrast">
               <property name="text">
                <string>Show contrast</string>
               </property>
@@ -1806,21 +1806,7 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_8">
             <item row="0" column="0">
-             <widget class="QScrollArea" name="scrollArea_2">
-              <property name="widgetResizable">
-               <bool>true</bool>
-              </property>
-              <widget class="QWidget" name="scrollAreaWidgetContents_2">
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>0</y>
-                 <width>839</width>
-                 <height>581</height>
-                </rect>
-               </property>
-              </widget>
-             </widget>
+             <widget class="QtCharts::QChartView" name="chartviewODMRFrequency"/>
             </item>
            </layout>
           </widget>
@@ -1831,51 +1817,71 @@
         <attribute name="title">
          <string>Time-domain Detecting</string>
         </attribute>
-        <widget class="QGroupBox" name="groupBoxODMRTimeChart">
-         <property name="geometry">
-          <rect>
-           <x>120</x>
-           <y>350</y>
-           <width>111</width>
-           <height>126</height>
-          </rect>
-         </property>
-         <property name="title">
-          <string>Time-domain Measurement Chart</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_14">
-          <item row="0" column="0">
-           <widget class="QScrollArea" name="scrollArea">
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>85</width>
-               <height>85</height>
-              </rect>
-             </property>
-            </widget>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QGroupBox" name="groupBoxODMRTimeChartOperation">
-         <property name="geometry">
-          <rect>
-           <x>180</x>
-           <y>50</y>
-           <width>120</width>
-           <height>80</height>
-          </rect>
-         </property>
-         <property name="title">
-          <string>GroupBox</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QGroupBox" name="groupBoxODMRTimeChartOperation">
+           <property name="title">
+            <string>GroupBox</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_16">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="pushButtonODMRTimeInterreupt">
+              <property name="text">
+               <string>Interrupt</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="pushButtonODMRTimeSave">
+              <property name="text">
+               <string>Save</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="pushButton_11">
+              <property name="text">
+               <string>(reserved)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pushButtonODMRTimeFit">
+              <property name="text">
+               <string>Fit</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="pushButton_12">
+              <property name="text">
+               <string>(reserved)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="pushButton_14">
+              <property name="text">
+               <string>(reserved)</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBoxODMRTimeChart">
+           <property name="title">
+            <string>Time-domain Measurement Chart</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_14">
+            <item row="0" column="0">
+             <widget class="QtCharts::QChartView" name="chartviewODMRTime"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </widget>
@@ -1888,7 +1894,7 @@
      <x>0</x>
      <y>0</y>
      <width>1341</width>
-     <height>26</height>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">

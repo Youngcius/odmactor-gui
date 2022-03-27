@@ -31,18 +31,29 @@ class MyWidget(QtWidgets.QWidget):
         self.ui.lineEdit.setAlignment(Qt.AlignCenter)
         self.ui.pushButtonLeft.setChecked(False)
         self.ui.pushButtonRight.setChecked(False)
+    @pyqtSlot()
+    def on_pushButtonItalic_clicked(self):
+        while True:
+            print('Italic')
 
+    @pyqtSlot()
+    def on_pushButtonBold_clicked(self):
+        while True:
+            print('checked Bold')
     @pyqtSlot(bool)
     def on_pushButtonBold_clicked(self, checked):
         font = self.ui.lineEdit.font()
         font.setBold(checked)
         self.ui.lineEdit.setFont(font)
-
+        while True:
+            print('Bold')
     @pyqtSlot(bool)
     def on_pushButtonItalic_clicked(self, checked):
         font = self.ui.lineEdit.font()
         font.setItalic(checked)
         self.ui.lineEdit.setFont(font)
+        while True:
+            print('Italic')
 
     @pyqtSlot(bool)
     def on_pushButtonUnderline_clicked(self, checked):
