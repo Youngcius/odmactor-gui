@@ -5,13 +5,13 @@ Dynamical Decoupling detection (time-domain measurement)
 2. scanning spin evolution time
 """
 
-from odmactor.scheduler.base import Scheduler
+from .base import Scheduler
 import datetime
 import time
 import os
 import numpy as np
 import scipy.constants as C
-from odmactor.utils import cal_contrast
+from utils import cal_contrast
 import TimeTagger as tt
 import pickle
 

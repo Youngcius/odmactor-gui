@@ -14,10 +14,10 @@ import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
 from RsInstrument import RsInstrument
-from odmactor.utils.asg import ASG
-from odmactor.utils import dBm_to_mW, mW_to_dBm
+from utils.asg import ASG
+from utils import dBm_to_mW, mW_to_dBm
 from typing import List, Any, Optional
-from odmactor.utils.sequence import seq_to_str, seq_to_fig
+from utils.sequence import seq_to_str, seq_to_fig
 from matplotlib.figure import Figure
 
 

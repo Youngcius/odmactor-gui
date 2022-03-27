@@ -4,7 +4,7 @@ Spin manipulation classes
 
 """
 
-from odmactor.scheduler.base import Scheduler
+from .base import Scheduler
 
 
 class SpinControlScheduler(Scheduler):

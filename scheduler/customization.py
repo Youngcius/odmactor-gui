@@ -1,8 +1,7 @@
 """
 Customized Scheduler
 """
-from odmactor.scheduler.base import Scheduler
-
+from .base import Scheduler
 
 class CustomizedScheduler(Scheduler):
     pass

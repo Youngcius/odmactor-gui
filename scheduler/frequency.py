@@ -13,9 +13,8 @@ import time
 import numpy as np
 import scipy.constants as C
 from typing import List
-from odmactor.scheduler.base import FrequencyDomainScheduler
-from odmactor import utils
-
+from .base import FrequencyDomainScheduler
+import utils
 
 class CWScheduler(FrequencyDomainScheduler):
     """

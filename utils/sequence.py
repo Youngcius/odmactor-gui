@@ -7,7 +7,7 @@ from typing import List, Union
 from operator import concat
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-
+import numpy as np
 
 class SequenceString:
     """
@@ -79,7 +79,6 @@ def add_axes_to_fig(seq: List[List[int]], fig: Figure, num_row, num_col, index):
         levels.append(level)
 
     # fig = plt.figure(figsize=(12, 1 * len(idx_exist)))
-    # fig = plt.figure()
     for i, ch in enumerate(channels):
         ax.stairs(levels[i], baseline=baselines[i] - 0.03, label=ch, fill=True)
     ax.set_title('Sequences', fontsize=18)
@@ -88,13 +87,17 @@ def add_axes_to_fig(seq: List[List[int]], fig: Figure, num_row, num_col, index):
 
     ax.set_xlim(0, max([sum(s) for s in seq_eff]))
     ax.set_ylim(-0.1, max(levels[-1]) + 0.1)
-    # ax.set_xticks(fontsize=13)
+    ax.set_xticks(fontsize=13)
 
 
 def seq_to_fig(seq: List[List[Union[float, int]]]) -> Figure:
     """
     Convert sequences (list of list) into a Figure instance
     """
+    fig = plt.figure()
+    if np.sum(seq) == 0:
+        return fig
+
     N = len(seq)  # num_channels
     idx_exist = [i for i, l in enumerate(seq) if sum(l) > 0]
     n = len(idx_exist)  # effective number of channels
@@ -128,7 +131,6 @@ def seq_to_fig(seq: List[List[Union[float, int]]]) -> Figure:
         baselines.append(b)
         levels.append(level)
 
-    fig = plt.figure(figsize=(12, 1 * len(idx_exist)))
     for i, ch in enumerate(channels):
         plt.stairs(levels[i], baseline=baselines[i] - 0.03, label=ch, fill=True)
     # plt.title('Sequences', fontsize=18)
@@ -137,7 +139,8 @@ def seq_to_fig(seq: List[List[Union[float, int]]]) -> Figure:
     plt.yticks(baselines, channels, fontsize=13)
 
     plt.xlim(0, max([sum(s) for s in seq_eff]))
-    plt.ylim(-0.1, max(levels[-1]) + 0.1)
+    plt.ylim(-0.1, baselines[-1] + 1.1)
+    # plt.xticks()
     plt.xticks(fontsize=13)
     return fig
 

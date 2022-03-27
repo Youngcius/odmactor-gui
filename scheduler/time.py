@@ -13,11 +13,11 @@ Time-domain ODMR detecting classes
     2) scanning free precession time
 """
 
-from odmactor.scheduler.base import TimeDomainScheduler
+from .base import TimeDomainScheduler
 import time
 import scipy.constants as C
 from typing import List
-from odmactor import utils
+import utils
 
 
 class RamseyScheduler(TimeDomainScheduler):

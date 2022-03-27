@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1341</width>
-    <height>854</height>
+    <width>1645</width>
+    <height>1088</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>472</width>
-          <height>762</height>
+          <width>477</width>
+          <height>925</height>
          </rect>
         </property>
         <attribute name="label">
@@ -634,7 +634,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_15">
               <property name="text">
-               <string>Tagger trigger</string>
+               <string>ASG trigger</string>
               </property>
              </widget>
             </item>
@@ -698,8 +698,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>472</width>
-          <height>962</height>
+          <width>403</width>
+          <height>858</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1198,8 +1198,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>472</width>
-          <height>670</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1209,7 +1209,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabPhotonCount">
         <attribute name="title">
@@ -1366,7 +1366,7 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_17">
             <item row="0" column="0">
-             <widget class="QWidget" name="widget" native="true">
+             <widget class="QWidget" name="widgetSequenceVisualization" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -1511,6 +1511,18 @@
                </property>
                <property name="whatsThis">
                 <string/>
+               </property>
+               <property name="textAlignment">
+                <set>AlignTrailing|AlignVCenter</set>
+               </property>
+               <property name="background">
+                <brush brushstyle="NoBrush">
+                 <color alpha="255">
+                  <red>0</red>
+                  <green>0</green>
+                  <blue>0</blue>
+                 </color>
+                </brush>
                </property>
               </item>
              </widget>
@@ -1675,7 +1687,7 @@
          <item>
           <widget class="QGroupBox" name="groupBoxODMRTimeChartOperation">
            <property name="title">
-            <string>GroupBox</string>
+            <string>Operation</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_16">
             <item row="0" column="0">
@@ -1747,8 +1759,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1341</width>
-     <height>37</height>
+     <width>1645</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">
