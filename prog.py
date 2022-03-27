@@ -10,7 +10,7 @@ from PyQt5.QtChart import QChartView, QChart, QLineSeries, QValueAxis
 
 # 继承关系：QGraphicsItem --> QGraphicsObject --> QGraphicsWidget --> QChart --> QPolarChart
 
-import TimeTagger as tt
+# import TimeTagger as tt
 
 from ui import odmactor_window
 from utils.sequence import *
@@ -32,9 +32,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.initPhotonCountFigure()
 
         # Initialize hardware resources
-        self.asg = ASG()
+        # self.asg = ASG()
         # self.tagger = tt.TimeTagger()
-        self.tagger: tt.TimeTagger = None
+        # self.tagger: tt.TimeTagger = None
         self.photonCountConfig = {
             'channels': [1],
             'binwidth': 0,
