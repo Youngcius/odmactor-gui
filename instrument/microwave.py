@@ -1,3 +1,4 @@
+import time
 from RsInstrument import RsInstrument
 
 
@@ -11,16 +12,17 @@ class Microwave(RsInstrument):
         super(Microwave, self).__init__('USB0::0x0AAD::0x0054::104174::INSTR', True, True)
 
     def set_frequency(self, freq):
-        # self.write_float('FREQUENCY', freq)
+        # super(Microwave, self).write_float('FREQUENCY', freq)
         print('MW frequency:', freq)
 
     def set_power(self, power):
-        # self.write_float('POW', power)
+        # super(Microwave, self).write_float('POW', power)
         print('MW power:', power)
 
-    def run_given_time(self, time):
-        # TODO: 补全
-        pass
+    def run_given_time(self, duration):
+        self.start()
+        time.sleep(duration)
+        self.stop()
 
     def start(self):
         # self.write_bool('OUTPUT:STATE', True)
@@ -29,3 +31,6 @@ class Microwave(RsInstrument):
     def stop(self):
         # self.write_bool('OUTPUT:STATE', False)
         print('MW stopped')
+
+    def close(self):
+        super(Microwave, self).close()

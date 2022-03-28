@@ -31,7 +31,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
@@ -698,8 +698,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>403</width>
-          <height>858</height>
+          <width>477</width>
+          <height>925</height>
          </rect>
         </property>
         <attribute name="label">
@@ -713,21 +713,21 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="pushButtonODMRLoadSequences">
               <property name="text">
                <string>Load Sequences</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="pushButtonODMRStartDetecting">
               <property name="text">
                <string>Start Detecting</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_4">
+             <widget class="QPushButton" name="pushButtonODMRSaveData">
               <property name="text">
                <string>Save Data</string>
               </property>
@@ -1121,7 +1121,7 @@
              </widget>
             </item>
             <item row="14" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRSignalReferenceReadoutInterval">
+             <widget class="QSpinBox" name="spinBoxODMRSignalReferenceInterval">
               <property name="maximum">
                <number>100000</number>
               </property>
@@ -1198,8 +1198,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>477</width>
+          <height>925</height>
          </rect>
         </property>
         <attribute name="label">

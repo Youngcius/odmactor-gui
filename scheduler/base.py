@@ -14,9 +14,9 @@ import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
 from RsInstrument import RsInstrument
-from utils.asg import ASG
+from instrument import ASG
 from utils import dBm_to_mW, mW_to_dBm
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Union
 from utils.sequence import seq_to_str, seq_to_fig
 from matplotlib.figure import Figure
 
@@ -76,7 +76,7 @@ class Scheduler(abc.ABC):
         else:
             self.epoch_omit = 0
 
-    def asg_connect_and_download_data(self, asg_data: List[List[float]]):
+    def asg_connect_and_download_data(self, asg_data: List[List[Union[float, int]]]):
         """
         Connect ASG and download designed sequences data into it
         :param asg_data: a List[List[float]] data type representing
@@ -469,6 +469,11 @@ class Scheduler(abc.ABC):
     @property
     def result_detail(self) -> dict:
         return self._result_detail
+
+    @property
+    def sequences(self) -> List[List[Union[float, int]]]:
+        # TODO: implement this
+        pass
 
     @property
     def sequences_strings(self) -> str:
