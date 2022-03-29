@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1645</width>
-    <height>1088</height>
+    <width>1525</width>
+    <height>1013</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>477</width>
-          <height>925</height>
+          <width>507</width>
+          <height>850</height>
          </rect>
         </property>
         <attribute name="label">
@@ -88,10 +88,10 @@
                 </item>
                </widget>
               </item>
-              <item row="0" column="3" rowspan="2">
+              <item row="0" column="3" rowspan="2" colspan="2">
                <widget class="QPushButton" name="pushButtonMicrowaveOnOff">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -104,17 +104,17 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
+              <item row="1" column="0" rowspan="2">
                <widget class="QLabel" name="labelMicrowavePower">
                 <property name="text">
                  <string>Power</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePower"/>
               </item>
-              <item row="1" column="2">
+              <item row="2" column="2">
                <widget class="QComboBox" name="comboBoxMicrowavePowerUnit">
                 <item>
                  <property name="text">
@@ -126,6 +126,20 @@
                   <string>mW</string>
                  </property>
                 </item>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QPushButton" name="pushButtonMicrowaveConnect">
+                <property name="text">
+                 <string>Connect</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="4">
+               <widget class="QPushButton" name="pushButtonMicrowaveClose">
+                <property name="text">
+                 <string>Close</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -307,10 +321,10 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" rowspan="2">
+              <item row="0" column="2" colspan="2">
                <widget class="QPushButton" name="pushButtonLaserOnOff">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -337,6 +351,20 @@
                 </property>
                </widget>
               </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="pushButtonLaserConnect">
+                <property name="text">
+                 <string>Connect</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="pushButtonLaserClose">
+                <property name="text">
+                 <string>Close</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -354,7 +382,7 @@
            <property name="title">
             <string>ASG Control Channels</string>
            </property>
-           <layout class="QFormLayout" name="formLayout_2">
+           <layout class="QGridLayout" name="gridLayout_18">
             <item row="0" column="0">
              <widget class="QLabel" name="labelHistType">
               <property name="text">
@@ -404,6 +432,16 @@
                 <string>8</string>
                </property>
               </item>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="checkBoxASGLaserTTL">
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item row="1" column="0">
@@ -463,6 +501,13 @@
               </item>
              </widget>
             </item>
+            <item row="1" column="2">
+             <widget class="QCheckBox" name="checkBoxASGMicrowaveTTL">
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+             </widget>
+            </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_11">
               <property name="text">
@@ -517,6 +562,16 @@
               </item>
              </widget>
             </item>
+            <item row="2" column="2">
+             <widget class="QCheckBox" name="checkBoxASGAPDTTL">
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_12">
               <property name="text">
@@ -569,6 +624,16 @@
                 <string>8</string>
                </property>
               </item>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QCheckBox" name="checkBoxASGTaggerTTL">
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
            </layout>
@@ -698,8 +763,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>477</width>
-          <height>925</height>
+          <width>486</width>
+          <height>858</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1188,6 +1253,13 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="checkBoxODMRMicrowaveOnOff">
+              <property name="text">
+               <string>With Microwave On/Off</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -1198,8 +1270,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>477</width>
-          <height>925</height>
+          <width>507</width>
+          <height>850</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1759,7 +1831,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1645</width>
+     <width>1525</width>
      <height>26</height>
     </rect>
    </property>

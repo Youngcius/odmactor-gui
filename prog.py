@@ -255,6 +255,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         else:
             self.laser.stop()
 
+    @pyqtSlot()
+    def on_pushButtonLaserConnect_clicked(self):
+        self.laser.connect()
+
+    @pyqtSlot()
+    def on_pushButtonLaserClose_clicked(self):
+        self.laser.close()
+
     @pyqtSlot(float)
     def on_doubleSpinBoxLaserPower_vaueChanged(self, power):
         self.laser.set_power(power)
@@ -278,6 +286,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.mw.start()
         else:
             self.mw.stop()
+
+    @pyqtSlot()
+    def on_pushButtonMicrowaveConnect_clicked(self):
+        self.mw.connect()
+
+    @pyqtSlot()
+    def on_pushButtonMicrowaveClose_clicked(self):
+        self.mw.close()
 
     # PI pulse
     @pyqtSlot(float)
@@ -345,6 +361,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # TODO: check 合法的 pulse duration 输入值
         self.odmrSeqConfig = {
             'N': self.ui.spinBoxODMRPeriodNumber.value(),
+            'withReference': self.ui.checkBoxODMRWithReference.isChecked(),
+            'MicrowaveOnOff': self.ui.checkBoxODMRMicrowaveOnOff.isChecked(),
             'laserInit': self.ui.spinBoxODMRLaserTime.value(),
             'laserMicrowaveInterval': self.ui.spinBoxODMRLaserTime.value(),
             'microwaveInit': self.ui.spinBoxODMRMicrowaveTime.value(),
@@ -352,12 +370,18 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'previousReadoutInterval': self.ui.spinBoxODMRPreReadoutInterval.value(),
             'signalReadout': self.ui.spinBoxODMRSignalReadoutTime.value(),
             'signalReferenceInterval': self.ui.spinBoxODMRSignalReferenceInterval.value(),
-            'withReference': self.ui.checkBoxODMRWithReference.isChecked(),
             'periodInterval': self.ui.spinBoxODMRPeriodInterval.value()
         }
         # self.scheduler.configure_odmr_seq(
         #     # TODO: check data
         # )
+
+        ls = [
+            self.ui.checkBoxASGLaserTTL.isChecked(),
+            self.ui.checkBoxASGMicrowaveTTL.isChecked(),
+            self.ui.checkBoxASGAPDTTL.isChecked(),
+            self.ui.checkBoxASGTaggerTTL.isChecked(),
+        ]  # TODO: 放在哪里合适呢
 
         self.sequences = self.schedulers[self.schedulerMode].sequences
         self.feedSequencesToTabkeWidget()

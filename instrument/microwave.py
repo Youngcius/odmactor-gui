@@ -24,6 +24,9 @@ class Microwave(RsInstrument):
         time.sleep(duration)
         self.stop()
 
+    def connect(self, force_close: bool = False) -> bool:
+        return super(Microwave, self).reconnect(force_close)
+
     def start(self):
         # self.write_bool('OUTPUT:STATE', True)
         print('MW started')
