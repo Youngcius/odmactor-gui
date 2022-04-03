@@ -16,6 +16,7 @@ from typing import List
 from .base import FrequencyDomainScheduler
 import utils
 
+
 class CWScheduler(FrequencyDomainScheduler):
     """
     Continuous-Wave ODMR scheduler
@@ -45,11 +46,12 @@ class CWScheduler(FrequencyDomainScheduler):
         :param N: n_values for TimeTagger.Counter
         """
         cont_seq = [t, 0]
-        if self.mw_ttl == 0:
-            mw_seq = utils.flip_sequence(cont_seq)
-        else:
-            mw_seq = cont_seq
-        self.download_asg_sequences(laser_seq=cont_seq, mw_seq=mw_seq, tagger_seq=cont_seq, N=N)
+        self.download_asg_sequences(
+            laser_seq=utils.flip_sequence(cont_seq) if self.laser_ttl else cont_seq,
+            mw_seq=utils.flip_sequence(cont_seq) if self.mw_ttl else cont_seq,
+            tagger_seq=utils.flip_sequence(cont_seq) if self.tagger_ttl else cont_seq,
+            N=N
+        )
 
     def run_single_step(self, power, freq, mw_control='on') -> List[float]:
         """
@@ -97,13 +99,7 @@ class PulseScheduler(FrequencyDomainScheduler):
 
     def configure_odmr_seq(self, t_init, t_mw, t_read_sig, t_read_ref=None, inter_init_mw=3000, pre_read=200,
                            inter_mw_read=500, inter_readout=200, inter_period=200, N: int = 1000):
-
-
-
-
-
-
-
+        # TODO: t_read_ref 给去掉
         """
         Wave form for single period:
             asg laser channel:
@@ -150,9 +146,12 @@ class PulseScheduler(FrequencyDomainScheduler):
             tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read, t_read_sig, inter_period]
             # apd_seq = [sum(tagger_seq[:-2], sum(tagger_seq[-2:]))]
 
+        if self.laser_ttl == 0:
+            laser_seq = utils.flip_sequence(laser_seq)
         if self.mw_ttl == 0:
-            #     # low-level effective
             mw_seq = utils.flip_sequence(mw_seq)
+        if self.tagger == 0:
+            tagger_seq = utils.flip_sequence(tagger_seq)
 
         self.download_asg_sequences(laser_seq, mw_seq, tagger_seq, N)
 

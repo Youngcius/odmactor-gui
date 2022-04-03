@@ -19,7 +19,13 @@ from ui import odmactor_window
 
 timeUnitDict = {'s': 1, 'ms': C.milli, 'ns': C.nano, 'ps': C.pico}
 freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
-schedulerModes = ['CW', 'Pulse', 'Ramsey', 'Rabi', 'Relaxation']
+frequencyDomainModes = ['CW', 'Pulse']
+timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation']
+schedulerModes = frequencyDomainModes + timeDomainModes
+
+
+# scheduler 可以根据几个 time interval 参数配置序列；
+# 也可以直接在界面编辑序列
 
 
 class OdmactorGUI(QtWidgets.QMainWindow):
@@ -46,6 +52,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.checkInstruments()
 
         # initialize data variables
+        self.schedulers = {mode: getattr(scheduler, mode + 'Scheduler') for mode in schedulerModes}
         # self.schedulers = {
         #     'CW': scheduler.CWScheduler(),
         #     'Pulse': scheduler.PulseScheduler(),
@@ -53,20 +60,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         #     'Rabi': scheduler.RabiScheduler(),
         #     'Relaxation': scheduler.RelaxationScheduler()
         # }
-        # self.scheduler =
-        # self.scheduler =
 
-        # Initialize hardware resources
-        # self.asg = ASG()
-        # self.tagger = tt.TimeTagger()
-        # self.tagger: tt.TimeTagger = None
-        self.photonCountConfig = {
-            'channels': [1],
-            'binwidth': 0,
-            'n_values': 0
-        }
-        # self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-        # self.counter.stop()
+        # photon count config (tagger counter measurement class)
+        self.updatePhotonCountConfig()
+        if self.tagger:
+            self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
+            self.counter.stop()
+        else:
+            self.counter = None
 
     def initInstruments(self):
         """
@@ -76,13 +77,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.asg = ASG()
 
         if tt.scanTimeTagger():
-            self.tagger = tt.TimeTagger()
+            self.tagger = tt.createTimeTagger()
         else:
             self.tagger = None
 
         try:
             self.mw = Microwave()
-        except ValueError:
+        except:
             self.mw = None
 
     def initCharts(self):
@@ -155,27 +156,50 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Fetch necessary parameters from UI components and initialize them into properties of the class
         """
-
         # ASG sequences from table widget
-
         self.sequences = []  # unit: ns
-        self.fetchSequencesfromTableWidget()
-        self.sequences[0] = [10, 0]
-        self.sequences[-1] = [10, 0]
+        self.fetchSequencesfromTableWidget()  # sequences with each element equal to 0 has been set in self.buildUI()
+        # self.sequences[0] = [10, 0]
+        # self.sequences[-1] = [10, 0]
 
         # Laser, MW, ASG, tagger counter # TODO: 似乎没必要预读取和设置仪器参数
+        # TODO: 似乎不需要 laserConfig MWConfig之类的字段
 
         # initialize other necessary parameters
-        self.piPulse = {'frequency': 0, 'duration': 0, 'power': 0}
+        self.updatePiPulse()
+        self.updateASGChannels()
+        self.updateTaggerChannels()
+
+    def updatePiPulse(self):
+        self.piPulse = {
+            'frequency': self.ui.doubleSpinBoxMicrowavePiPulseFrequency.value(),
+            'duration': self.ui.doubleSpinBoxMicrowavePiPulseDuration.value(),
+            'power': self.ui.doubleSpinBoxMicrowavePiPulsePower.value()
+        }
+        self.piPulse['frequency'] *= freqUnitDict[self.ui.comboBoxMicrowavePiPulseFrequencyUnit.currentText()]
+        self.piPulse['duration'] *= timeUnitDict[self.ui.comboBoxMicrowavePiPulseDurationUnit.currentText()]
+        if self.ui.comboBoxMicrowavePiPulsePowerUnit.currentText() == 'mW':
+            self.piPulse['power'] = utils.mW_to_dBm(self.piPulse['power'])
+
+    def updateASGChannels(self):
         self.asgChannels = {
             'laser': int(self.ui.comboBoxASGLaser.currentText()),
             'mw': int(self.ui.comboBoxASGMicrowave.currentText()),
             'apd': int(self.ui.comboBoxTaggerAPD.currentText()),
             'tagger': int(self.ui.comboBoxASGTagger.currentText())
         }
+
+    def updateTaggerChannels(self):
         self.taggerChannels = {
             'apd': int(self.ui.comboBoxTaggerAPD.currentText()),
             'asg': int(self.ui.comboBoxTaggerTrigger.currentText())
+        }
+
+    def updatePhotonCountConfig(self):
+        self.photonCountConfig = {
+            'channels': [self.taggerChannels['apd']],
+            'binwidth': 0,  # unit: ps
+            'n_values': 0
         }
 
     def buildUI(self):
@@ -194,6 +218,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.ui.statusbar.addPermanentWidget(self.progressBar)
 
         # table widget
+        # self.ui.tableWidgetSequence.horizontalHeader().setStyleSheet('QHeaderView::section{background:lightblue;}')
         for i in range(self.ui.tableWidgetSequence.rowCount()):
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 item = QtWidgets.QTableWidgetItem(str(0))
@@ -206,9 +231,18 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         txt = self.labelInstrStatus.text()
 
-        # txt += ': There is no '
-        # QtWidgets.QMessageBox.about(self, '', txt)
-        pass
+        laserStatus = 'ready'  # Laser is not implemented in programs
+        asgStatus = 'connected' if self.asg.connect() else 'None'
+        taggerStatus = 'connected' if self.tagger else 'None'
+        if self.mw is None or self.mw.is_connection_active() is False:
+            mwStatus = 'None'
+        else:
+            mwStatus = 'connected'
+
+        txt += 'Laser: {}, Microwave: {}, ASG: {}, Tagger: {}'.format(laserStatus, mwStatus, asgStatus, taggerStatus)
+        self.labelInstrStatus.setText(txt)
+
+    # def updateInstrumentsStatus(self):
 
     ###########################################
     # Menu bar
@@ -252,16 +286,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonLaserOnOff_clicked(self, checked):
         if checked:
             self.laser.start()
+            self.labelInstrStatus.setText('Laser: started')
         else:
             self.laser.stop()
+            self.labelInstrStatus.setText('Laser: stopped')
 
     @pyqtSlot()
     def on_pushButtonLaserConnect_clicked(self):
         self.laser.connect()
+        self.labelInstrStatus.setText('Laser: connected')  # TODO: connect fail还是success呢？？？
 
     @pyqtSlot()
     def on_pushButtonLaserClose_clicked(self):
         self.laser.close()
+        self.labelInstrStatus.setText('Laser: closed')
 
     @pyqtSlot(float)
     def on_doubleSpinBoxLaserPower_vaueChanged(self, power):
@@ -275,7 +313,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot(float)
     def on_doubleSpinBoxMicrowavePower_valueChanged(self, power):
-        # = self.ui.doubleSpinBoxMicrowavePower.value()
         if self.ui.comboBoxMicrowavePowerUnit.currentText() == 'mW':
             power *= utils.mW_to_dBm(power)
         self.mw.set_power(power)
@@ -284,16 +321,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonMicrowaveOnOff_clicked(self, checked):
         if checked:
             self.mw.start()
+            self.labelInstrStatus.setText('Microwave: started')
         else:
             self.mw.stop()
+            self.labelInstrStatus.setText('Microwave: stopped')
 
     @pyqtSlot()
     def on_pushButtonMicrowaveConnect_clicked(self):
         self.mw.connect()
+        self.labelInstrStatus.setText('Microwave: connected')
 
     @pyqtSlot()
     def on_pushButtonMicrowaveClose_clicked(self):
         self.mw.close()
+        self.labelInstrStatus.setText('Microwave: closed')
 
     # PI pulse
     @pyqtSlot(float)
@@ -320,12 +361,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_comboBoxASGMicrowave_valueChanged(self):
         self.asgChannels['mw'] = int(self.ui.comboBoxASGMicrowave.currentText())
-        pass
 
     @pyqtSlot()
     def on_comboBoxASGAPD_valueChanged(self):
         self.asgChannels['apd'] = int(self.ui.comboBoxASGAPD.currentText())
-        pass
 
     @pyqtSlot()
     def on_comboBoxASGTagger_valueChanged(self):
@@ -357,7 +396,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     # Operation
     @pyqtSlot()
     def on_pushButtonODMRLoadSequences_clicked(self):
-        # 读取 sequences data 并且 load
+        """
+        Fetch sequences parameters to generate ASG sequences, load it into ASG and visualize
+        """
         # TODO: check 合法的 pulse duration 输入值
         self.odmrSeqConfig = {
             'N': self.ui.spinBoxODMRPeriodNumber.value(),
@@ -365,24 +406,33 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'MicrowaveOnOff': self.ui.checkBoxODMRMicrowaveOnOff.isChecked(),
             'laserInit': self.ui.spinBoxODMRLaserTime.value(),
             'laserMicrowaveInterval': self.ui.spinBoxODMRLaserTime.value(),
-            'microwaveInit': self.ui.spinBoxODMRMicrowaveTime.value(),
+            'microwaveTime': self.ui.spinBoxODMRMicrowaveTime.value(),
             'microwaveReadoutInterval': self.ui.spinBoxODMRMicrowaveReadoutInterval.value(),
             'previousReadoutInterval': self.ui.spinBoxODMRPreReadoutInterval.value(),
             'signalReadout': self.ui.spinBoxODMRSignalReadoutTime.value(),
             'signalReferenceInterval': self.ui.spinBoxODMRSignalReferenceInterval.value(),
             'periodInterval': self.ui.spinBoxODMRPeriodInterval.value()
         }
-        # self.scheduler.configure_odmr_seq(
-        #     # TODO: check data
-        # )
 
-        ls = [
-            self.ui.checkBoxASGLaserTTL.isChecked(),
-            self.ui.checkBoxASGMicrowaveTTL.isChecked(),
-            self.ui.checkBoxASGAPDTTL.isChecked(),
-            self.ui.checkBoxASGTaggerTTL.isChecked(),
-        ]  # TODO: 放在哪里合适呢
+        self.schedulers[self.schedulerMode].set_asg_sequences_ttl(
+            laser_ttl=1 if self.ui.checkBoxASGLaserTTL.isChecked() else 0,
+            mw_ttl=1 if self.ui.checkBoxASGMicrowaveTTL.isChecked() else 0,
+            apd_ttl=1 if self.ui.checkBoxASGAPDTTL.isChecked() else 0,
+            tagger_ttl=1 if self.ui.checkBoxASGTaggerTTL.isChecked() else 0,
+        )
+        self.schedulers[self.schedulerMode].configure_odmr_seq(
+            t_init=self.odmrSeqConfig['laserInit'],
+            t_mw=self.odmrSeqConfig['microwaveTime'],
+            t_read_sig=self.odmrSeqConfig['signalReadout'],
+            inter_init_mw=self.odmrSeqConfig['laserMicrowaveInterval'],
+            pre_read=self.odmrSeqConfig['previousReadoutInterval'],
+            inter_read=self.odmrSeqConfig['signalReferenceInterval'],
+            inter_period=self.odmrSeqConfig['periodInterval'],
+            N=self.odmrSeqConfig['N'],
+        )
 
+        if self.schedulerMode in timeDomainModes:
+            self.schedulers[self.schedulerMode].gene_pseudo_detect_seq()
         self.sequences = self.schedulers[self.schedulerMode].sequences
         self.feedSequencesToTabkeWidget()
         self.updateSequenceChart()
@@ -395,7 +445,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # start button 按下去时候 freqs、times才有用
 
         # frequencies for scanning
-
         unit_freq = freqUnitDict[self.ui.comboBoxODMRFrequencyUnit.currentText()]
         freq_start = self.ui.doubleSpinBoxODMRFrequencyStart.value() * unit_freq
         freq_end = self.ui.doubleSpinBoxODMRFrequencyEnd.value() * unit_freq
@@ -409,20 +458,23 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         self.scheduler.run_scanning()
 
-        if self.schedulerMode in ['CW', 'Pulse']:
+        if self.schedulerMode in frequencyDomainModes:
+            self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
             # 跳转到 frequency-domain panel TODO
             # 更新 chart
             if self.ui.radioButtonODMRFrequencyShowCount.isChecked():
                 pass
             else:
                 pass
-        else:
+        if self.schedulerMode in timeDomainModes:
+            self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)
             # 更新 chart
             pass
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData(self):
         # TODO
+        self.counter.getData()
         pass
 
     # ODMR cheduler mode
@@ -436,7 +488,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         for k, scheduler in self.schedulers.keys():
             if k != mode:
                 scheduler.close()
-        self.schedulers[mode].connect()
+        self.schedulers[mode].connect()  # TODO: implement this
 
     @pyqtSlot()
     def on_radioButtonODMRCW_clicked(self):
@@ -458,14 +510,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_radioButtonODMRRelaxation_clicked(self):
         self.connectScheduler('Relaxation')
 
-        ########################
-
-    # Photon count parameter updating
-
-    # @pyqtSlot()
-    # def on_spinBoxBinwidth_valueChange
-    #
-
     ###########################################
     # Photon count configuration
     ################
@@ -485,15 +529,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
             # TODO: 持续返回数据，定时刷新曲线，rate?!
             if self.ui.radioButtonPhotonCountRate.isChecked():
-                self.counter.getDataNormalized()
+                self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
             else:
-                self.counter.getData()
+                self.counter.getData().ravel()
         else:
             self.counter.stop()
 
     @pyqtSlot()
     def on_pushButtonPhotonCountRefresh_clicked(self):
-        # 清空chart
+        # 清空chart，重新开始
+        # self.chartPhotonCount.clearFocus()
         pass
 
     @pyqtSlot()
@@ -502,6 +547,26 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Save data in form of JSON file in default
         """
         pass
+
+    @pyqtSlot()
+    def on_pushButtonTaggerConnect_clicked(self):
+        """
+        Re-connect Time Tagger
+        """
+        try:
+            self.tagger.getSerial()
+        except:
+            self.tagger = tt.createTimeTagger()
+        self.labelInstrStatus.setText('Tagger: connected')
+
+    @pyqtSlot()
+    def on_pushButtonTaggerClose_clicked(self):
+        """
+        Close connection with Tagger
+        """
+        if isinstance(self.tagger, tt.TimeTagger):
+            tt.freeTimeTagger(self.tagger)
+        self.labelInstrStatus.setText('Tagger: closed')
 
     ###########################################
     # ASG sequences configuration
@@ -526,30 +591,34 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonASGOpen_clicked(self):
         c = self.asg.connect()
         if c == 1:
-            print('ASG连接成功')
+            self.labelInstrStatus.setText('ASG: connect success')
         else:
-            print('ASG连接失败！')
+            self.labelInstrStatus.setText('ASG: connect fail')
 
     @pyqtSlot()
     def on_pushButtonASGClose_clicked(self):
         self.asg.close()
+        self.labelInstrStatus.setText('ASG: closed')
 
     @pyqtSlot()
     def on_pushButtonASGStart_clicked(self):
         self.asg.start()
+        self.labelInstrStatus.setText('ASG: started')
 
     @pyqtSlot()
     def on_pushButtonASGStop_clicked(self):
         self.asg.stop()
+        self.labelInstrStatus.setText('ASG: stopped')
 
     @pyqtSlot()
     def on_pushButtonASGLoad_clicked(self):
-        # 1) seq = .........
+        # 1) fetch sequences data
         self.fetchSequencesfromTableWidget()
         self.asg.load_data(self.sequences)
-        # self.asg.download_ASG_pulse_data(seq)
-        # 用写好的函数 scheduler中
-        # 2) 可视化
+        # 用写好的函数 scheduler中 ........................
+        # 2) load sequences into current scheduler
+        self.schedulers[self.schedulerMode].config_sequences(self.sequences)  # TODO: implement this
+        # 3) visualize seuqnces
         self.updateSequenceChart()
 
     @pyqtSlot()
@@ -559,7 +628,15 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonASGAdd_clicked(self):
         # self.ui.tableWidgetSequence add 2 columns
-        pass
+        rowCount = self.ui.tableWidgetSequence.rowCount()
+        originColumnCount = self.ui.tableWidgetSequence.columnCount()
+        self.ui.tableWidgetSequence.setColumnCount(originColumnCount + 2)
+        self.ui.tableWidgetSequence.setHorizontalHeaderLabels(['High', 'Low'] * int(originColumnCount/2+1))
+        for i in range(rowCount):
+            for j in range(originColumnCount, originColumnCount + 2):
+                item = QtWidgets.QTableWidgetItem(str(0))
+                item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                self.ui.tableWidgetSequence.setItem(i, j, item)
 
     ###########################################
     # Frequency-domain measurement panel (CW, Pulse)
@@ -567,6 +644,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRFrequencyInterrupt_clicked(self):
         # interrupt
+        # 要不要开辟新的 thread TODO
         pass
 
     @pyqtSlot()
@@ -586,3 +664,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonODMRTimeFit_clicked(self):
         # 必须等run结束曲线画出来后拟合
         pass
+
+# TODO 1: 先画图于 odmr spectrum chart，在做 real-time 的 chart
+# TODO 2: 先跑单线程的，在考虑为 scheduler 开辟新的 thread

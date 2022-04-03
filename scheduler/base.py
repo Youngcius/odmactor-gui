@@ -62,10 +62,22 @@ class Scheduler(abc.ABC):
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
 
-        if 'mw_ttl' in kwargs.keys():
-            self.mw_ttl = kwargs['mw_ttl']  # 1: high-level effective; 0: low level effective
+        if 'laser_ttl' in kwargs.keys():
+            self.laser_ttl = kwargs['laser_ttl']  # 1: high-level effective; 0: low level effective
         else:
-            self.mw_ttl = 1  # default: high-level effective
+            self.laser_ttl = 1  # default: high-level effective
+        if 'mw_ttl' in kwargs.keys():
+            self.mw_ttl = kwargs['mw_ttl']
+        else:
+            self.mw_ttl = 1
+        if 'apd_ttl' in kwargs.keys():
+            self.apd_ttl = kwargs['apd_ttl']
+        else:
+            self.apd_ttl = 1
+        if 'tagger_ttl' in kwargs.keys():
+            self.tagger_ttl = kwargs['tagger_ttl']
+        else:
+            self.tagger_ttl = 1
 
         if 'with_ref' in kwargs.keys():
             self.with_ref = kwargs['with_ref']
@@ -76,16 +88,16 @@ class Scheduler(abc.ABC):
         else:
             self.epoch_omit = 0
 
-    def asg_connect_and_download_data(self, asg_data: List[List[Union[float, int]]]):
-        """
-        Connect ASG and download designed sequences data into it
-        :param asg_data: a List[List[float]] data type representing
-        """
-        is_connected = self._asg.connect()  # auto stop
-        if is_connected == 1:
-            self._asg.download_ASG_pulse_data(asg_data, [len(row) for row in asg_data])
-        else:
-            raise ConnectionError('ASG not connected')
+    # def asg_connect_and_download_data(self, asg_data: List[List[Union[float, int]]]):
+    #     """
+    #     Connect ASG and download designed sequences data into it
+    #     :param asg_data: a List[List[float]] data type representing
+    #     """
+    #     is_connected = self._asg.connect()  # auto stop
+    #     if is_connected == 1:
+    #         self._asg.download_ASG_pulse_data(asg_data, [len(row) for row in asg_data])
+    #     else:
+    #         raise ConnectionError('ASG not connected')
 
     def download_asg_sequences(self, laser_seq: List[int] = None, mw_seq: List[int] = None,
                                tagger_seq: List[int] = None, N: int = 100000):
@@ -121,7 +133,8 @@ class Scheduler(abc.ABC):
             self._asg_sequences[idx_tagger_channel] = tagger_seq
 
         # connect & download pulse data
-        self.asg_connect_and_download_data(self._asg_sequences)
+        # self.asg_connect_and_download_data(self._asg_sequences)
+        self._asg.load_data(self._asg_sequences)
 
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
@@ -202,6 +215,13 @@ class Scheduler(abc.ABC):
         self._mw_instr.write_bool('OUTPUT:STATE', False)
         print('Stopped: Scheduling process has stopped')
 
+    def connect(self) -> bool:
+        """
+        Connect instruments
+        """
+        # TODO: implement this
+        pass
+
     def close(self):
         """
         Release instrument (ASG, MW, Tagger) resources
@@ -273,7 +293,8 @@ class Scheduler(abc.ABC):
         idx_laser_channel = self.channel['laser'] - 1
         t = sum(self._asg_sequences[idx_laser_channel])
         self._asg_sequences[idx_laser_channel] = [t, 0]
-        self.asg_connect_and_download_data(self._asg_sequences)
+        # self.asg_connect_and_download_data(self._asg_sequences)
+        self._asg.load_data(self._asg_sequences)
         self.asg.start()
 
     def laser_off_seq(self):
@@ -282,7 +303,8 @@ class Scheduler(abc.ABC):
         """
         idx_laser_channel = self.channel['laser'] - 1
         self._asg_sequences[idx_laser_channel] = [0, 0]
-        self.asg_connect_and_download_data(self._asg_sequences)
+        # self.asg_connect_and_download_data(self._asg_sequences)
+        self._asg.load_data(self._asg_sequences)
         self.asg.start()
 
     def mw_on_seq(self):
@@ -291,12 +313,13 @@ class Scheduler(abc.ABC):
         """
         idx_mw_channel = self.channel['mw'] - 1
         t = sum(self._asg_sequences[idx_mw_channel])
-        if self.mw_ttl == 0:
+        if self.mw_ttl == 0:  # low-level effective
             mw_seq = [0, t]
-        else:
+        else:  # high-level effective
             mw_seq = [t, 0]
         self._asg_sequences[idx_mw_channel] = mw_seq
-        self.asg_connect_and_download_data(self._asg_sequences)
+        # self.asg_connect_and_download_data(self._asg_sequences)
+        self._asg.load_data(self._asg_sequences)
         self.asg.start()
 
     def mw_off_seq(self):
@@ -306,7 +329,8 @@ class Scheduler(abc.ABC):
         mw_seq = [0, 0]
         idx_mw_channel = self.channel['mw'] - 1
         self._asg_sequences[idx_mw_channel] = mw_seq
-        self.asg_connect_and_download_data(self._asg_sequences)
+        # self.asg_connect_and_download_data(self._asg_sequences)
+        self._asg.load_data(self._asg_sequences)
         self.asg.start()
 
     def mw_control_seq(self, mw_seq: List[int] = None) -> Optional[List[int]]:
@@ -320,7 +344,8 @@ class Scheduler(abc.ABC):
             return self._asg_sequences[idx_mw_channel]
         else:
             self._asg_sequences[idx_mw_channel] = mw_seq
-            self.asg_connect_and_download_data(self._asg_sequences)
+            # self.asg_connect_and_download_data(self._asg_sequences)
+            self._asg.load_data(self._asg_sequences)
             self._asg.start()
 
     def _conf_time_paras(self, t, N):
@@ -473,7 +498,7 @@ class Scheduler(abc.ABC):
     @property
     def sequences(self) -> List[List[Union[float, int]]]:
         # TODO: implement this
-        pass
+        return self._asg_sequences
 
     @property
     def sequences_strings(self) -> str:
@@ -724,7 +749,7 @@ class TimeDomainScheduler(Scheduler):
         self._acquire_data()  # scanning time intervals in this loop
         self.stop()
 
-    def _gene_pseudo_detect_seq(self):
+    def gene_pseudo_detect_seq(self):
         """
         Generate pseudo pulses for visualization and regulation
         """

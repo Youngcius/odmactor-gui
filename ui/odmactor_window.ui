@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1525</width>
-    <height>1013</height>
+    <width>1522</width>
+    <height>1042</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,8 +38,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>507</width>
-          <height>850</height>
+          <width>506</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -53,18 +53,18 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
-             <layout class="QGridLayout" name="gridLayout_2">
-              <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
                <widget class="QLabel" name="labelMicrowaveFrequency">
                 <property name="text">
                  <string>Frequency</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
+              <item>
                <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowaveFrequency"/>
               </item>
-              <item row="0" column="2">
+              <item>
                <widget class="QComboBox" name="comboBoxMicrowaveFrequencyUnit">
                 <item>
                  <property name="text">
@@ -88,7 +88,39 @@
                 </item>
                </widget>
               </item>
-              <item row="0" column="3" rowspan="2" colspan="2">
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QLabel" name="labelMicrowavePower">
+                <property name="text">
+                 <string>Power</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePower"/>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBoxMicrowavePowerUnit">
+                <item>
+                 <property name="text">
+                  <string>dBm</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>mW</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_21">
+              <item>
                <widget class="QPushButton" name="pushButtonMicrowaveOnOff">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -104,38 +136,14 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0" rowspan="2">
-               <widget class="QLabel" name="labelMicrowavePower">
-                <property name="text">
-                 <string>Power</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePower"/>
-              </item>
-              <item row="2" column="2">
-               <widget class="QComboBox" name="comboBoxMicrowavePowerUnit">
-                <item>
-                 <property name="text">
-                  <string>dBm</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>mW</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="2" column="3">
+              <item>
                <widget class="QPushButton" name="pushButtonMicrowaveConnect">
                 <property name="text">
                  <string>Connect</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="4">
+              <item>
                <widget class="QPushButton" name="pushButtonMicrowaveClose">
                 <property name="text">
                  <string>Close</string>
@@ -763,8 +771,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>486</width>
-          <height>858</height>
+          <width>506</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1270,8 +1278,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>507</width>
-          <height>850</height>
+          <width>506</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1418,6 +1426,20 @@
              <widget class="QPushButton" name="pushButtonPhotonCountSaveData">
               <property name="text">
                <string>Save data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonTaggerConnect">
+              <property name="text">
+               <string>Connect tagger</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonTaggerClose">
+              <property name="text">
+               <string>Close tagger</string>
               </property>
              </widget>
             </item>
@@ -1831,7 +1853,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1525</width>
+     <width>1522</width>
      <height>26</height>
     </rect>
    </property>

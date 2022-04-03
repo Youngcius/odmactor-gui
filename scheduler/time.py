@@ -14,9 +14,7 @@ Time-domain ODMR detecting classes
 """
 
 from .base import TimeDomainScheduler
-import time
 import scipy.constants as C
-from typing import List
 import utils
 
 
@@ -58,8 +56,12 @@ class RamseyScheduler(TimeDomainScheduler):
             tagger_seq = [0, t_init + inter_init_mw + t_mw * 2 + t_free + inter_mw_read + pre_read, t_read_sig,
                           inter_period]
 
+        if self.laser_ttl == 0:
+            laser_seq = utils.flip_sequence(laser_seq)
         if self.mw_ttl == 0:
             mw_seq = utils.flip_sequence(mw_seq)
+        if self.tagger == 0:
+            tagger_seq = utils.flip_sequence(tagger_seq)
 
         self.download_asg_sequences(laser_seq, mw_seq, tagger_seq, N)
 
@@ -142,8 +144,12 @@ class RabiScheduler(TimeDomainScheduler):
             mw_seq = [0, t_init + inter_init_mw, t_mw, inter_mw_read + pre_read + t_read_sig + inter_period]
             tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read, t_read_sig, inter_period]
 
+        if self.laser_ttl == 0:
+            laser_seq = utils.flip_sequence(laser_seq)
         if self.mw_ttl == 0:
             mw_seq = utils.flip_sequence(mw_seq)
+        if self.tagger == 0:
+            tagger_seq = utils.flip_sequence(tagger_seq)
 
         self.download_asg_sequences(laser_seq, mw_seq, tagger_seq, N)
 
@@ -345,9 +351,12 @@ class HahnEchoScheduler(TimeDomainScheduler):
                           t_init + inter_init_mw + t_mw_half_pi * 2 + t_mw_pi + t_free * 2 + + inter_mw_read + pre_read,
                           t_read_sig,
                           inter_period]
-
+        if self.laser_ttl == 0:
+            laser_seq = utils.flip_sequence(laser_seq)
         if self.mw_ttl == 0:
             mw_seq = utils.flip_sequence(mw_seq)
+        if self.tagger == 0:
+            tagger_seq = utils.flip_sequence(tagger_seq)
 
         self.download_asg_sequences(laser_seq, mw_seq, tagger_seq, N)
 
