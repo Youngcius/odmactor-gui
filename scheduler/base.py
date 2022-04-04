@@ -62,42 +62,22 @@ class Scheduler(abc.ABC):
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
 
-        if 'laser_ttl' in kwargs.keys():
-            self.laser_ttl = kwargs['laser_ttl']  # 1: high-level effective; 0: low level effective
-        else:
-            self.laser_ttl = 1  # default: high-level effective
-        if 'mw_ttl' in kwargs.keys():
-            self.mw_ttl = kwargs['mw_ttl']
-        else:
-            self.mw_ttl = 1
-        if 'apd_ttl' in kwargs.keys():
-            self.apd_ttl = kwargs['apd_ttl']
-        else:
-            self.apd_ttl = 1
-        if 'tagger_ttl' in kwargs.keys():
-            self.tagger_ttl = kwargs['tagger_ttl']
-        else:
-            self.tagger_ttl = 1
+        # 1: high-level effective; 0: low level effective
+        kwargs.setdefault('laser_ttl', 1)
+        kwargs.setdefault('mw_ttl', 1)
+        kwargs.setdefault('apd_ttl', 1)
+        kwargs.setdefault('tagger_ttl', 1)
 
-        if 'with_ref' in kwargs.keys():
-            self.with_ref = kwargs['with_ref']
-        else:
-            self.with_ref = False
-        if 'epoch_omit' in kwargs.keys():
-            self.epoch_omit = kwargs['epoch_omit']
-        else:
-            self.epoch_omit = 0
+        self.laser_ttl = kwargs['laser_ttl']
+        self.mw_ttl = kwargs['mw_ttl']
+        self.apd_ttl = kwargs['apd_ttl']
+        self.tagger_ttl = kwargs['tagger_ttl']
 
-    # def asg_connect_and_download_data(self, asg_data: List[List[Union[float, int]]]):
-    #     """
-    #     Connect ASG and download designed sequences data into it
-    #     :param asg_data: a List[List[float]] data type representing
-    #     """
-    #     is_connected = self._asg.connect()  # auto stop
-    #     if is_connected == 1:
-    #         self._asg.download_ASG_pulse_data(asg_data, [len(row) for row in asg_data])
-    #     else:
-    #         raise ConnectionError('ASG not connected')
+        kwargs.setdefault('with_ref', True)
+        self.with_ref = kwargs['with_ref']
+
+        kwargs.setdefault('epoch_omit', 0)
+        self.epoch_omit = kwargs['epoch_omit']
 
     def download_asg_sequences(self, laser_seq: List[int] = None, mw_seq: List[int] = None,
                                tagger_seq: List[int] = None, N: int = 100000):
