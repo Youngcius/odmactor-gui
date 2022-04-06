@@ -102,7 +102,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             if self.ui.radioButtonPhotonCountRate.isChecked():
                 counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
             else:
-                counts = self.counter.getData().rave()
+                counts = self.counter.getData().ravel()
             self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
             # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
             for i, c in enumerate(counts):
