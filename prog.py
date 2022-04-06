@@ -1,16 +1,18 @@
 import sys
 import os
 import json
+import time
+import threading
 import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5 import QtWidgets, QtCore, QtGui, QtChart
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, QThread
 
 import scheduler
 import utils
-from instrument import ASG, Microwave, Laser
+from instrument import ASG, Microwave, Laser, LockInAmplifier
 from utils.sequence import seq_to_fig
 
 from ui import odmactor_window
@@ -22,10 +24,6 @@ freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
 frequencyDomainModes = ['CW', 'Pulse']
 timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation']
 schedulerModes = frequencyDomainModes + timeDomainModes
-
-
-# scheduler 可以根据几个 time interval 参数配置序列；
-# 也可以直接在界面编辑序列
 
 
 class OdmactorGUI(QtWidgets.QMainWindow):
@@ -43,9 +41,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # fetch parameters from initial UI
         self.fetchParameters()
-
-        # initial charts
-        self.initCharts()
 
         # initialize instrument instances
         self.initInstruments()
@@ -69,6 +64,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         else:
             self.counter = None
 
+        # initial charts
+        self.initCharts()
+
     def initInstruments(self):
         """
         Initialize instances representing specific instruments, i.e, Laser, Microwave, ASG, Tagger, etc.
@@ -86,10 +84,104 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.mw = None
 
+        try:
+            self.lockin = LockInAmplifier()
+        except:
+            self.lockin = None
+
+    def updatePhotonCountChart(self):
+        # x-axis and y-axis
+        binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
+        self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
+        if self.ui.radioButtonPhotonCountRate.isChecked():
+            self.axisYPhotonCount.setTitleText("Count rate")
+        else:
+            self.axisYPhotonCount.setTitleText("Count number")
+
+        while True:
+            if self.ui.radioButtonPhotonCountRate.isChecked():
+                counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
+            else:
+                counts = self.counter.getData().rave()
+            self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+            # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
+            for i, c in enumerate(counts):
+                self.seriesPhotonCount.append(i * binwidth_sec, c)
+            time.sleep(0.1)
+    # def initCharts(self):
+    #     """
+    #     Initialize charts of measurement results, i.e., Photon Count, Sequences, Frequency-domain ODMR, Time-domain ODMR
+    #     """
+    #     # visualize ASG sequences
+    #     self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？
+    #     self.layoutSequenceVisualization = QtWidgets.QVBoxLayout(self.ui.widgetSequenceVisualization)
+    #     self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
+    #     self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
+    #     self.layoutSequenceVisualization.setSpacing(0)
+    #
+    #     # initialize photon count chart
+    #     self.chartPhotonCount = QtChart.QChart()
+    #     self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
+    #
+    #     # 创建曲线序列
+    #     series0 = QtChart.QLineSeries()
+    #     series1 = QtChart.QLineSeries()
+    #     series0.setName("Sin曲线")
+    #     series1.setName("Cos曲线")
+    #     self.chartPhotonCount.addSeries(series0)  # 序列添加到图表
+    #     self.chartPhotonCount.addSeries(series1)
+    #
+    #     # 序列添加数值
+    #     t = 0
+    #     intv = 0.1
+    #     pointCount = 100
+    #     for i in range(pointCount):
+    #         y1 = np.cos(t)
+    #
+    #         series0.append(t, y1)
+    #
+    #         y2 = 1.5 * np.sin(t + 20)
+    #         series1.append(t, y2)
+    #         t = t + intv
+    #
+    #
+    #     ##创建坐标轴
+    #     axisX = QtChart.QValueAxis()  # X 轴
+    #     axisX.setRange(0, 10)  # 设置坐标轴范围
+    #     axisX.setTitleText("time(secs)")  # 标题
+    #     axisX.setLabelFormat("%.1f")  # 标签格式
+    #     axisX.setTickCount(11)  # 主分隔个数
+    #     axisX.setMinorTickCount(4)
+    #     # axisX.setGridLineVisible(False)
+    #
+    #     axisY = QtChart.QValueAxis()  # Y 轴
+    #     axisY.setRange(-2, 2)
+    #     axisY.setTitleText("value")
+    #     axisY.setTickCount(5)
+    #     axisY.setMinorTickCount(4)
+    #     axisY.setLabelFormat("%.2f")  # 标签格式
+    #     # axisY.setGridLineVisible(False)
+    #
+    #     # 为序列设置坐标轴
+    #     self.chartPhotonCount.setAxisX(axisX, series0)  # 为序列设置坐标轴
+    #     self.chartPhotonCount.setAxisY(axisY, series0)
+    #
+    #     self.chartPhotonCount.setAxisX(axisX, series1)  # 为序列设置坐标轴
+    #     self.chartPhotonCount.setAxisY(axisY, series1)
+    #
+    #     # initialize frequency-domain ODMR chart
+    #     self.chartODMRFrequency = QtChart.QChart()
+    #     self.ui.chartviewODMRFrequency.setChart(self.chartODMRFrequency)
+    #
+    #     # initialized time-domain ODMR chart
+    #     self.chartODMRTime = QtChart.QChart()
+    #     self.ui.chartviewODMRTime.setChart(self.chartODMRTime)
+
     def initCharts(self):
         """
         Initialize charts of measurement results, i.e., Photon Count, Sequences, Frequency-domain ODMR, Time-domain ODMR
         """
+        ###################################
         # visualize ASG sequences
         self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？
         self.layoutSequenceVisualization = QtWidgets.QVBoxLayout(self.ui.widgetSequenceVisualization)
@@ -97,57 +189,36 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutSequenceVisualization.setSpacing(0)
 
+        ###################################
         # initialize photon count chart
         self.chartPhotonCount = QtChart.QChart()
         self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
+        self.seriesPhotonCount = QtChart.QLineSeries()
+        self.seriesPhotonCount.setName('Channel {} counting'.format(self.ui.comboBoxTaggerAPD.currentText()))
+        self.chartPhotonCount.addSeries(self.seriesPhotonCount)
 
-        # 创建曲线序列
-        series0 = QtChart.QLineSeries()
-        series1 = QtChart.QLineSeries()
-        series0.setName("Sin曲线")
-        series1.setName("Cos曲线")
-        self.chartPhotonCount.addSeries(series0)  # 序列添加到图表
-        self.chartPhotonCount.addSeries(series1)
+        self.axisXPhotonCount = QtChart.QValueAxis()  # X axis
+        self.axisXPhotonCount.setTitleText('Time (s)')
+        self.axisXPhotonCount.setTickCount(11)  # 主分隔个数
+        self.axisXPhotonCount.setMinorTickCount(4)  # 次刻度数
+        self.axisXPhotonCount.setLabelFormat("%.1f")
 
-        # 序列添加数值
-        t = 0
-        intv = 0.1
-        pointCount = 100
-        for i in range(pointCount):
-            y1 = np.cos(t)
-            series0.append(t, y1)
-            y2 = 1.5 * np.sin(t + 20)
-            series1.append(t, y2)
-            t = t + intv
-
-        ##创建坐标轴
-        axisX = QtChart.QValueAxis()  # X 轴
-        axisX.setRange(0, 10)  # 设置坐标轴范围
-        axisX.setTitleText("time(secs)")  # 标题
-        axisX.setLabelFormat("%.1f")  # 标签格式
-        axisX.setTickCount(11)  # 主分隔个数
-        axisX.setMinorTickCount(4)
-        # axisX.setGridLineVisible(False)
-
-        axisY = QtChart.QValueAxis()  # Y 轴
-        axisY.setRange(-2, 2)
-        axisY.setTitleText("value")
-        axisY.setTickCount(5)
-        axisY.setMinorTickCount(4)
-        axisY.setLabelFormat("%.2f")  # 标签格式
+        self.axisYPhotonCount = QtChart.QValueAxis()  # Y axis
+        self.axisYPhotonCount.setTickCount(5)
+        self.axisYPhotonCount.setMinorTickCount(4)
+        self.axisYPhotonCount.setLabelFormat("%.2f")  # 标签格式
         # axisY.setGridLineVisible(False)
 
-        # 为序列设置坐标轴
-        self.chartPhotonCount.setAxisX(axisX, series0)  # 为序列设置坐标轴
-        self.chartPhotonCount.setAxisY(axisY, series0)
+        # add axis on series
+        self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.seriesPhotonCount)
+        self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.seriesPhotonCount)
 
-        self.chartPhotonCount.setAxisX(axisX, series1)  # 为序列设置坐标轴
-        self.chartPhotonCount.setAxisY(axisY, series1)
-
+        ###################################
         # initialize frequency-domain ODMR chart
         self.chartODMRFrequency = QtChart.QChart()
         self.ui.chartviewODMRFrequency.setChart(self.chartODMRFrequency)
 
+        ###################################
         # initialized time-domain ODMR chart
         self.chartODMRTime = QtChart.QChart()
         self.ui.chartviewODMRTime.setChart(self.chartODMRTime)
@@ -196,10 +267,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         }
 
     def updatePhotonCountConfig(self):
+        unit = timeUnitDict[self.ui.comboBoxBinwidthUnit.currentText()]
         self.photonCountConfig = {
-            'channels': [self.taggerChannels['apd']],
-            'binwidth': 0,  # unit: ps
-            'n_values': 0
+            'channels': [[int(self.ui.comboBoxTaggerAPD.currentText())]],
+            'binwidth': unit * self.ui.spinBoxBinwidth.value() / C.pico,  # unit: ps
+            'n_values': self.ui.spinBoxCountNumber.value()
         }
 
     def buildUI(self):
@@ -488,7 +560,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         for k, scheduler in self.schedulers.keys():
             if k != mode:
                 scheduler.close()
-        self.schedulers[mode].connect()  # TODO: implement this
+        self.schedulers[mode].connect()
 
     @pyqtSlot()
     def on_radioButtonODMRCW_clicked(self):
@@ -513,26 +585,59 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     ###########################################
     # Photon count configuration
     ################
+
+    # # ============================
+    # N = 1000
+    # lockin = LockInAmplifier()
+    #
+    # # create a figure widget and a plot
+    # fig_trace = go.FigureWidget()
+    # # fig_trace.add_scatter(x=trace.getIndex(), y=trace.getData()[0])
+    # fig_trace.add_scatter(x=range(N), y=lockin.get_data_with_time(num=N))
+    #
+    # async def update_trace():
+    #     """Update the plot every 0.1 s"""
+    #     while True:
+    #         # fig_trace.data[0].y = trace.getData()[0]
+    #         fig_trace.data[0].y = lockin.get_data_with_time(num=N)
+    #
+    #         await asyncio.sleep(0.1)
+    #
+    # # If this cell is re-excecuted and there was a previous task, stop it first to avoid a dead daemon
+    # try:
+    #     task_trace.cancel()
+    # except:
+    #     pass
+    #
+    # loop = asyncio.get_event_loop()
+    # task_trace = loop.create_task(update_trace())
+    #
+    # # create a stop button
+    # button_trace_stop = Button(description='stop')
+    # button_trace_stop.on_click(lambda a: task_trace.cancel())
+    #
+    # display(fig_trace, button_trace_stop)
+    # async def update(self) -> None:
+
     @pyqtSlot(bool)
     def on_pushButtonPhotonCountOnOff_clicked(self, checked):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-        # TODO: on/off 切换状态时候 才读取 binwidth、count number，
+        self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         if checked:
-            unit = timeUnitDict[self.ui.comboBoxBinwidthUnit.currentText()]
-            self.photonCountConfig['channels'] = [int(self.ui.comboBoxASGAPD.currentText())]  # TODO 设置几个comboBox 数据互斥
-            self.photonCountConfig['binwidth'] = unit * self.ui.spinBoxBinwidth.value() / C.pico
-            self.photonCountConfig['n_values'] = self.ui.spinBoxCountNumber.value()
+            self.updatePhotonCountConfig()
             self.counter = tt.Counter(self.tagger, *self.photonCountConfig)
-            self.counter.start()
+            t = threading.Thread(target=self.updatePhotonCountChart)
 
             # TODO: 持续返回数据，定时刷新曲线，rate?!
-            if self.ui.radioButtonPhotonCountRate.isChecked():
-                self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
-            else:
-                self.counter.getData().ravel()
+            self.counter.start()
+            t.start()
         else:
+            try:
+                t.wait()
+            except:
+                pass
             self.counter.stop()
 
     @pyqtSlot()
@@ -617,7 +722,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.asg.load_data(self.sequences)
         # 用写好的函数 scheduler中 ........................
         # 2) load sequences into current scheduler
-        self.schedulers[self.schedulerMode].config_sequences(self.sequences)  # TODO: implement this
+        self.schedulers[self.schedulerMode].config_sequences(self.sequences)
         # 3) visualize seuqnces
         self.updateSequenceChart()
 
@@ -631,7 +736,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         rowCount = self.ui.tableWidgetSequence.rowCount()
         originColumnCount = self.ui.tableWidgetSequence.columnCount()
         self.ui.tableWidgetSequence.setColumnCount(originColumnCount + 2)
-        self.ui.tableWidgetSequence.setHorizontalHeaderLabels(['High', 'Low'] * int(originColumnCount/2+1))
+        self.ui.tableWidgetSequence.setHorizontalHeaderLabels(['High', 'Low'] * int(originColumnCount / 2 + 1))
         for i in range(rowCount):
             for j in range(originColumnCount, originColumnCount + 2):
                 item = QtWidgets.QTableWidgetItem(str(0))

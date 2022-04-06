@@ -23,6 +23,10 @@ class ASG(ASG8005):
         self.connect()
 
     def load_data(self, asg_data: List[List[Union[float, int]]]):
+        """
+        Connect ASG and download designed sequences data into it
+        :param asg_data: ASG sequences for different channels
+        """
         is_connected = super(ASG, self).connect()
         if is_connected == 1:
             super(ASG, self).download_ASG_pulse_data(asg_data, [len(row) for row in asg_data])
