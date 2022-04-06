@@ -100,6 +100,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.axisYPhotonCount.setTitleText("Count number")
 
         while True:
+            print('async')
             if self.ui.radioButtonPhotonCountRate.isChecked():
                 counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
             else:
