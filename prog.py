@@ -270,7 +270,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         unit = timeUnitDict[self.ui.comboBoxBinwidthUnit.currentText()]
         self.photonCountConfig = {
             'channels': [int(self.ui.comboBoxTaggerAPD.currentText())],
-            'binwidth': unit * self.ui.spinBoxBinwidth.value() / C.pico,  # unit: ps
+            'binwidth': int(unit * self.ui.spinBoxBinwidth.value() / C.pico),  # unit: ps
             'n_values': self.ui.spinBoxCountNumber.value()
         }
 
