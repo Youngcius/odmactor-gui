@@ -19,7 +19,7 @@ from ui import odmactor_window
 
 # 继承关系：QGraphicsItem --> QGraphicsObject --> QGraphicsWidget --> QChart --> QPolarChart
 
-timeUnitDict = {'s': 1, 'ms': C.milli, 'ns': C.nano, 'ps': C.pico}
+timeUnitDict = {'s': 1, 'ms': C.milli, 'us':C.micro, 'ns': C.nano, 'ps': C.pico}
 freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
 frequencyDomainModes = ['CW', 'Pulse']
 timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation']
