@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import time
+import asyncio
 import threading
 import numpy as np
 import scipy.constants as C
@@ -19,7 +20,7 @@ from ui import odmactor_window
 
 # 继承关系：QGraphicsItem --> QGraphicsObject --> QGraphicsWidget --> QChart --> QPolarChart
 
-timeUnitDict = {'s': 1, 'ms': C.milli, 'us':C.micro, 'ns': C.nano, 'ps': C.pico}
+timeUnitDict = {'s': 1, 'ms': C.milli, 'us': C.micro, 'ns': C.nano, 'ps': C.pico}
 freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
 frequencyDomainModes = ['CW', 'Pulse']
 timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation']
@@ -89,7 +90,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.lockin = None
 
-    def updatePhotonCountChart(self):
+    async def updatePhotonCountChart(self):
         # x-axis and y-axis
         binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
         self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
@@ -107,7 +108,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
             for i, c in enumerate(counts):
                 self.seriesPhotonCount.append(i * binwidth_sec, c)
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
+            # time.sleep(0.1)
+
     # def initCharts(self):
     #     """
     #     Initialize charts of measurement results, i.e., Photon Count, Sequences, Frequency-domain ODMR, Time-domain ODMR
@@ -585,57 +588,44 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     ###########################################
     # Photon count configuration
     ################
-
-    # # ============================
-    # N = 1000
-    # lockin = LockInAmplifier()
-    #
-    # # create a figure widget and a plot
-    # fig_trace = go.FigureWidget()
-    # # fig_trace.add_scatter(x=trace.getIndex(), y=trace.getData()[0])
-    # fig_trace.add_scatter(x=range(N), y=lockin.get_data_with_time(num=N))
-    #
-    # async def update_trace():
-    #     """Update the plot every 0.1 s"""
-    #     while True:
-    #         # fig_trace.data[0].y = trace.getData()[0]
-    #         fig_trace.data[0].y = lockin.get_data_with_time(num=N)
-    #
-    #         await asyncio.sleep(0.1)
-    #
-    # # If this cell is re-excecuted and there was a previous task, stop it first to avoid a dead daemon
-    # try:
-    #     task_trace.cancel()
-    # except:
-    #     pass
-    #
-    # loop = asyncio.get_event_loop()
-    # task_trace = loop.create_task(update_trace())
-    #
-    # # create a stop button
-    # button_trace_stop = Button(description='stop')
-    # button_trace_stop.on_click(lambda a: task_trace.cancel())
-    #
-    # display(fig_trace, button_trace_stop)
-    # async def update(self) -> None:
-
     @pyqtSlot(bool)
     def on_pushButtonPhotonCountOnOff_clicked(self, checked):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
         self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
+        #
+        # # If this cell is re-excecuted and there was a previous task, stop it first to avoid a dead daemon
+        # try:
+        #     task_trace.cancel()
+        # except:
+        #     pass
+        #
+        # loop = asyncio.get_event_loop()
+        # task_trace = loop.create_task(update_trace())
+        #
+        # # create a stop button
+        # button_trace_stop = Button(description='stop')
+        # button_trace_stop.on_click(lambda a: task_trace.cancel())
+        #
+        # display(fig_trace, button_trace_stop)
+        # async def update(self) -> None:
+
         if checked:
             self.updatePhotonCountConfig()
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-            t = threading.Thread(target=self.updatePhotonCountChart)
+            loop = asyncio.get_event_loop()
+            self.taskPhotonCount = loop.create_task(self.updatePhotonCountChart())
+            # self.taskPhotonCount
+            # t = threading.Thread(target=self.updatePhotonCountChart)
 
             # TODO: 持续返回数据，定时刷新曲线，rate?!
-            self.counter.start()
-            t.start()
+            # self.counter.start()
+            # t.start()
+
         else:
             try:
-                t.wait()
+                self.taskPhotonCount.cancel()
             except:
                 pass
             self.counter.stop()
