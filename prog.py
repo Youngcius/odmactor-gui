@@ -610,16 +610,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
             print(self.tagger.getSerial())
             while True:
-                print('async')
-                if self.ui.radioButtonPhotonCountRate.isChecked():
-                    counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
-                else:
-                    counts = self.counter.getData().ravel()
+                # print('async')
+                # if self.ui.radioButtonPhotonCountRate.isChecked():
+                #     counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
+                # else:
+                counts = self.counter.getData().ravel()
                 self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
                 # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
                 for i, c in enumerate(counts):
                     self.seriesPhotonCount.append(i * binwidth_sec, c)
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(1)
 
 
 
