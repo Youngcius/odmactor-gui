@@ -90,26 +90,26 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.lockin = None
 
-    async def updatePhotonCountChart(self):
-        # x-axis and y-axis
-        binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
-        self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
-        if self.ui.radioButtonPhotonCountRate.isChecked():
-            self.axisYPhotonCount.setTitleText("Count rate")
-        else:
-            self.axisYPhotonCount.setTitleText("Count number")
-
-        while True:
-            print('async')
-            if self.ui.radioButtonPhotonCountRate.isChecked():
-                counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
-            else:
-                counts = self.counter.getData().ravel()
-            self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
-            # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
-            for i, c in enumerate(counts):
-                self.seriesPhotonCount.append(i * binwidth_sec, c)
-            await asyncio.sleep(0.1)
+    # async def updatePhotonCountChart(self):
+    #     # x-axis and y-axis
+    #     binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
+    #     self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
+    #     if self.ui.radioButtonPhotonCountRate.isChecked():
+    #         self.axisYPhotonCount.setTitleText("Count rate")
+    #     else:
+    #         self.axisYPhotonCount.setTitleText("Count number")
+    #
+    #     while True:
+    #         print('async')
+    #         if self.ui.radioButtonPhotonCountRate.isChecked():
+    #             counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
+    #         else:
+    #             counts = self.counter.getData().ravel()
+    #         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+    #         # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
+    #         for i, c in enumerate(counts):
+    #             self.seriesPhotonCount.append(i * binwidth_sec, c)
+    #         await asyncio.sleep(0.1)
             # time.sleep(0.1)
 
     # def initCharts(self):
@@ -594,29 +594,39 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
+
+        async def updatePhotonCountChart():
+            # x-axis and y-axis
+            binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
+
+            self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
+            if self.ui.radioButtonPhotonCountRate.isChecked():
+                self.axisYPhotonCount.setTitleText("Count rate")
+            else:
+                self.axisYPhotonCount.setTitleText("Count number")
+
+            while True:
+                print('async')
+                if self.ui.radioButtonPhotonCountRate.isChecked():
+                    counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
+                else:
+                    counts = self.counter.getData().ravel()
+                self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+                # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
+                for i, c in enumerate(counts):
+                    self.seriesPhotonCount.append(i * binwidth_sec, c)
+                await asyncio.sleep(0.1)
+
+
+
         self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
-        #
-        # # If this cell is re-excecuted and there was a previous task, stop it first to avoid a dead daemon
-        # try:
-        #     task_trace.cancel()
-        # except:
-        #     pass
-        #
-        # loop = asyncio.get_event_loop()
-        # task_trace = loop.create_task(update_trace())
-        #
-        # # create a stop button
-        # button_trace_stop = Button(description='stop')
-        # button_trace_stop.on_click(lambda a: task_trace.cancel())
-        #
-        # display(fig_trace, button_trace_stop)
-        # async def update(self) -> None:
 
         if checked:
+            print('此处应该有异步：')
             self.updatePhotonCountConfig()
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
             loop = asyncio.get_event_loop()
-            self.taskPhotonCount = loop.create_task(self.updatePhotonCountChart())
+            self.taskPhotonCount = loop.create_task(updatePhotonCountChart())
             # self.taskPhotonCount
             # t = threading.Thread(target=self.updatePhotonCountChart)
 
