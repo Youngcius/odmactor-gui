@@ -628,8 +628,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             print('此处应该有异步：')
             self.updatePhotonCountConfig()
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-            loop = asyncio.get_event_loop()
-            self.taskPhotonCount = loop.create_task(updatePhotonCountChart())
+            print(self.photonCountConfig)
+            print(self.counter.getData()[0][:10])
+            self.loop = asyncio.get_event_loop()
+            print(self.loop)
+            self.loop.run_until_complete(updatePhotonCountChart())
+            # self.taskPhotonCount = loop.create_task(updatePhotonCountChart())
             # self.taskPhotonCount
             # t = threading.Thread(target=self.updatePhotonCountChart)
 
@@ -639,7 +643,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         else:
             try:
-                self.taskPhotonCount.cancel()
+                self.loop.close()
+                print('closed loop')
+                # self.taskPhotonCount.cancel()
             except:
                 pass
             self.counter.stop()
