@@ -598,13 +598,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         async def updatePhotonCountChart():
             # x-axis and y-axis
             binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
-
+            print(binwidth_sec)
             self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
             if self.ui.radioButtonPhotonCountRate.isChecked():
                 self.axisYPhotonCount.setTitleText("Count rate")
+                print('Count rate')
             else:
                 self.axisYPhotonCount.setTitleText("Count number")
+                print('Count number')
 
+            print(self.tagger.getSerial())
             while True:
                 print('async')
                 if self.ui.radioButtonPhotonCountRate.isChecked():
