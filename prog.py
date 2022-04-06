@@ -85,10 +85,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.mw = None
 
-        try:
-            self.lockin = LockInAmplifier()
-        except:
-            self.lockin = None
+        # try:
+        #     self.lockin = LockInAmplifier()
+        # except:
+        #     self.lockin = None
+        self.lockin = None
 
     # async def updatePhotonCountChart(self):
     #     # x-axis and y-axis
