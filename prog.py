@@ -269,7 +269,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def updatePhotonCountConfig(self):
         unit = timeUnitDict[self.ui.comboBoxBinwidthUnit.currentText()]
         self.photonCountConfig = {
-            'channels': [[int(self.ui.comboBoxTaggerAPD.currentText())]],
+            'channels': [int(self.ui.comboBoxTaggerAPD.currentText())],
             'binwidth': unit * self.ui.spinBoxBinwidth.value() / C.pico,  # unit: ps
             'n_values': self.ui.spinBoxCountNumber.value()
         }
@@ -627,7 +627,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         if checked:
             self.updatePhotonCountConfig()
-            self.counter = tt.Counter(self.tagger, *self.photonCountConfig)
+            self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
             t = threading.Thread(target=self.updatePhotonCountChart)
 
             # TODO: 持续返回数据，定时刷新曲线，rate?!
