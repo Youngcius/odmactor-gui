@@ -642,7 +642,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonASGLoad_clicked(self):
         # 1) fetch sequences data
         self.fetchSequencesfromTableWidget()
-        self.asg.load_data(self.sequences)
+        sequencesNormalized = self.asg.normalize_data(self.sequences)
+        print(sequencesNormalized)
+        if self.asg.check_data(sequencesNormalized):
+            self.asg.load_data(self.sequences)
+            self.labelInstrStatus.setText('ASG: sequences loaded')
+        else:
+
+            self.labelInstrStatus.setText('ASG: abnormal sequence, not loaded')
         # 用写好的函数 scheduler中 ........................
         # 2) load sequences into current scheduler
         # self.schedulers[self.schedulerMode].config_sequences(self.sequences) # 这行代码执行有问题 TODO
