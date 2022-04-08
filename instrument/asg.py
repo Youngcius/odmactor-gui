@@ -22,7 +22,30 @@ class ASG(ASG8005):
         super(ASG, self).__init__()
         self.connect()
 
-    def load_data(self, asg_data: List[List[Union[float, int]]]):
+    def normalize_data(self, asg_data: List[List[int]]) -> bool:
+
+        if self.check_data(asg_data):
+            return True
+        else:
+            asg_data = asg_data.copy()
+            for i, seq in enumerate(asg_data):
+                if sum(seq) == 0:
+                    asg_data[i] = [0, 0]
+                else:
+                    n = len(seq)
+                    for j in range(n, 0, -1):
+                        if seq[j] > 0:
+                            break
+                        else:
+                            asg_data[i].pop(j)
+                    if len(asg_data[i]) % 2 != 0:
+                        asg_data[i].append(0)
+            if self.check_data(asg_data):
+                return True
+            else:
+                return False
+
+    def load_data(self, asg_data: List[List[int]]):
         """
         Connect ASG and download designed sequences data into it
         :param asg_data: ASG sequences for different channels
@@ -33,10 +56,10 @@ class ASG(ASG8005):
         else:
             raise ConnectionError('ASG not connected')
 
-    def check_data(self, asg_data: List[List[Union[float, int]]]):
+    def check_data(self, asg_data: List[List[int]]):
         return super(ASG, self).checkdata(asg_data, [len(row) for row in asg_data])
 
-    def connect(self):
+    def connect(self) -> bool:
         return super(ASG, self).connect()
 
     def start(self, count=1):

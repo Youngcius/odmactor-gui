@@ -524,23 +524,11 @@ class Scheduler(abc.ABC):
 
     @property
     def laser_control(self) -> bool:
+        """
+        True: laser-controlled measurement
+        False: pure spin manipulation
+        """
         return self._laser_control
-
-    @property
-    def mw_instr(self):
-        return self.mw
-
-    @mw_instr.setter
-    def mw_instr(self, value: Microwave):
-        self.mw = value
-
-    @property
-    def asg(self):
-        return self.asg
-
-    @asg.setter
-    def asg(self, value: ASG):
-        self.asg = value
 
     @property
     def result(self) -> List[List[float]]:
