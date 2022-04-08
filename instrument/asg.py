@@ -1,4 +1,5 @@
-from typing import List, Union
+from copy import deepcopy
+from typing import List
 from utils.asg import ASG8005
 
 """
@@ -22,9 +23,9 @@ class ASG(ASG8005):
         super(ASG, self).__init__()
         self.connect()
 
-    def normalize_data(self, asg_data: List[List[int]]) -> List[List[int]]:
+    def normalize_data(self, sequences: List[List[int]]) -> List[List[int]]:
+        asg_data = deepcopy(sequences)
         if not self.check_data(asg_data):
-            asg_data = asg_data.copy()
             for i, seq in enumerate(asg_data):
                 if sum(seq) == 0:
                     asg_data[i] = [0, 0]

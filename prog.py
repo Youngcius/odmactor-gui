@@ -151,7 +151,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # ASG sequences from table widget
         self.sequences = []  # unit: ns
         self.fetchSequencesfromTableWidget()  # sequences with each element equal to 0 has been set in self.buildUI()
-        self.sequences[0][0] = 10
         # self.sequences[-1] = [10, 0]
 
         # Laser, MW, ASG, tagger counter # TODO: 似乎没必要预读取和设置仪器参数
@@ -594,9 +593,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.sequences.append([])
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 self.sequences[i].append(int(self.ui.tableWidgetSequence.item(i, j).text()))
-        print('fetched')
-        print(self.sequences[0])
-        print('---------------')
 
     def feedSequencesToTabkeWidget(self):
         for i, seq in enumerate(self.sequences):
@@ -604,22 +600,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 self.ui.tableWidgetSequence.item(i, j).setText(str(val))
 
     def updateSequenceChart(self):
-        # TODO: check 是不是只更新 seqFigCanvas 就行了？,因为 seqFigCanvas 已经被 add 到 layout里面了
-        # self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
-        # self.layoutSequenceVisualization.removeWidget(self.seqFigCanvas)
-        print('updated')
-        print(self.sequences[0])
-        # self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？
-        self.seqFigCanvas.figure = seq_to_fig(self.sequences)
-        print(self.sequences[0])
-        # self.layoutSequenceVisualization = QtWidgets.QVBoxLayout(self.ui.widgetSequenceVisualization)
-        # self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
-        # self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
-        # self.layoutSequenceVisualization.setSpacing(0)
-
-
-        # self.seqFigCanvas.figure = seq_to_fig(self.asg.normalize_data(self.sequences))
-
+        """
+        Update sequences chart and add it to the layout widget
+        """
+        self.layoutSequenceVisualization.removeWidget(self.seqFigCanvas)
+        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
+        self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
+        self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
+        self.layoutSequenceVisualization.setSpacing(0)
 
     def updatePhotonCountChart(self):
         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
@@ -660,10 +648,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # 1) fetch sequences data
         self.fetchSequencesfromTableWidget()
         try:
-            print(self.sequences[0])
             self.asg.load_data(self.asg.normalize_data(self.sequences))
-            print(self.sequences[0])
-            print('==========================')
             self.updateSequenceChart()
             self.labelInstrStatus.setText('ASG: sequences loaded')
         except:
