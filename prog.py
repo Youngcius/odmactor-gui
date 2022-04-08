@@ -645,7 +645,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.asg.load_data(self.sequences)
         # 用写好的函数 scheduler中 ........................
         # 2) load sequences into current scheduler
-        self.schedulers[self.schedulerMode].config_sequences(self.sequences)
+        # self.schedulers[self.schedulerMode].config_sequences(self.sequences) # 这行代码执行有问题 TODO
         # 3) visualize seuqnces
         self.updateSequenceChart()
 
