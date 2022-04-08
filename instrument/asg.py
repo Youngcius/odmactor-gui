@@ -37,7 +37,7 @@ class ASG(ASG8005):
         return super(ASG, self).checkdata(asg_data, [len(row) for row in asg_data])
 
     def connect(self):
-        super(ASG, self).connect()
+        return super(ASG, self).connect()
 
     def start(self, count=1):
         super(ASG, self).start()
