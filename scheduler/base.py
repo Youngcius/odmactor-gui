@@ -9,6 +9,7 @@ import uuid
 import json
 import os
 import pickle
+import nidaqmx
 import threading
 import numpy as np
 import scipy.constants as C
@@ -34,9 +35,9 @@ class Scheduler(abc.ABC):
         self.pi_pulse = {'freq': None, 'power': None, 'time': None}  # unit: Hz, dBm, s
         self._result = []
         self._result_detail = {}
-        self._freqs = []
-        self._times = []
-        self._cur_freq = 0
+        self._freqs = []  # unit: Hz
+        self._times = []  # unit: ns
+        self._cur_freq = 1e9
         self._cur_time = 0
         self._asg_sequences = []
         self.reset_asg_sequence()
@@ -176,16 +177,14 @@ class Scheduler(abc.ABC):
         # connect & download pulse data
         self.asg.load_data(self._asg_sequences)
 
-    def configure_lockin_counting(self, ):
+    def configure_lockin_counting(self, channel: str = 'Dev1/ai0'):
         """
 
-        :param apd_channel:
-        :param asg_channel:
-        :return:
+        :param channel: output channel from NIDAQ to PC
         """
         self.lockin = LockInAmplifier(N=self._asg_conf['N'])
-        # 不需要设置lockin的channel
-        pass
+        self.daqtask = nidaqmx.Task()
+        self.daqtask.ai_channels.add_ai_voltage_chan(channel)
 
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
