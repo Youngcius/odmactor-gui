@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import time
+import datetime
 import asyncio
 import threading
 import numpy as np
@@ -601,14 +602,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-
         self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
         except:
             self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
-            return
 
         self.axisXPhotonCount.setTitleText(
             'Time ({} {})'.format(self.ui.spinBoxBinwidth.value(), self.ui.comboBoxBinwidthUnit.currentText()))
@@ -626,16 +625,35 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_pushButtonPhotonCountRefresh_clicked(self):
-        # 清空chart，重新开始
-        # self.chartPhotonCount.clearFocus()
-        pass
+        """
+        Clear series data of the chart, restart counting
+        """
+        self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+        try:
+            self.counter.clear()
+        except:
+            self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
 
     @pyqtSlot()
     def on_pushButtonPhotonCountSaveData_clicked(self):
         """
         Save data in form of JSON file in default
         """
-        pass
+        # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
+        timestamp = datetime.datetime.now()
+        counts = self.counter.getData().ravel()
+        data = {
+            'channel': self.photonCountConfig['channels'][0],
+            'time': self.counter.getIndex() * C.pico,
+            'count': counts.tolist(),
+            'count rate (1/s)': (counts / self.photonCountConfig['binwidth'] / C.pico).tolist(),
+            'timestap': str(timestamp),
+        }
+        fname = 'odmactor-counts_' + timestamp.strftime('%Y-%m-%d_%H-%M-%S') + '.json'
+        fname = os.path.join(os.path.expanduser('~'), 'Downloads', fname) # 暂时只考虑 windows 的文件路径
+        with open(fname, 'w') as f:
+            json.dump(data, f)
+        self.labelInstrStatus.setText('File has been saved in {}'.format(fname))
 
     @pyqtSlot()
     def on_pushButtonTaggerConnect_clicked(self):
@@ -673,53 +691,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 self.ui.tableWidgetSequence.item(i, j).setText(str(val))
 
     def updateSequenceChart(self):
-        self.seqFigCanvas = FigureCanvas(
-            seq_to_fig(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？,因为 seqFigCanvas 已经被 add 到 layout里面了
+        # TODO: check 是不是只更新 seqFigCanvas 就行了？,因为 seqFigCanvas 已经被 add 到 layout里面了
+        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
 
     def updatePhotonCountChart(self):
-
-        # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
-        #
-        # if checked:
-        #     print('此处应该有异步：')
-        #     self.updatePhotonCountConfig()
-        #     # self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-        #     print(self.photonCountConfig)
-        #     # print(self.counter.getData()[0][:10])
-        #     self.loop = asyncio.get_event_loop()
-        #     print(self.loop)
-        #     # self.loop.run_until_complete(updatePhotonCountChart())
-        #     self.taskPhotonCount = self.loop.create_task(updatePhotonCountChart())
-        #
-        #     # self.taskPhotonCount
-        #     # t = threading.Thread(target=self.updatePhotonCountChart)
-        #
-        #     # TODO: 持续返回数据，定时刷新曲线，rate?!
-        #     # self.counter.start()
-        #     # t.start()
-        #
-        # else:
-        #     try:
-        #         self.loop.close()
-        #         print('closed loop')
-        #         # self.taskPhotonCount.cancel()
-        #     except:
-
-        #     binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
-        #     self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
-
-        #
-        #     while True:
-        #         print('async')
-        #         if self.ui.radioButtonPhotonCountRate.isChecked():
-        #             counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
-        #         else:
-        #             counts = self.counter.getData().ravel()
-        #         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
-        #         # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
-        #         for i, c in enumerate(counts):
-        #             self.seriesPhotonCount.append(i * binwidth_sec, c)
-
         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
         counts = self.counter.getData().ravel()
         if self.ui.radioButtonPhotonCountRate.isChecked():
@@ -729,14 +704,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
         for i, c in enumerate(counts):
             self.seriesPhotonCount.append(i, c)
-        # y = self.lister.new()
-        # ymin, ymax = min(y), max(y)
-        # delta = ymax - ymin
-        #
-        # self.axisYPhotonCount.setRange(ymin -0.05*delta, ymax+0.05*delta)
-        # # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
-        # for i, c in enumerate(y):
-        #     self.seriesPhotonCount.append(i, c)
 
     @pyqtSlot()
     def on_pushButtonASGOpen_clicked(self):
