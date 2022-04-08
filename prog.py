@@ -644,7 +644,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         counts = self.counter.getData().ravel()
         data = {
             'channel': self.photonCountConfig['channels'][0],
-            'time': self.counter.getIndex() * C.pico,
+            'time': (self.counter.getIndex() * C.pico).tolist(),
             'count': counts.tolist(),
             'count rate (1/s)': (counts / self.photonCountConfig['binwidth'] / C.pico).tolist(),
             'timestap': str(timestamp),
