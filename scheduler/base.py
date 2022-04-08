@@ -86,8 +86,8 @@ class Scheduler(abc.ABC):
         self.mw_on_off = kwargs['mw_on_off']
 
         # with lockin or tagger
-        kwargs.setdefault('with_lockin', False)
-        self.with_lockin = kwargs['with_lockin']
+        kwargs.setdefault('use_lockin', False)
+        self.use_lockin = kwargs['use_lockin']
 
         # initialize instruments
         self.laser = Laser()
@@ -97,7 +97,7 @@ class Scheduler(abc.ABC):
         except:
             self.mw = None
 
-        if self.with_lockin:
+        if self.use_lockin:
             try:
                 self.lockin = LockInAmplifier()
             except:
@@ -108,6 +108,8 @@ class Scheduler(abc.ABC):
             else:
                 self.tagger = None
 
+    # TODO: connect和 odmactor中的reconnect需要整合
+    # TODO: 从外界传入仪器的接口，是的scheduler和GUI程序的仪器变量相同
     def connect(self):
         """
         Check and connect all instruments
@@ -120,7 +122,7 @@ class Scheduler(abc.ABC):
         if self.mw is not None:
             self.mw.connect()
 
-        if self.with_lockin:
+        if self.use_lockin:
             self.lockin = LockInAmplifier()
         else:
             try:
@@ -230,7 +232,7 @@ class Scheduler(abc.ABC):
         self.asg.start()
 
         # 2. restart self.counter if using Tagger
-        if not self.with_lockin:
+        if not self.use_lockin:
             self.counter.start()
 
         # 3. run MW then
@@ -238,30 +240,34 @@ class Scheduler(abc.ABC):
         print('MW on/off status:', self.mw.instrument_status_checking)
 
     def _get_data(self):
-        if self.with_lockin:
+        if self.use_lockin:
             # from lockin
             tmp = []
             for _ in range(self._asg_conf['N']):
                 time.sleep(self._asg_conf['t'])
-                tmp.append(self.lockin.magnitude)
+                tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
             self._data.append(tmp)
         else:
             # from tagger
-            self._data.append(self.counter.getData().ravel().tolist())
             self.counter.clear()
+            time.sleep(self.time_pad)
+            time.sleep(self.asg_dwell)
+            self._data.append(self.counter.getData().ravel().tolist())
 
     def _get_data_ref(self):
-        if self.with_lockin:
+        if self.use_lockin:
             # from lockin
             tmp = []
             for _ in range(self._asg_conf['N']):
                 time.sleep(self._asg_conf['t'])
-                tmp.append(self.lockin.magnitude)
+                tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
             self._data_ref.append(tmp)
         else:
             # from tagger
-            self._data_ref.append(self.counter.getData().ravel().tolist())
             self.counter.clear()
+            time.sleep(self.time_pad)
+            time.sleep(self.asg_dwell)
+            self._data_ref.append(self.counter.getData().ravel().tolist())
 
     def run(self):
         """
@@ -631,10 +637,12 @@ class FrequencyDomainScheduler(Scheduler):
                 self.mw.start()
 
             print('scanning freq {:.3f} GHz'.format(freq / C.giga))
-            t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)  # accumulate counts
-            t.start()  # begin readout
+            self._get_data()
+            # t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
+            # time.sleep(self.time_pad)
+            # time.sleep(self.asg_dwell)  # accumulate counts
+            # t.start()  # begin readout
+            # t.join()
 
             if self.with_ref:
                 # turn off MW via ASG
@@ -645,13 +653,16 @@ class FrequencyDomainScheduler(Scheduler):
                     self.mw.stop()
 
                 # reference data acquisition
-                tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
-                time.sleep(self.time_pad)
-                time.sleep(self.asg_dwell)
-                tr.start()
+                # tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
+                # time.sleep(self.time_pad)
+                # time.sleep(self.asg_dwell)
+                # tr.start()
+                self._get_data_ref()
 
                 # recover the sequences
                 self.mw_control_seq(mw_on_seq)
+
+                # tr.join()
 
         print('finished data acquisition')
 
@@ -743,7 +754,7 @@ class TimeDomainScheduler(Scheduler):
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
             print('scanning freq {:.3f} ns (trivial)'.format(self._times[0]))
 
-            self._gene_detect_seq(self._times[0])
+            self.gene_detect_seq(self._times[0])
             self.asg.start()
             time.sleep(self.time_pad + self.asg_dwell)
 
@@ -754,7 +765,7 @@ class TimeDomainScheduler(Scheduler):
         # =======================================================
         for i, duration in enumerate(self._times):
             self._cur_time = duration
-            self._gene_detect_seq(duration)
+            self.gene_detect_seq(duration)
             self.asg.start()
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
             print('scanning time interval: {:.3f} ns'.format(duration))
@@ -764,10 +775,11 @@ class TimeDomainScheduler(Scheduler):
                 self.mw.start()
 
             # Signal readout
-            t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)  # accumulate counts
-            t.start()  # begin readout
+            # t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
+            # time.sleep(self.time_pad)
+            # time.sleep(self.asg_dwell)  # accumulate counts
+            self._get_data()  # 4.6 修改，不用同步
+            # t.start()  # begin readout
 
             # Reference readout
             if self.with_ref:
@@ -778,10 +790,11 @@ class TimeDomainScheduler(Scheduler):
                 if self.mw_on_off:
                     self.mw.stop()
 
-                tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
-                time.sleep(self.time_pad)
-                time.sleep(self.asg_dwell)
-                tr.start()
+                # tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
+                # time.sleep(self.time_pad)
+                # time.sleep(self.asg_dwell)
+                self._get_data_ref()
+                # tr.start()
 
         print('finished data acquisition')
 
