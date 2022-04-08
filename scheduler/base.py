@@ -10,6 +10,7 @@ import json
 import os
 import pickle
 import threading
+import nidaqmx
 import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
@@ -36,8 +37,6 @@ class Scheduler(abc.ABC):
         self._result_detail = {}
         self._freqs = []
         self._times = []
-        self._cur_freq = 0
-        self._cur_time = 0
         self._asg_sequences = []
         self.reset_asg_sequence()
         self._asg_conf = {'t': 0, 'N': 0}  # to calculate self.asg_dwell = N * t
@@ -50,9 +49,10 @@ class Scheduler(abc.ABC):
 
         self.mw_exec_mode = ''
         self.mw_exec_modes_optional = {'scan-center-span', 'scan-start-stop'}
-        self.channel = {'laser': 1, 'mw': 2, 'apd': 3, 'tagger': 5}
+        self.channel = {'laser': 1, 'mw': 2, 'apd': 3, 'tagger': 5, 'lockin': 8}
         self.tagger_input = {'apd': 1, 'asg': 2}
         self.counter: tt.IteratorBase = None
+        self.daqtask: nidaqmx.Task = None
 
         # properties or method for debugging
         self.sync_delay = 0.0
@@ -86,8 +86,8 @@ class Scheduler(abc.ABC):
         self.mw_on_off = kwargs['mw_on_off']
 
         # with lockin or tagger
-        kwargs.setdefault('with_lockin', False)
-        self.with_lockin = kwargs['with_lockin']
+        kwargs.setdefault('use_lockin', False)
+        self.use_lockin = kwargs['use_lockin']
 
         # initialize instruments
         self.laser = Laser()
@@ -97,7 +97,7 @@ class Scheduler(abc.ABC):
         except:
             self.mw = None
 
-        if self.with_lockin:
+        if self.use_lockin:
             try:
                 self.lockin = LockInAmplifier()
             except:
@@ -108,19 +108,14 @@ class Scheduler(abc.ABC):
             else:
                 self.tagger = None
 
-    def connect(self):
-        """
-        Check and connect all instruments
-        ---
-        Laser, MW, ADG, Tagger, Lockin
-        """
+    def reconnect(self):
         self.laser.connect()
         self.asg.connect()
 
         if self.mw is not None:
             self.mw.connect()
 
-        if self.with_lockin:
+        if self.use_lockin:
             self.lockin = LockInAmplifier()
         else:
             try:
@@ -128,26 +123,17 @@ class Scheduler(abc.ABC):
             except:
                 self.tagger = tt.createTimeTagger()
 
-    def set_asg_sequences_ttl(self, laser_ttl=None, mw_ttl=None, apd_ttl=None, tagger_ttl=None):
-        if laser_ttl is not None:
-            self.laser_ttl = laser_ttl
-        if mw_ttl is not None:
-            self.mw_ttl = mw_ttl
-        if apd_ttl is not None:
-            self.apd_ttl = apd_ttl
-        if tagger_ttl is not None:
-            self.tagger_ttl = tagger_ttl
-
     def download_asg_sequences(self, laser_seq: List[int] = None, mw_seq: List[int] = None,
-                               tagger_seq: List[int] = None, N: int = 100000):
+                               tagger_seq: List[int] = None, lockin_seq: List[int] = None, N: int = 100000):
         """
         Download control sequences into the memory of ASG
         :param laser_seq: laser control sequence
         :param mw_seq: MW control sequence
         :param tagger_seq: tagger readout control sequence
+        :param lockin_seq: lock-in amplifier control sequence
         :param N: repetition number of sequences periods for each detection point
         """
-        sequences = [laser_seq, mw_seq, tagger_seq]
+        sequences = [laser_seq, mw_seq, tagger_seq, lockin_seq]
         if not any(sequences):
             raise ValueError('laser_seq, mw_seq and tagger_seq cannot be all None')
         sequences = [seq for seq in sequences if seq is not None]  # non-None sequences
@@ -162,6 +148,7 @@ class Scheduler(abc.ABC):
         idx_laser_channel = self.channel['laser'] - 1
         idx_mw_channel = self.channel['mw'] - 1
         idx_tagger_channel = self.channel['tagger'] - 1
+        idx_lockin_channel = self.channel['lockin'] - 1
 
         self.reset_asg_sequence()
         if laser_seq is not None:
@@ -170,20 +157,20 @@ class Scheduler(abc.ABC):
             self._asg_sequences[idx_mw_channel] = mw_seq
         if tagger_seq is not None:
             self._asg_sequences[idx_tagger_channel] = tagger_seq
+        if lockin_seq is not None:
+            self._asg_sequences[idx_lockin_channel] = lockin_seq
 
         # connect & download pulse data
         self.asg.load_data(self._asg_sequences)
 
-    def configure_lockin_counting(self, ):
+    def configure_lockin_counting(self, channel: str = 'Dev1/ai0'):
         """
 
-        :param apd_channel:
-        :param asg_channel:
-        :return:
+        :param channel: output channel from NIDAQ to PC
         """
         self.lockin = LockInAmplifier(N=self._asg_conf['N'])
-        # 不需要设置lockin的channel
-        pass
+        self.daqtask = nidaqmx.Task()
+        self.daqtask.ai_channels.add_ai_voltage_chan(channel)
 
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
@@ -192,7 +179,7 @@ class Scheduler(abc.ABC):
         :param asg_channel: ASG channel number
         :param reader: counter of specific readout type
         """
-        self.two_pulse_readout = False  # TODO: 目前的two-pulse readout不可用，强制设置为False
+
         if apd_channel is not None:
             self.tagger_input['apd'] = apd_channel
         if asg_channel is not None:
@@ -224,13 +211,14 @@ class Scheduler(abc.ABC):
         """
         Start device: MW, ASG; Execute Measurement instance.
         """
+
         # 1. run ASG firstly
         self._data.clear()
         self._data_ref.clear()
         self.asg.start()
 
-        # 2. restart self.counter if using Tagger
-        if not self.with_lockin:
+        # 2. restart self.counter or self.lockin if necessary
+        if self.counter is not None:
             self.counter.start()
 
         # 3. run MW then
@@ -238,30 +226,34 @@ class Scheduler(abc.ABC):
         print('MW on/off status:', self.mw.instrument_status_checking)
 
     def _get_data(self):
-        if self.with_lockin:
+        if self.use_lockin:
             # from lockin
             tmp = []
             for _ in range(self._asg_conf['N']):
                 time.sleep(self._asg_conf['t'])
-                tmp.append(self.lockin.magnitude)
+                tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
             self._data.append(tmp)
         else:
             # from tagger
-            self._data.append(self.counter.getData().ravel().tolist())
             self.counter.clear()
+            time.sleep(self.time_pad)
+            time.sleep(self.asg_dwell)
+            self._data.append(self.counter.getData().ravel().tolist())
 
     def _get_data_ref(self):
-        if self.with_lockin:
+        if self.use_lockin:
             # from lockin
             tmp = []
             for _ in range(self._asg_conf['N']):
                 time.sleep(self._asg_conf['t'])
-                tmp.append(self.lockin.magnitude)
+                tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
             self._data_ref.append(tmp)
         else:
             # from tagger
-            self._data_ref.append(self.counter.getData().ravel().tolist())
             self.counter.clear()
+            time.sleep(self.time_pad)
+            time.sleep(self.asg_dwell)
+            self._data_ref.append(self.counter.getData().ravel().tolist())
 
     def run(self):
         """
@@ -277,7 +269,10 @@ class Scheduler(abc.ABC):
         """
         Stop hardware (ASG, MW, Tagger) scheduling
         """
-        self.counter.stop()
+        if self.counter is not None:
+            self.counter.stop()
+        if self.daqtask is not None:
+            self.daqtask.stop()
         self.asg.stop()
         self.mw.stop()
         print('Stopped: Scheduling process has stopped')
@@ -286,9 +281,14 @@ class Scheduler(abc.ABC):
         """
         Release instrument (ASG, MW, Tagger) resources
         """
-        self.asg.close()
-        self.mw.close()
-        tt.freeTimeTagger(self.tagger)
+        if self.asg is not None:
+            self.asg.close()
+        if self.mw is not None:
+            self.mw.close()
+        if not self.use_lockin and self.tagger is not None:
+            tt.freeTimeTagger(self.tagger)
+        if self.use_lockin and self.daqtask is not None:
+            self.daqtask.close()
         print('Closed: All instrument resources has been released')
 
     def configure_mw_paras(self, power: float = None, freq: float = None, regulate_pi: bool = False, *args, **kwargs):
@@ -499,33 +499,6 @@ class Scheduler(abc.ABC):
     def __str__(self):
         return self.name
 
-    def config_sequences(self, sequences: List[List[Union[float, int]]]):
-        """
-        Configure ODMR sequences from external sequences data directly
-        """
-        self._asg_sequences = sequences
-        self.asg.load_data(sequences)
-
-    @property
-    def sequences(self):
-        return self._asg_sequences
-
-    @property
-    def frequencies(self):
-        return self._freqs
-
-    @property
-    def times(self):
-        return self._times
-
-    @property
-    def cur_freq(self):
-        return self._cur_freq
-
-    @property
-    def cur_time(self):
-        return self._cur_time
-
     @abc.abstractmethod
     def configure_odmr_seq(self, *args, **kwargs):
         """
@@ -556,11 +529,15 @@ class Scheduler(abc.ABC):
 
     @property
     def laser_control(self) -> bool:
-        """
-        True: laser-controlled measurement
-        False: pure spin manipulation
-        """
         return self._laser_control
+
+    @property
+    def mw_instr(self):
+        return self.mw
+
+    @mw_instr.setter
+    def mw_instr(self, value: Microwave):
+        self.mw = value
 
     @property
     def result(self) -> List[List[float]]:
@@ -623,7 +600,6 @@ class FrequencyDomainScheduler(Scheduler):
 
         mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
         for i, freq in enumerate(self._freqs):
-            self._cur_freq = freq
             self.mw.set_frequency(freq)
 
             # need to turn on MW again
@@ -631,10 +607,12 @@ class FrequencyDomainScheduler(Scheduler):
                 self.mw.start()
 
             print('scanning freq {:.3f} GHz'.format(freq / C.giga))
-            t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)  # accumulate counts
-            t.start()  # begin readout
+            self._get_data()
+            # t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
+            # time.sleep(self.time_pad)
+            # time.sleep(self.asg_dwell)  # accumulate counts
+            # t.start()  # begin readout
+            # t.join()
 
             if self.with_ref:
                 # turn off MW via ASG
@@ -645,13 +623,16 @@ class FrequencyDomainScheduler(Scheduler):
                     self.mw.stop()
 
                 # reference data acquisition
-                tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
-                time.sleep(self.time_pad)
-                time.sleep(self.asg_dwell)
-                tr.start()
+                # tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
+                # time.sleep(self.time_pad)
+                # time.sleep(self.asg_dwell)
+                # tr.start()
+                self._get_data_ref()
 
                 # recover the sequences
                 self.mw_control_seq(mw_on_seq)
+
+                # tr.join()
 
         print('finished data acquisition')
 
@@ -753,7 +734,6 @@ class TimeDomainScheduler(Scheduler):
 
         # =======================================================
         for i, duration in enumerate(self._times):
-            self._cur_time = duration
             self._gene_detect_seq(duration)
             self.asg.start()
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
@@ -764,10 +744,11 @@ class TimeDomainScheduler(Scheduler):
                 self.mw.start()
 
             # Signal readout
-            t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)  # accumulate counts
-            t.start()  # begin readout
+            # t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
+            # time.sleep(self.time_pad)
+            # time.sleep(self.asg_dwell)  # accumulate counts
+            self._get_data()  # 4.6 修改，不用同步
+            # t.start()  # begin readout
 
             # Reference readout
             if self.with_ref:
@@ -778,10 +759,11 @@ class TimeDomainScheduler(Scheduler):
                 if self.mw_on_off:
                     self.mw.stop()
 
-                tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
-                time.sleep(self.time_pad)
-                time.sleep(self.asg_dwell)
-                tr.start()
+                # tr = threading.Thread(target=self._get_data_ref, name='thread-ref-{}'.format(i))
+                # time.sleep(self.time_pad)
+                # time.sleep(self.asg_dwell)
+                self._get_data_ref()
+                # tr.start()
 
         print('finished data acquisition')
 
@@ -813,7 +795,7 @@ class TimeDomainScheduler(Scheduler):
         self._acquire_data()  # scanning time intervals in this loop
         self.stop()
 
-    def gene_pseudo_detect_seq(self):
+    def _gene_pseudo_detect_seq(self):
         """
         Generate pseudo pulses for visualization and regulation
         """
