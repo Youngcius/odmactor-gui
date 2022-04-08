@@ -24,6 +24,9 @@ class ASG(ASG8005):
         self.connect()
 
     def normalize_data(self, sequences: List[List[int]]) -> List[List[int]]:
+        """
+        Normalize sequences to make it acceptable data for ASG loading
+        """
         asg_data = deepcopy(sequences)
         if not self.check_data(asg_data):
             for i, seq in enumerate(asg_data):
