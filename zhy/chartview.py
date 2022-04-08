@@ -16,7 +16,7 @@ class ChartView(QChartView, QChart):
 
     def timer_init(self):
         # 使用QTimer，一定时间触发一次，更新数据
-        self.timer = QTimer(self)
+        self.timer = QTimer()
         self.timer.timeout.connect(self.drawLine)
         self.timer.start(100)  # unit: ms
 
@@ -31,7 +31,7 @@ class ChartView(QChartView, QChart):
         self.dtaxisX = QDateTimeAxis()
         self.vlaxisY = QValueAxis()
         # 设置坐标轴显示范围
-        self.dtaxisX.setMin(QDateTime.currentDateTime().addSecs(-300*1))
+        self.dtaxisX.setMin(QDateTime.currentDateTime().addSecs(-300 * 1))
         self.dtaxisX.setMax(QDateTime.currentDateTime().addSecs(0))
         self.vlaxisY.setMin(0)
         self.vlaxisY.setMax(1500)
@@ -55,14 +55,17 @@ class ChartView(QChartView, QChart):
         self.setChart(self.chart)
 
     def drawLine(self):
+        """
+        更新数据重新绘图
+        """
         # 获取当前时间
         bjtime = QDateTime.currentDateTime()
         # 更新X轴坐标
-        self.dtaxisX.setMin(QDateTime.currentDateTime().addSecs(-300*1))
+        self.dtaxisX.setMin(QDateTime.currentDateTime().addSecs(-300 * 1))
         self.dtaxisX.setMax(QDateTime.currentDateTime().addSecs(0))
         # 当曲线上的点超出X轴的范围时，移除最早的点
-        if(self.series.count() > 149):
-            self.series.removePoints(0, self.series.count()-149)
+        if (self.series.count() > 149):
+            self.series.removePoints(0, self.series.count() - 149)
         # 产生随即数
         yint = random.randint(0, 1500)
         # 添加数据到曲线末端

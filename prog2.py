@@ -658,6 +658,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         #         pass
         # self.counter.stop()
         self.updatePhotonCountConfig()
+        # self.lister = Lister(self.photonCountConfig['n_values'])
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
         except:
@@ -676,7 +677,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.timerPhotonCount.start(100)
         else:
             self.timerPhotonCount.stop()
-            self.counter.stop()
 
     @pyqtSlot()
     def on_pushButtonPhotonCountRefresh_clicked(self):
@@ -874,3 +874,19 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 # TODO 1: 先画图于 odmr spectrum chart，在做 real-time 的 chart
 # TODO 2: 先跑单线程的，在考虑为 scheduler 开辟新的 thread
 
+
+from random import randrange
+
+
+class Lister:
+    def __init__(self, N: int):
+        # self.l = np.random.randint(0, 100, N).tolist()
+        self.l = np.random.rand(N).tolist()
+
+    def new(self):
+        a = np.random.rand()
+        self.l = self.l[1:] + [a]
+        return self.l
+
+    def cur(self):
+        return self.l
