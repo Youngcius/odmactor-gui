@@ -601,68 +601,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-        #
-        # async def updatePhotonCountChart():
-        #     # x-axis and y-axis
-        #     self.axisXPhotonCount.setRange(0, self.photonCountConfig['n_values'])
-        #     # if self.ui.radioButtonPhotonCountRate.isChecked():
-        #     #     self.axisYPhotonCount.setTitleText("Count rate")
-        #     #     print('Count rate')
-        #     # else:
-        #     #     self.axisYPhotonCount.setTitleText("Count number")
-        #     #     print('Count number')
-        #
-        #     # print(self.tagger.getSerial())
-        #     lister = Lister(self.photonCountConfig['n_values'])
-        #     while True:
-        #         # print('async')
-        #         # if self.ui.radioButtonPhotonCountRate.isChecked():
-        #         #     counts = self.counter.getData().ravel() / self.photonCountConfig['binwidth'] / C.pico
-        #         # else:
-        #         # counts = self.counter.getData().ravel()
-        #         counts = lister.new()
-        #
-        #         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
-        #         # self.chartPhotonCount.removeSeries(self.seriesPhotonCount)
-        #         for i, c in enumerate(counts):
-        #             self.seriesPhotonCount.append(i, c)
-        #         await asyncio.sleep(1)
-        #
-
-        # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
-        #
-        # if checked:
-        #     print('此处应该有异步：')
-        #     self.updatePhotonCountConfig()
-        #     # self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-        #     print(self.photonCountConfig)
-        #     # print(self.counter.getData()[0][:10])
-        #     self.loop = asyncio.get_event_loop()
-        #     print(self.loop)
-        #     # self.loop.run_until_complete(updatePhotonCountChart())
-        #     self.taskPhotonCount = self.loop.create_task(updatePhotonCountChart())
-        #
-        #     # self.taskPhotonCount
-        #     # t = threading.Thread(target=self.updatePhotonCountChart)
-        #
-        #     # TODO: 持续返回数据，定时刷新曲线，rate?!
-        #     # self.counter.start()
-        #     # t.start()
-        #
-        # else:
-        #     try:
-        #         self.loop.close()
-        #         print('closed loop')
-        #         # self.taskPhotonCount.cancel()
-        #     except:
-        #         pass
-        # self.counter.stop()
+        self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
         except:
-            # self.labelInstrStatus.setText('No Time Tagger to detect photons!')
-
             self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
             return
 
