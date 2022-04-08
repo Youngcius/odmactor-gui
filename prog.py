@@ -601,6 +601,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
+
+
+
+
         self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
@@ -608,6 +612,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
             return
+
+        binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
+        self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
 
         self.axisXPhotonCount.setRange(0, self.photonCountConfig['n_values'])
         if self.ui.radioButtonPhotonCountRate.isChecked():
@@ -720,12 +727,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
         counts = self.counter.getData().ravel()
         if self.ui.radioButtonPhotonCountRate.isChecked():
-            counts /= self.photonCountConfig['binwidth'] / C.pico
+            counts = counts/self.photonCountConfig['binwidth'] / C.pico
         cmin, cmax = min(counts), max(counts)
         delta = cmax - cmin
         self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
         for i, c in enumerate(counts):
-            self.seriesPhotonCount.append(i, c)
+            self.seriesPhotonCount.append(i * self.photonCountConfig['binwidth'] * C.pico, c)
         # y = self.lister.new()
         # ymin, ymax = min(y), max(y)
         # delta = ymax - ymin
