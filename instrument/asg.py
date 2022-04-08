@@ -22,10 +22,11 @@ class ASG(ASG8005):
         super(ASG, self).__init__()
         self.connect()
 
-    def normalize_data(self, asg_data: List[List[int]]) -> bool:
+    def normalize_data(self, asg_data: List[List[int]]) -> List[List[int]]:
 
         if self.check_data(asg_data):
-            return True
+            print('norm True')
+            return asg_data
         else:
             asg_data = asg_data.copy()
             for i, seq in enumerate(asg_data):
@@ -41,9 +42,11 @@ class ASG(ASG8005):
                     if len(asg_data[i]) % 2 != 0:
                         asg_data[i].append(0)
             if self.check_data(asg_data):
-                return True
+                print(True)
+
             else:
-                return False
+                print(False)
+            return asg_data
 
     def load_data(self, asg_data: List[List[int]]):
         """
