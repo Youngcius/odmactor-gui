@@ -61,10 +61,10 @@ class ASG(ASG8005):
         return super(ASG, self).connect()
 
     def start(self, count=1):
-        super(ASG, self).start()
+        return super(ASG, self).start()
 
     def stop(self):
-        super(ASG, self).stop()
+        return super(ASG, self).stop()
 
     def close(self):
-        super(ASG, self).close_device()
+        return super(ASG, self).close_device()

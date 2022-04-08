@@ -14,9 +14,17 @@ class Microwave(RsInstrument):
         # super(Microwave, self).write_float('FREQUENCY', freq)
         print('MW frequency:', freq)
 
+    def get_frequency(self):
+        # return super(Microwave, self).query_float('FREQUENCY')
+        return 1e9
+
     def set_power(self, power):
         # super(Microwave, self).write_float('POW', power)
         print('MW power:', power)
+
+    def get_power(self):
+        # return super(Microwave, self).query_float_with_opc('POW')
+        return 1
 
     def run_given_time(self, duration):
         self.start()

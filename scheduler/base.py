@@ -36,6 +36,8 @@ class Scheduler(abc.ABC):
         self._result_detail = {}
         self._freqs = []
         self._times = []
+        self._cur_freq = 0
+        self._cur_time = 0
         self._asg_sequences = []
         self.reset_asg_sequence()
         self._asg_conf = {'t': 0, 'N': 0}  # to calculate self.asg_dwell = N * t
@@ -126,6 +128,16 @@ class Scheduler(abc.ABC):
             except:
                 self.tagger = tt.createTimeTagger()
 
+    def set_asg_sequences_ttl(self, laser_ttl=None, mw_ttl=None, apd_ttl=None, tagger_ttl=None):
+        if laser_ttl is not None:
+            self.laser_ttl = laser_ttl
+        if mw_ttl is not None:
+            self.mw_ttl = mw_ttl
+        if apd_ttl is not None:
+            self.apd_ttl = apd_ttl
+        if tagger_ttl is not None:
+            self.tagger_ttl = tagger_ttl
+
     def download_asg_sequences(self, laser_seq: List[int] = None, mw_seq: List[int] = None,
                                tagger_seq: List[int] = None, N: int = 100000):
         """
@@ -180,7 +192,7 @@ class Scheduler(abc.ABC):
         :param asg_channel: ASG channel number
         :param reader: counter of specific readout type
         """
-
+        self.two_pulse_readout = False  # TODO: 目前的two-pulse readout不可用，强制设置为False
         if apd_channel is not None:
             self.tagger_input['apd'] = apd_channel
         if asg_channel is not None:
@@ -494,6 +506,26 @@ class Scheduler(abc.ABC):
         self._asg_sequences = sequences
         self.asg.load_data(sequences)
 
+    @property
+    def sequences(self):
+        return self._asg_sequences
+
+    @property
+    def frequencies(self):
+        return self._freqs
+
+    @property
+    def times(self):
+        return self._times
+
+    @property
+    def cur_freq(self):
+        return self._cur_freq
+
+    @property
+    def cur_time(self):
+        return self._cur_time
+
     @abc.abstractmethod
     def configure_odmr_seq(self, *args, **kwargs):
         """
@@ -591,6 +623,7 @@ class FrequencyDomainScheduler(Scheduler):
 
         mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
         for i, freq in enumerate(self._freqs):
+            self._cur_freq = freq
             self.mw.set_frequency(freq)
 
             # need to turn on MW again
@@ -720,6 +753,7 @@ class TimeDomainScheduler(Scheduler):
 
         # =======================================================
         for i, duration in enumerate(self._times):
+            self._cur_time = duration
             self._gene_detect_seq(duration)
             self.asg.start()
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
@@ -779,7 +813,7 @@ class TimeDomainScheduler(Scheduler):
         self._acquire_data()  # scanning time intervals in this loop
         self.stop()
 
-    def _gene_pseudo_detect_seq(self):
+    def gene_pseudo_detect_seq(self):
         """
         Generate pseudo pulses for visualization and regulation
         """

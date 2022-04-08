@@ -58,8 +58,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         #     'Relaxation': scheduler.RelaxationScheduler()
         # }
 
-        # self.updateASGChannels() # 几个channels
-
         # photon count config (tagger counter measurement class)
         self.updatePhotonCountConfig()
         if self.tagger:
@@ -73,7 +71,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def initInstruments(self):
         """
-        Initialize instances representing specific instruments, i.e, Laser, Microwave, ASG, Tagger, etc.
+        Initialize instances representing specific instruments, i.e, Laser, Microwave, ASG, Tagger, Lock-in, etc.
         """
         self.laser = Laser()
         self.asg = ASG()
@@ -94,6 +92,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         #     self.lockin = None
         self.lockin = None
 
+    def releaseInstruments(self):
+        """
+        Close all instruments, i.e., Laser, Microwave, ASG, Tagger, Lock-in, etc.
+        """
+        self.laser.close()
+        self.mw.close()
+        self.asg.close()
+        if isinstance(self.tagger, tt.TimeTagger):
+            tt.freeTimeTagger(self.tagger)
+
     def initCharts(self):
         """
         Initialize charts of measurement results, i.e., Photon Count, Sequences, Frequency-domain ODMR, Time-domain ODMR
@@ -108,19 +116,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         ###################################
         # initialize photon count chart
+        # data field: chart, series, axisX, axisY
         self.chartPhotonCount = QtChart.QChart()
         self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
         self.seriesPhotonCount = QtChart.QLineSeries()
         self.seriesPhotonCount.setName('Channel {} counting'.format(self.ui.comboBoxTaggerAPD.currentText()))
         self.chartPhotonCount.addSeries(self.seriesPhotonCount)
 
-        self.axisXPhotonCount = QtChart.QValueAxis()  # X axis
-        self.axisXPhotonCount.setTitleText('Time (s)')
+        self.axisXPhotonCount = QtChart.QValueAxis()  # X axis: Time
+        self.axisXPhotonCount.setTitleText('Time')
         self.axisXPhotonCount.setTickCount(11)  # 主分隔个数
         self.axisXPhotonCount.setMinorTickCount(4)  # 次刻度数
         self.axisXPhotonCount.setLabelFormat("%.1f")
 
-        self.axisYPhotonCount = QtChart.QValueAxis()  # Y axis
+        self.axisYPhotonCount = QtChart.QValueAxis()  # Y axis: count or count rate
         self.axisYPhotonCount.setTickCount(5)
         self.axisYPhotonCount.setMinorTickCount(4)
         self.axisYPhotonCount.setLabelFormat("%.2f")  # 标签格式
@@ -138,11 +147,49 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # initialize frequency-domain ODMR chart
         self.chartODMRFrequency = QtChart.QChart()
         self.ui.chartviewODMRFrequency.setChart(self.chartODMRFrequency)
+        self.seriesODMRFrequency = QtChart.QLineSeries()  # 有参考时就返回对比度，否则就是计数
+        self.chartODMRFrequency.addSeries(self.seriesODMRFrequency)
+
+        self.axisXODMRFrequency = QtChart.QValueAxis()  # X axis: frequency
+        self.axisXODMRFrequency.setTitleText('Frequency')
+        self.axisXODMRFrequency.setTickCount(11)
+        self.axisXODMRFrequency.setMinorTickCount(4)
+        self.axisXODMRFrequency.setLabelFormat("%.1f")
+
+        self.axisYODMRFrequency = QtChart.QValueAxis()  # Y axis: count or contrast
+        self.axisYODMRFrequency.setTickCount(5)
+        self.axisYODMRFrequency.setMinorTickCount(4)
+        self.axisYODMRFrequency.setLabelFormat("%.2f")  # 标签格式
+
+        self.chartODMRFrequency.setAxisX(self.axisXODMRFrequency, self.seriesODMRFrequency)
+        self.chartODMRFrequency.setAxisY(self.axisYODMRFrequency, self.seriesODMRFrequency)
+
+        self.timerODMRFrequency = QTimer()
+        self.timerODMRFrequency.timeout.connect(self.updateODMRFrequencyChart)
 
         ###################################
         # initialized time-domain ODMR chart
         self.chartODMRTime = QtChart.QChart()
         self.ui.chartviewODMRTime.setChart(self.chartODMRTime)
+        self.seriesODMRTime = QtChart.QLineSeries()
+        self.chartODMRTime.addSeries(self.seriesODMRTime)
+
+        self.axisXODMRTime = QtChart.QValueAxis()  # X axis: time
+        self.axisXODMRTime.setTitleText('Time')
+        self.axisXODMRTime.setTickCount(11)
+        self.axisXODMRTime.setMinorTickCount(4)
+        self.axisXODMRTime.setLabelFormat("%.1f")
+
+        self.axisYODMRTime = QtChart.QValueAxis()  # T axis
+        self.axisYODMRTime.setTickCount(5)
+        self.axisYODMRTime.setMinorTickCount(4)
+        self.axisYODMRTime.setLabelFormat("%.2f")  # 标签格式
+
+        self.chartODMRTime.setAxisX(self.axisXODMRTime, self.seriesODMRTime)
+        self.chartODMRTime.setAxisY(self.axisYODMRTime, self.seriesODMRTime)
+
+        self.timerODMRTime = QTimer()
+        self.timerODMRTime.timeout.connect(self.updateODMRTimeChart)
 
     def fetchParameters(self):
         """
@@ -203,9 +250,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # progress bar
         self.progressBar = QtWidgets.QProgressBar(self)
         self.progressBar.setMinimumWidth(200)
-        self.progressBar.setMinimum(5)
-        self.progressBar.setValue(0)
-        self.progressBar.setMaximum(50)
+        # self.progressBar.setMinimum(5)
+        # self.progressBar.setValue(101)
+        print(self.progressBar.maximum(), self.progressBar.minimum(), self.progressBar.value())
+        # self.progressBar.setMaximum(50)
         self.progressBar.setFormat('%p%')  # %p%, %v
         self.ui.statusbar.addPermanentWidget(self.progressBar)
 
@@ -311,21 +359,34 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_pushButtonMicrowaveOnOff_clicked(self, checked):
-        if checked:
-            self.mw.start()
-            self.labelInstrStatus.setText('Microwave: started')
+        if isinstance(self.mw, Microwave) and self.mw.connect():
+            if checked:
+                self.mw.start()
+                self.labelInstrStatus.setText('Microwave: started')
+            else:
+                self.mw.stop()
+                self.labelInstrStatus.setText('Microwave: stopped')
         else:
-            self.mw.stop()
-            self.labelInstrStatus.setText('Microwave: stopped')
+            self.labelInstrStatus.setText(color_str('Microwave: not connected'))
 
     @pyqtSlot()
     def on_pushButtonMicrowaveConnect_clicked(self):
-        self.mw.connect()
-        self.labelInstrStatus.setText('Microwave: connected')
+        if isinstance(self.mw, Microwave):
+            if self.mw.connect():
+                self.labelInstrStatus.setText('Microwave: connected')
+            else:
+                self.labelInstrStatus.setText(color_str('Microwave: connect fail'))
+        else:
+            try:
+                self.mw = Microwave()
+                self.labelInstrStatus.setText('Microwave: connected')
+            except:
+                self.labelInstrStatus.setText(color_str('Microwave: connect fail'))
 
     @pyqtSlot()
     def on_pushButtonMicrowaveClose_clicked(self):
-        self.mw.close()
+        if isinstance(self.mw, Microwave):
+            self.mw.close()
         self.labelInstrStatus.setText('Microwave: closed')
 
     # PI pulse
@@ -430,38 +491,88 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.updateSequenceChart()
         self.asg.load_data(self.sequences)
 
+    def loop_demo(self):
+        self.i = 0
+        while True:
+            time.sleep(1)
+            self.i += 1
+            print(self.i)
+
     @pyqtSlot()
     def on_pushButtonODMRStartDetecting_clicked(self):
-        # TODO
-        # run 完要不要 close？
-        # start button 按下去时候 freqs、times才有用
+        # 微波参数 --> 设置序列 ------> 频率范围 --> counting setting
+        # TODO: 不同 update pi pulse, asg channels 和 tagger cannels
+        if self.ui.groupBoxODMRFrequency.isChecked():
+            self.startFrequencyDomainDetecting()
+        else:
+            self.startTimeDomainDetecting()
+
+    def startFrequencyDomainDetecting(self):
+        """
+        Start frequency-domain ODMR detecting experiments, i.e., CW or Pulse
+        """
+        # configure parameters
+        self.seriesODMRFrequency.removePoints(0, self.seriesODMRFrequency.count())
+        self.seriesODMRFrequency.setName('{} Spectrum'.format(self.schedulerMode))
 
         # frequencies for scanning
         unit_freq = freqUnitDict[self.ui.comboBoxODMRFrequencyUnit.currentText()]
         freq_start = self.ui.doubleSpinBoxODMRFrequencyStart.value() * unit_freq
         freq_end = self.ui.doubleSpinBoxODMRFrequencyEnd.value() * unit_freq
         freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
+        self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
+        self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
+
+        self.schedulers[self.schedulerMode].configure_odmr_seq()
+        self.schedulers[self.schedulerMode].configure_tagger_counting(
+            apd_channel=self.taggerChannels['apd'],
+            asg_channel=self.taggerChannels['asg'],
+            reader='counter' if self.schedulerMode == 'CW' else 'cmb'
+        )
+
+        # freqs = self.schedulers[self.schedulerMode].frequencies
+
+        # conduct ODMR scheduling and update real-time chart
+        self.releaseInstruments()
+        self.schedulers[self.schedulerMode].connect()
+        print('成功！')
+
+        t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)  # TODO: 先连接
+        t.start()
+        self.timerODMRFrequency.start(1000)
+        t.join()
+        self.timerODMRFrequency.stop()
+        self.progressBar.setValue(-1)
+        # self.schedulers[self.schedulerMode].close()
+
+    def startTimeDomainDetecting(self):
+        """
+        Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
+        """
+        # configure chart parameters
+        self.seriesODMRTime.removePoints(0, self.seriesODMRTime.count())
+        self.seriesODMRFrequency.setName('{} Result'.format(self.schedulerMode))
+
+        # configure pi pulse
+        self.schedulers[self.schedulerMode].pi_pulse['freqs'] = self.piPulse['frequency']
+        self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
+        self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
 
         # times for scanning
         unit_time = timeUnitDict[self.ui.comboBoxODMRTimeUnit.currentText()]
         time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time
         time_end = self.ui.doubleSpinBoxODMRTimeEnd.value() * unit_time
         time_step = self.ui.doubleSpinBoxODMRTimeStep.value() * unit_time
+        self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)
+        self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].times))
 
-        self.scheduler.run_scanning()
-
-        if self.schedulerMode in frequencyDomainModes:
-            self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
-            # 跳转到 frequency-domain panel TODO
-            # 更新 chart
-            if self.ui.radioButtonODMRFrequencyShowCount.isChecked():
-                pass
-            else:
-                pass
-        if self.schedulerMode in timeDomainModes:
-            self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)
-            # 更新 chart
-            pass
+        # conduct ODMR scheduling and update real-time chart
+        t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
+        t.start()
+        self.timerODMRTime.start(1000)
+        t.join()
+        self.timerODMRTime.stop()
+        self.progressBar.setValue(-1)
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData(self):
@@ -515,7 +626,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
         except:
-            self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
+            self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
 
         self.axisXPhotonCount.setTitleText(
             'Time ({} {})'.format(self.ui.spinBoxBinwidth.value(), self.ui.comboBoxBinwidthUnit.currentText()))
@@ -541,7 +652,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         try:
             self.counter.clear()
         except:
-            self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
+            self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
 
     @pyqtSlot()
     def on_pushButtonPhotonCountSaveData_clicked(self):
@@ -593,6 +704,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.sequences.append([])
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 self.sequences[i].append(int(self.ui.tableWidgetSequence.item(i, j).text()))
+        if self.asg is not None:
+            self.sequences = self.asg.normalize_data(self.sequences)
 
     def feedSequencesToTabkeWidget(self):
         for i, seq in enumerate(self.sequences):
@@ -620,43 +733,72 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         for i, c in enumerate(counts):
             self.seriesPhotonCount.append(i, c)
 
+    def updateODMRFrequencyChart(self):
+        """
+        Update frequency-domain ODMR results periodically
+        """
+        # update series
+
+        # update progress bar
+        freqs = self.schedulers[self.schedulerMode].frequencies
+        cur_freq = self.schedulers[self.schedulerMode].cur_freq
+        self.progressBar.setValue(freqs.index(cur_freq) + 1)
+
+    def updateODMRTimeChart(self):
+        """
+        Update time-domain ODMR results periodically
+        """
+        # update series
+
+        # update progress bar
+        times = self.schedulers[self.schedulerMode].times
+        cur_time = self.schedulers[self.schedulerMode].cur_time
+        self.progressBar.setValue(times.index(cur_time) + 1)
+
     @pyqtSlot()
     def on_pushButtonASGOpen_clicked(self):
         c = self.asg.connect()
         if c == 1:
             self.labelInstrStatus.setText('ASG: connect success')
         else:
-            self.labelInstrStatus.setText('ASG: connect fail')
+            self.labelInstrStatus.setText(color_str('ASG: connect fail'))
 
     @pyqtSlot()
     def on_pushButtonASGClose_clicked(self):
-        self.asg.close()
-        self.labelInstrStatus.setText('ASG: closed')
+        if self.asg.close():
+            self.labelInstrStatus.setText('ASG: closed')
+        else:
+            self.labelInstrStatus.setText(color_str('ASG: close fail'))
 
     @pyqtSlot()
     def on_pushButtonASGStart_clicked(self):
-        self.asg.start()
-        self.labelInstrStatus.setText('ASG: started')
+        if self.asg.start():
+            self.labelInstrStatus.setText('ASG: started')
+        else:
+            self.labelInstrStatus.setText(color_str('ASG: start fail'))
 
     @pyqtSlot()
     def on_pushButtonASGStop_clicked(self):
-        self.asg.stop()
-        self.labelInstrStatus.setText('ASG: stopped')
+        if self.asg.stop():
+            self.labelInstrStatus.setText('ASG: stopped')
+        else:
+            self.labelInstrStatus.setText(color_str('ASG: stop fail'))
 
     @pyqtSlot()
     def on_pushButtonASGLoad_clicked(self):
-        # 1) fetch sequences data
+        # 1) fetch sequences data and visualize
         self.fetchSequencesfromTableWidget()
         try:
-            self.asg.load_data(self.asg.normalize_data(self.sequences))
+            self.asg.load_data(self.sequences)
             self.updateSequenceChart()
             self.labelInstrStatus.setText('ASG: sequences loaded')
         except:
-            self.labelInstrStatus.setText('ASG: abnormal sequence, not loaded')
-        # 用写好的函数 scheduler中 ........................
+            self.labelInstrStatus.setText(color_str('ASG: abnormal sequence, not loaded'))
         # 2) load sequences into current scheduler
-        # self.schedulers[self.schedulerMode].config_sequences(self.sequences) # 这行代码执行有问题 TODO
-        # 3) visualize seuqnces
+        try:
+            self.schedulers[self.schedulerMode].config_sequences(self.sequences)
+        except:
+            self.labelInstrStatus.setText(color_str('ASG: abnormal sequence, not loaded'))
 
     @pyqtSlot()
     def on_pushButtonASGClear_clicked(self):
@@ -681,13 +823,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRFrequencyInterrupt_clicked(self):
         # interrupt
-        # 要不要开辟新的 thread TODO
-        pass
+        self.timerODMRFrequency.stop()
+        try:
+            self.schedulers[self.schedulerMode].close()
+            self.labelInstrStatus.setText('{} Scheduler: interrupted'.format(self.schedulerMode))
+        except:
+            self.labelInstrStatus.setText(color_str('{} Scheduler: interrupted'.format(self.schedulerMode)))
 
     @pyqtSlot()
     def on_pushButtonODMRFrequencyFit_clicked(self):
         # 必须等run结束曲线画出来后拟合
-        pass
+        if not self.timerODMRFrequency.isActive() and ...:
+            self.labelInstrStatus.setText(color_str('Data fitting: done'))
+        else:
+            self.labelInstrStatus.setText(color_str('Data fitting: no data to fit'))
 
     ###########################################
     # Time-domain measurement panel (Ramsey, Rabi, Relaxation)
@@ -695,12 +844,24 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRTimeInterrupt_clicked(self):
         # interrupt
-        pass
+        self.timerODMRTime.stop()
+        try:
+            self.schedulers[self.schedulerMode].close()
+            self.labelInstrStatus.setText('{} Scheduler: interrupted'.format(self.schedulerMode))
+        except:
+            self.labelInstrStatus.setText(color_str('{} Scheduler: interrupted'.format(self.schedulerMode)))
 
     @pyqtSlot()
     def on_pushButtonODMRTimeFit_clicked(self):
         # 必须等run结束曲线画出来后拟合
-        pass
+        if not self.timerODMRTime.isActive() and ...:
+            self.labelInstrStatus.setText(color_str('Data fitting: done'))
+        else:
+            self.labelInstrStatus.setText(color_str('Data fitting: no data to fit'))
 
-# TODO 1: 先画图于 odmr spectrum chart，在做 real-time 的 chart
-# TODO 2: 先跑单线程的，在考虑为 scheduler 开辟新的 thread
+
+def color_str(string, color='red'):
+    """
+    Convert plaintext to color text in for of HTML labels
+    """
+    return '<font color={}>{}</font>'.format(color, string)
