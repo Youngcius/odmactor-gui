@@ -30,7 +30,7 @@ class ASG(ASG8005):
                     asg_data[i] = [0, 0]
                 else:
                     n = len(seq)
-                    for j in range(n, 0, -1):
+                    for j in range(n - 1, 0, -1):
                         if seq[j] > 0:
                             break
                         else:
