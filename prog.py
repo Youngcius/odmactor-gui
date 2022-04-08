@@ -602,9 +602,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
 
-
-
-
         self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
@@ -613,9 +610,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.labelInstrStatus.setText('<font color=red>No Time Tagger to detect photons</red>')
             return
 
-        binwidth_sec = self.photonCountConfig['binwidth'] * C.pico
-        self.axisXPhotonCount.setRange(0, binwidth_sec * self.photonCountConfig['n_values'])
-
+        self.axisXPhotonCount.setTitleText(
+            'Time ({} {})'.format(self.ui.spinBoxBinwidth.value(), self.ui.comboBoxBinwidthUnit.currentText()))
         self.axisXPhotonCount.setRange(0, self.photonCountConfig['n_values'])
         if self.ui.radioButtonPhotonCountRate.isChecked():
             self.axisYPhotonCount.setTitleText("Count rate")
@@ -727,12 +723,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
         counts = self.counter.getData().ravel()
         if self.ui.radioButtonPhotonCountRate.isChecked():
-            counts = counts/self.photonCountConfig['binwidth'] / C.pico
+            counts = counts / self.photonCountConfig['binwidth'] / C.pico
         cmin, cmax = min(counts), max(counts)
         delta = cmax - cmin
         self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
         for i, c in enumerate(counts):
-            self.seriesPhotonCount.append(i * self.photonCountConfig['binwidth'] * C.pico, c)
+            self.seriesPhotonCount.append(i, c)
         # y = self.lister.new()
         # ymin, ymax = min(y), max(y)
         # delta = ymax - ymin
@@ -820,7 +816,5 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # 必须等run结束曲线画出来后拟合
         pass
 
-
 # TODO 1: 先画图于 odmr spectrum chart，在做 real-time 的 chart
 # TODO 2: 先跑单线程的，在考虑为 scheduler 开辟新的 thread
-
