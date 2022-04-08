@@ -37,11 +37,6 @@ class ASG(ASG8005):
                             asg_data[i].pop(j)
                     if len(asg_data[i]) % 2 != 0:
                         asg_data[i].append(0)
-            # if self.check_data(asg_data):
-            #     print(True)
-            #
-            # else:
-            #     print(False)
         return asg_data
 
     def load_data(self, asg_data: List[List[int]]):

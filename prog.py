@@ -602,7 +602,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def updateSequenceChart(self):
         # TODO: check 是不是只更新 seqFigCanvas 就行了？,因为 seqFigCanvas 已经被 add 到 layout里面了
-        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
+        # self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
+        self.seqFigCanvas.figure = seq_to_fig(self.asg.normalize_data(self.sequences))
+
 
     def updatePhotonCountChart(self):
         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
@@ -642,19 +644,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonASGLoad_clicked(self):
         # 1) fetch sequences data
         self.fetchSequencesfromTableWidget()
-        sequencesNormalized = self.asg.normalize_data(self.sequences)
-        print(sequencesNormalized)
-        if self.asg.check_data(sequencesNormalized):
-            self.asg.load_data(self.sequences)
+        try:
+            self.asg.load_data(self.asg.normalize_data(self.sequences))
+            self.updateSequenceChart()
             self.labelInstrStatus.setText('ASG: sequences loaded')
-        else:
-
+        except:
             self.labelInstrStatus.setText('ASG: abnormal sequence, not loaded')
         # 用写好的函数 scheduler中 ........................
         # 2) load sequences into current scheduler
         # self.schedulers[self.schedulerMode].config_sequences(self.sequences) # 这行代码执行有问题 TODO
         # 3) visualize seuqnces
-        self.updateSequenceChart()
 
     @pyqtSlot()
     def on_pushButtonASGClear_clicked(self):
