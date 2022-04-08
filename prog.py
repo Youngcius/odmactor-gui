@@ -602,7 +602,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-        self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
+        # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
@@ -618,10 +618,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.axisYPhotonCount.setTitleText("Count number")
 
         if checked:
+            self.counter.start()
             self.timerPhotonCount.start(100)
         else:
-            self.timerPhotonCount.stop()
             self.counter.stop()
+            self.timerPhotonCount.stop()
 
     @pyqtSlot()
     def on_pushButtonPhotonCountRefresh_clicked(self):
@@ -647,10 +648,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'time': (self.counter.getIndex() * C.pico).tolist(),
             'count': counts.tolist(),
             'count rate (1/s)': (counts / self.photonCountConfig['binwidth'] / C.pico).tolist(),
-            'timestap': str(timestamp),
+            'timestamp': str(timestamp),
         }
         fname = 'odmactor-counts_' + timestamp.strftime('%Y-%m-%d_%H-%M-%S') + '.json'
-        fname = os.path.join(os.path.expanduser('~'), 'Downloads', fname) # 暂时只考虑 windows 的文件路径
+        fname = os.path.join(os.path.expanduser('~'), 'Downloads', fname)  # 暂时只考虑 windows 的文件路径
         with open(fname, 'w') as f:
             json.dump(data, f)
         self.labelInstrStatus.setText('File has been saved in {}'.format(fname))
