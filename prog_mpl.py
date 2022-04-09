@@ -620,7 +620,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Clear series data of the chart, restart counting
         """
-        self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+        self.axesPhotonCount.clear()
+        self.axesODMRFrequency.set_xlabel('Time (s)', fontsize=13)
+        if self.ui.radioButtonPhotonCountRate.isChecked():
+            self.axesODMRFrequency.set_ylabel('Count rate', fontsize=13)
+        else:
+            self.axesODMRFrequency.set_ylabel('Count number', fontsize=13)
+
         try:
             self.counter.clear()
         except:
@@ -703,7 +709,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             counts = counts / self.photonCountConfig['binwidth'] / C.pico
             self.axesPhotonCount.set_ylabel('Count rate', fontsize=13)
         else:
-            self.axesPhotonCount.set_ylabel('Count number')
+            self.axesPhotonCount.set_ylabel('Count number', fontsize=13)
         self.axesPhotonCount.plot(times, counts)
         self.axesPhotonCount.figure.canvas.draw()
 
