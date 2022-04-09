@@ -662,13 +662,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
 
-        self.axisXPhotonCount.setTitleText(
-            'Time ({} {})'.format(self.ui.spinBoxBinwidth.value(), self.ui.comboBoxBinwidthUnit.currentText()))
-        self.axisXPhotonCount.setRange(0, self.photonCountConfig['n_values'])
-        if self.ui.radioButtonPhotonCountRate.isChecked():
-            self.axisYPhotonCount.setTitleText("Count rate")
-        else:
-            self.axisYPhotonCount.setTitleText("Count number")
+        # self.axisXPhotonCount.setTitleText(
+        #     'Time ({} {})'.format(self.ui.spinBoxBinwidth.value(), self.ui.comboBoxBinwidthUnit.currentText()))
+        # self.axisXPhotonCount.setRange(0, self.photonCountConfig['n_values'])
+        # if self.ui.radioButtonPhotonCountRate.isChecked():
+        #     self.axisYPhotonCount.setTitleText("Count rate")
+        # else:
+        #     self.axisYPhotonCount.setTitleText("Count number")
 
         if checked:
             self.counter.start()
