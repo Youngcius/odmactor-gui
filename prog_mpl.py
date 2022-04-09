@@ -29,6 +29,8 @@ frequencyDomainModes = ['CW', 'Pulse']
 timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation']
 schedulerModes = frequencyDomainModes + timeDomainModes
 
+plt.style.use('seaborn-pastel')
+
 
 class OdmactorGUI(QtWidgets.QMainWindow):
     """
@@ -117,19 +119,18 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutSequenceVisualization.setSpacing(0)
 
-
-
         ###################################
         # initialize photon count chart
         self.countFigCanvas = FigureCanvas(plt.figure())
         self.layoutPhotonCountVisualization = QtWidgets.QVBoxLayout(self.ui.widgetPhotonCountVisualization)
         self.layoutPhotonCountVisualization.addWidget(self.countFigCanvas)
-        self.layoutPhotonCountVisualization.setContentsMargins(0,0,0,0)
+        self.layoutPhotonCountVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutPhotonCountVisualization.setSpacing(0)
-        self.axesPhotonCount= self.countFigCanvas.figure.subplots()
-        self.axesPhotonCount.set_xlabel('Time point')
+        self.axesPhotonCount = self.countFigCanvas.figure.subplots()
+        self.axesPhotonCount.set_xlabel('Time (s)')
+        self.axesPhotonCount.set_ylabel('Count')
         self.timerPhotonCount = self.countFigCanvas.new_timer(100, [(self.updatePhotonCountChart, (), {})])
-        #
+
         #
         # self._static_ax = static_canvas.figure.subplots()
         # f, ax = plt.subplots()
@@ -672,7 +673,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         if checked:
             self.counter.start()
-            self.timerPhotonCount.start(100)
+            self.timerPhotonCount.start()
         else:
             self.counter.stop()
             self.timerPhotonCount.stop()
@@ -758,8 +759,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def updatePhotonCountChart(self):
 
-
-
         # # ======================================
         # self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
         # self.scatterPhotonCount.removePoints(0, self.scatterPhotonCount.count())
@@ -775,21 +774,18 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         #     self.seriesPhotonCount.append(i, c)
         #     self.scatterPhotonCount.append(i,c)
 
-
         # # ======================================
         self.axesPhotonCount.clear()
+        self.axesPhotonCount.set_xlabel('Time (s)', fontsize=12)
         counts = self.counter.getData().ravel()
+        times = self.counter.getIndex() * C.pico
         if self.ui.radioButtonPhotonCountRate.isChecked():
             counts = counts / self.photonCountConfig['binwidth'] / C.pico
-        self.axesPhotonCount.plot(counts)
+            self.axesPhotonCount.set_ylabel('Count rate', fontsize=12)
+        else:
+            self.axesPhotonCount.set_ylabel('Count number')
+        self.axesPhotonCount.plot(times, counts)
         self.axesPhotonCount.figure.canvas.draw()
-
-        # self._dynamic_ax.clear()
-        # t = np.linspace(0, 10, 101)
-        # Shift the sinusoid as a function of time.
-        # self._dynamic_ax.plot(t, np.sin(t + time.time()) + np.random.rand(len(t)))
-        # self._dynamic_ax.figure.canvas.draw()
-
 
     def updateODMRFrequencyChart(self):
         """
