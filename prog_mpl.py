@@ -11,6 +11,7 @@ import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5 import QtWidgets, QtCore, QtGui, QtChart
 from PyQt5.QtCore import Qt, pyqtSlot, QThread, QTimer
 
@@ -122,13 +123,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         ###################################
         # initialize photon count chart
         self.countFigCanvas = FigureCanvas(plt.figure())
+        self.naviBarPhotonCount = NavigationToolbar(self.countFigCanvas,self.ui.widgetPhotonCountVisualization)
         self.layoutPhotonCountVisualization = QtWidgets.QVBoxLayout(self.ui.widgetPhotonCountVisualization)
+
+        self.layoutPhotonCountVisualization.addWidget(self.naviBarPhotonCount)
         self.layoutPhotonCountVisualization.addWidget(self.countFigCanvas)
         self.layoutPhotonCountVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutPhotonCountVisualization.setSpacing(0)
         self.axesPhotonCount = self.countFigCanvas.figure.subplots()
-        self.axesPhotonCount.set_xlabel('Time (s)')
-        self.axesPhotonCount.set_ylabel('Count')
+        self.axesPhotonCount.set_xlabel('Time (s)',fontsize=13)
+        self.axesPhotonCount.set_ylabel('Count',fontsize=13)
         self.timerPhotonCount = self.countFigCanvas.new_timer(100, [(self.updatePhotonCountChart, (), {})])
 
         #
@@ -776,12 +780,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # # ======================================
         self.axesPhotonCount.clear()
-        self.axesPhotonCount.set_xlabel('Time (s)', fontsize=12)
+        self.axesPhotonCount.set_xlabel('Time (s)', fontsize=13)
         counts = self.counter.getData().ravel()
         times = self.counter.getIndex() * C.pico
         if self.ui.radioButtonPhotonCountRate.isChecked():
             counts = counts / self.photonCountConfig['binwidth'] / C.pico
-            self.axesPhotonCount.set_ylabel('Count rate', fontsize=12)
+            self.axesPhotonCount.set_ylabel('Count rate', fontsize=13)
         else:
             self.axesPhotonCount.set_ylabel('Count number')
         self.axesPhotonCount.plot(times, counts)
