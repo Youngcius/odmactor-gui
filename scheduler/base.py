@@ -61,7 +61,10 @@ class Scheduler(abc.ABC):
         self.asg_dwell = 0.0
         self.time_pad = 0.0
         self.time_total = 0.0  # total time for scanning frequencies (estimated)
-        self.output_dir = '../output/'
+        kwargs.setdefault('output_dir',
+                          os.path.join(os.path.expanduser('~'), 'Downloads', 'output-' + str(datetime.date.today)))
+        self.output_dir = kwargs['output_dir']
+        # self.output_dir = '../output/'
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -89,6 +92,18 @@ class Scheduler(abc.ABC):
         # with lockin or tagger
         kwargs.setdefault('use_lockin', False)
         self.use_lockin = kwargs['use_lockin']
+
+        # configure instruments from external variables
+        kwargs.setdefault('laser', None)
+        kwargs.setdefault('asg', None)
+        kwargs.setdefault('mw', None)
+        kwargs.setdefault('tagger', None)
+        kwargs.setdefault('lockin', None)
+        self.laser = kwargs['laser']
+        self.asg = kwargs['asg']
+        self.mw = kwargs['mw']
+        self.tagger = kwargs['tagger']
+        self.lockin = kwargs['lockin']
 
         # initialize instruments
         self.laser = Laser()
@@ -475,16 +490,13 @@ class Scheduler(abc.ABC):
         Generate file name of data acquisition result, based on time, data and random numbers
         :return: file name, str type
         """
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         if self.with_ref:
             # calculate signals and reference counts
-            fname = os.path.join(self.output_dir,
-                                 '{}-counts-with-ref-{}-{}'.format(self.name.split()[0], str(datetime.date.today()),
-                                                                   uuid.uuid1()))
+            fname = os.path.join(self.output_dir, '{}-counts-with-ref-{}'.format(self.name.split()[0], timestamp))
         else:
             # just calculate signal counts
-            fname = os.path.join(self.output_dir,
-                                 '{}-counts-{}-{}'.format(self.name.split()[0], str(datetime.date.today()),
-                                                          uuid.uuid1()))
+            fname = os.path.join(self.output_dir, '{}-counts-{}'.format(self.name.split()[0], timestamp))
         return fname
 
     def save_result(self, fname: str = None):
@@ -530,6 +542,24 @@ class Scheduler(abc.ABC):
     @property
     def cur_time(self):
         return self._cur_time
+
+    @property
+    def cur_data(self, aggregate='mean'):
+        if aggregate == 'mean':
+            return [np.mean(ls) for ls in self._data]
+        elif aggregate == 'sum':
+            return [np.sum(ls) for ls in self._data]
+        else:
+            raise ValueError('Not supported aggregation type')
+
+    @property
+    def cur_data_ref(self, aggregate='mean'):
+        if aggregate == 'mean':
+            return [np.mean(ls) for ls in self._data_ref]
+        elif aggregate == 'sum':
+            return [np.sum(ls) for ls in self._data_ref]
+        else:
+            raise ValueError('Not supported aggregation type')
 
     @abc.abstractmethod
     def configure_odmr_seq(self, *args, **kwargs):
@@ -831,10 +861,10 @@ class TimeDomainScheduler(Scheduler):
         """
         ts = list(self._cache.values())[:-1]
         t_sum = sum([t for t in ts if t is not None])
-        self._gene_detect_seq(int(t_sum / 40) * 10)
+        self.gene_detect_seq(int(t_sum / 40) * 10)
 
     @abc.abstractmethod
-    def _gene_detect_seq(self, *args, **kwargs):
+    def gene_detect_seq(self, *args, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -850,7 +880,7 @@ class TimeDomainScheduler(Scheduler):
         print('running with time = {:.3f} ns, MW power = {:.2f} dBm ...'.format(self.asg_dwell, self._mw_conf['power']))
 
         # generate ASG sequences
-        self._gene_detect_seq(t_free)
+        self.gene_detect_seq(t_free)
 
         # start sequence for time: N * t
         self._start_device()

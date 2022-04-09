@@ -38,9 +38,9 @@ print('已经 start')
 print('刚 close')
 
 
-
 def func():
     print('---')
+
 
 print(...)
 print('===')
@@ -55,3 +55,9 @@ timer.stop()
 print('stopped')
 print(timer.isActive())
 
+import instrument
+
+laser1 = getattr(instrument, 'Laser')
+print('1', laser1)
+laser2 = getattr(instrument, 'Laser')()
+print('2', laser2)

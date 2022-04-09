@@ -5,7 +5,7 @@ import time
 import datetime
 import asyncio
 import threading
-
+# import nidaqmx
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as C
@@ -54,7 +54,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.fetchParameters()
 
         # initialize data variables
-        self.schedulers = {mode: getattr(scheduler, mode + 'Scheduler') for mode in schedulerModes}
+        self.schedulers = {
+            mode: getattr(scheduler, mode + 'Scheduler')(
+                laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5
+            ) for mode in schedulerModes
+        }
         # self.schedulers = {
         #     'CW': scheduler.CWScheduler(),
         #     'Pulse': scheduler.PulseScheduler(),
@@ -114,7 +118,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         ###################################
         # visualize ASG sequences
-        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？
+        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
         self.layoutSequenceVisualization = QtWidgets.QVBoxLayout(self.ui.widgetSequenceVisualization)
         self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
@@ -137,7 +141,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         ###################################
         # initialize frequency-domain ODMR chart: figure canvas, toolbar, axes, timer
         self.canvasODMRFrequency = FigureCanvas(plt.figure())  # figure canvas
-        self.naviBarODMRFrequency = NavigationToolbar(self.canvasODMRFrequency,self.ui.widgetODMRFrequencyVisualization)
+        self.naviBarODMRFrequency = NavigationToolbar(self.canvasODMRFrequency,
+                                                      self.ui.widgetODMRFrequencyVisualization)
         self.layoutODMRFrequencyVisualization = QtWidgets.QVBoxLayout(self.ui.widgetODMRFrequencyVisualization)
         self.layoutODMRFrequencyVisualization.addWidget(self.naviBarODMRFrequency)
         self.layoutODMRFrequencyVisualization.addWidget(self.canvasODMRFrequency)
@@ -252,8 +257,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         txt += 'Laser: {}, Microwave: {}, ASG: {}, Tagger: {}'.format(laserStatus, mwStatus, asgStatus, taggerStatus)
         self.labelInstrStatus.setText(txt)
-
-    # def updateInstrumentsStatus(self):
 
     ###########################################
     # Menu bar
@@ -437,7 +440,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'signalReferenceInterval': self.ui.spinBoxODMRSignalReferenceInterval.value(),
             'periodInterval': self.ui.spinBoxODMRPeriodInterval.value()
         }
-
+        self.schedulers[self.schedulerMode].with_ref = self.odmrSeqConfig['withReference']
+        self.schedulers[self.schedulerMode].mw_on_off = self.odmrSeqConfig['MicrowaveOnOff']
         self.schedulers[self.schedulerMode].set_asg_sequences_ttl(
             laser_ttl=1 if self.ui.checkBoxASGLaserTTL.isChecked() else 0,
             mw_ttl=1 if self.ui.checkBoxASGMicrowaveTTL.isChecked() else 0,
@@ -462,13 +466,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.updateSequenceChart()
         self.asg.load_data(self.sequences)
 
-    def loop_demo(self):
-        self.i = 0
-        while True:
-            time.sleep(1)
-            self.i += 1
-            print(self.i)
-
     @pyqtSlot()
     def on_pushButtonODMRStartDetecting_clicked(self):
         # 微波参数 --> 设置序列 ------> 频率范围 --> counting setting
@@ -477,6 +474,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.startFrequencyDomainDetecting()
         else:
             self.startTimeDomainDetecting()
+        self.labelInstrStatus.setText('ODMR Scheduler: done')
 
     def startFrequencyDomainDetecting(self):
         """
@@ -498,23 +496,22 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.schedulers[self.schedulerMode].configure_tagger_counting(
             apd_channel=self.taggerChannels['apd'],
             asg_channel=self.taggerChannels['asg'],
-            reader='counter' if self.schedulerMode == 'CW' else 'cmb'
+            reader='counter' if self.schedulerMode == 'CW' else 'cbm'
         )
 
         # freqs = self.schedulers[self.schedulerMode].frequencies
 
         # conduct ODMR scheduling and update real-time chart
-        self.releaseInstruments()
-        self.schedulers[self.schedulerMode].connect()
-        print('成功！')
+        # self.releaseInstruments()
+        # self.schedulers[self.schedulerMode].connect()
+        # print('成功！')
 
-        t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)  # TODO: 先连接
+        t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
         self.timerODMRFrequency.start()
         t.join()
         self.timerODMRFrequency.stop()
         self.progressBar.setValue(-1)
-        # self.schedulers[self.schedulerMode].close()
 
     def startTimeDomainDetecting(self):
         """
@@ -548,8 +545,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRSaveData(self):
         # TODO
-        self.counter.getData()
-        pass
+
+        # self.counter.getData()
+        # pass
+        self.labelInstrStatus.setText('Saved in {}'.format(self.schedulers[self.schedulerMode].output_dir))
 
     # ODMR cheduler mode
     def connectScheduler(self, mode: str):
@@ -559,30 +558,50 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.schedulerMode = mode
         if mode not in schedulerModes:
             raise ValueError('{} is not a supported scheduler type'.format(mode))
-        for k, scheduler in self.schedulers.keys():
-            if k != mode:
-                scheduler.close()
+        # for k, scheduler in self.schedulers.keys():
+        #     if k != mode:
+        #         scheduler.close() # TODO: 不用释放仪器，因为仪器变量是 shared
         self.schedulers[mode].connect()
 
     @pyqtSlot()
     def on_radioButtonODMRCW_clicked(self):
-        self.connectScheduler('CW')
+        try:
+            self.connectScheduler('CW')
+            self.labelInstrStatus.setText('CW Scheduler: ready')
+        except:
+            self.labelInstrStatus.setText(color_str('CW Scheduler: not ready'))
 
     @pyqtSlot()
     def on_radioButtonODMRPulse_clicked(self):
-        self.connectScheduler('Pulse')
+        try:
+            self.connectScheduler('Pulse')
+            self.labelInstrStatus.setText('Pulse Scheduler: ready')
+        except:
+            self.labelInstrStatus.setText(color_str('Pulse Scheduler: not ready'))
 
     @pyqtSlot()
     def on_radioButtonODMRRamsey_clicked(self):
-        self.connectScheduler('Ramsey')
+        try:
+            self.connectScheduler('Ramsey')
+            self.labelInstrStatus.setText('Ramsey Scheduler: ready')
+        except:
+            self.labelInstrStatus.setText(color_str('Ramsey Scheduler: not ready'))
 
     @pyqtSlot()
     def on_radioButtonODMRRabi_clicked(self):
-        self.connectScheduler('Rabi')
+        try:
+            self.connectScheduler('Rabi')
+            self.labelInstrStatus.setText('Rabi Scheduler: ready')
+        except:
+            self.labelInstrStatus.setText(color_str('Rabi Scheduler: not ready'))
 
     @pyqtSlot()
     def on_radioButtonODMRRelaxation_clicked(self):
-        self.connectScheduler('Relaxation')
+        try:
+            self.connectScheduler('Relaxation')
+            self.labelInstrStatus.setText('Relaxation Scheduler: ready')
+        except:
+            self.labelInstrStatus.setText(color_str('Relaxation Scheduler: not ready'))
 
     ###########################################
     # Photon count configuration
@@ -592,20 +611,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-        self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
+        # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
         except:
             self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
-
-        # self.axisXPhotonCount.setTitleText(
-        #     'Time ({} {})'.format(self.ui.spinBoxBinwidth.value(), self.ui.comboBoxBinwidthUnit.currentText()))
-        # self.axisXPhotonCount.setRange(0, self.photonCountConfig['n_values'])
-        # if self.ui.radioButtonPhotonCountRate.isChecked():
-        #     self.axisYPhotonCount.setTitleText("Count rate")
-        # else:
-        #     self.axisYPhotonCount.setTitleText("Count number")
 
         if checked:
             self.counter.start()
@@ -720,14 +731,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRFrequency.clear()
         self.axesODMRFrequency.set_title('{} Spectrum'.format(self.schedulerMode), fontsize=15)
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
-        self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
+        freqs = self.schedulers[self.schedulerMode].frequencies
+        sig = self.schedulers[self.schedulerMode].cur_data
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
-            self.axesODMRFrequency.set_ylabel('Count')
-        else:  # plot contrast
-            self.axesODMRFrequency.set_ylabel('Contrast')
+            ref = self.schedulers[self.schedulerMode].cur_data_ref
+            length = len(ref)
+            contrast = [s / r for s, r in zip(sig[:length], ref)]
+            self.axesODMRFrequency.plot(freqs[:length], contrast, 'o-')
+            self.axesODMRFrequency.set_ylabel('Contrast', fontsize=13)
+        else:  # plot count
+            length = len(sig)
+            self.axesODMRFrequency.plot(freqs[:length], sig, 'o-')
+            self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
 
         # update progress bar
-        freqs = self.schedulers[self.schedulerMode].frequencies
         cur_freq = self.schedulers[self.schedulerMode].cur_freq
         self.progressBar.setValue(freqs.index(cur_freq) + 1)
 
@@ -736,9 +753,21 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Update time-domain ODMR results periodically
         """
         # update series
+        self.axesODMRTime.clear()
+        self.axesODMRTime.set_title('{} Measurement'.format(self.schedulerMode), fontsize=15)
+        self.axesODMRTime.set_xlabel('Time (s)', fontsize=13)
+        times = self.schedulers[self.schedulerMode].times
+        sig = self.schedulers[self.schedulerMode].data_ref
+        if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
+            ref = self.schedulers[self.schedulerMode].cur_data_ref
+            length = len(ref)
+            contrast = [s / r for s, r in zip(sig[:length], ref)]
+            self.axesODMRFrequency.plot(times[:length], contrast, 'o-')
+            self.axesODMRTime.set_ylabel('Contrast', fontsize=13)
+        else:  # plot contrast
+            self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
 
         # update progress bar
-        times = self.schedulers[self.schedulerMode].times
         cur_time = self.schedulers[self.schedulerMode].cur_time
         self.progressBar.setValue(times.index(cur_time) + 1)
 
