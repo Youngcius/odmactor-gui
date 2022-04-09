@@ -41,12 +41,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # initialize other UI components
         self.buildUI()
 
-        # fetch parameters from initial UI
-        self.fetchParameters()
-
         # initialize instrument instances
         self.initInstruments()
         self.checkInstruments()
+
+        # fetch parameters from initial UI
+        self.fetchParameters()
 
         # initialize data variables
         self.schedulers = {mode: getattr(scheduler, mode + 'Scheduler') for mode in schedulerModes}
@@ -75,6 +75,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         self.laser = Laser()
         self.asg = ASG()
+        print(self.asg.connect(), 'asg 初始化了')
 
         if tt.scanTimeTagger():
             self.tagger = tt.createTimeTagger()
@@ -120,8 +121,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.chartPhotonCount = QtChart.QChart()
         self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
         self.seriesPhotonCount = QtChart.QLineSeries()
+        self.scatterPhotonCount = QtChart.QScatterSeries()
         self.seriesPhotonCount.setName('Channel {} counting'.format(self.ui.comboBoxTaggerAPD.currentText()))
         self.chartPhotonCount.addSeries(self.seriesPhotonCount)
+        self.chartPhotonCount.addSeries(self.scatterPhotonCount)
 
         self.axisXPhotonCount = QtChart.QValueAxis()  # X axis: Time
         self.axisXPhotonCount.setTitleText('Time')
@@ -138,6 +141,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # add axis on series
         self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.seriesPhotonCount)
         self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.seriesPhotonCount)
+
+        self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.scatterPhotonCount)
+        self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.scatterPhotonCount)
 
         # set timer to update chart
         self.timerPhotonCount = QTimer()
@@ -621,7 +627,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-        # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
+        self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         self.updatePhotonCountConfig()
         try:
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
@@ -724,14 +730,18 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def updatePhotonCountChart(self):
         self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+        self.scatterPhotonCount.removePoints(0, self.scatterPhotonCount.count())
+
         counts = self.counter.getData().ravel()
         if self.ui.radioButtonPhotonCountRate.isChecked():
             counts = counts / self.photonCountConfig['binwidth'] / C.pico
         cmin, cmax = min(counts), max(counts)
         delta = cmax - cmin
         self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
+
         for i, c in enumerate(counts):
             self.seriesPhotonCount.append(i, c)
+            self.scatterPhotonCount.append(i,c)
 
     def updateODMRFrequencyChart(self):
         """
