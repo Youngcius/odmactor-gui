@@ -19,10 +19,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         chartview = QtChart.QChartView(self._main)
 
 
-
         static_canvas = FigureCanvas(Figure(figsize=(5, 3)))
-        chartview.setChart(static_canvas)
-        # layout.addWidget(static_canvas)
+        # chartview.setChart(static_canvas)
+        layout.addWidget(static_canvas)
 
 
 
@@ -44,7 +43,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self._dynamic_ax.clear()
         t = np.linspace(0, 10, 101)
         # Shift the sinusoid as a function of time.
-        self._dynamic_ax.plot(t, np.sin(t + time.time()))
+        self._dynamic_ax.plot(t, np.sin(t + time.time()) + np.random.rand(len(t)))
         self._dynamic_ax.figure.canvas.draw()
 
 

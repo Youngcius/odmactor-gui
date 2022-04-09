@@ -5,6 +5,8 @@ import time
 import datetime
 import asyncio
 import threading
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
@@ -17,7 +19,7 @@ import utils
 from instrument import ASG, Microwave, Laser, LockInAmplifier
 from utils.sequence import seq_to_fig
 
-from ui import odmactor_window
+from ui import odmactor_window_mpl
 
 # 继承关系：QGraphicsItem --> QGraphicsObject --> QGraphicsWidget --> QChart --> QPolarChart
 
@@ -35,7 +37,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(OdmactorGUI, self).__init__()
-        self.ui = odmactor_window.Ui_OdmactorMainWindow()
+        self.ui = odmactor_window_mpl.Ui_OdmactorMainWindow()
         self.ui.setupUi(self)
 
         # initialize other UI components
@@ -115,40 +117,65 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutSequenceVisualization.setSpacing(0)
 
+
+
         ###################################
         # initialize photon count chart
-        # data field: chart, series, axisX, axisY
-        self.chartPhotonCount = QtChart.QChart()
-        self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
-        # self.ui.chartviewPhotonCount.addWidget
-        self.seriesPhotonCount = QtChart.QLineSeries()
-        self.scatterPhotonCount = QtChart.QScatterSeries()
-        self.seriesPhotonCount.setName('Channel {} counting'.format(self.ui.comboBoxTaggerAPD.currentText()))
-        self.chartPhotonCount.addSeries(self.seriesPhotonCount)
-        self.chartPhotonCount.addSeries(self.scatterPhotonCount)
+        self.countFigCanvas = FigureCanvas(plt.figure())
+        self.layoutPhotonCountVisualization = QtWidgets.QVBoxLayout(self.ui.widgetPhotonCountVisualization)
+        self.layoutPhotonCountVisualization.addWidget(self.countFigCanvas)
+        self.layoutPhotonCountVisualization.setContentsMargins(0,0,0,0)
+        self.layoutPhotonCountVisualization.setSpacing(0)
+        self.axesPhotonCount= self.countFigCanvas.figure.subplots()
+        self.axesPhotonCount.set_xlabel('Time point')
+        self.timerPhotonCount = self.countFigCanvas.new_timer(100, [(self.updatePhotonCountChart, (), {})])
+        #
+        #
+        # self._static_ax = static_canvas.figure.subplots()
+        # f, ax = plt.subplots()
+        # ax.set_xalbel('')
+        # t = np.linspace(0, 10, 501)
+        # self._static_ax.plot(t, np.tan(t), ".")
+        #
+        # self._dynamic_ax = dynamic_canvas.figure.subplots()
+        # self._timer = dynamic_canvas.new_timer(100, [(self._update_canvas, (), {})])
+        # self._timer.start()
 
-        self.axisXPhotonCount = QtChart.QValueAxis()  # X axis: Time
-        self.axisXPhotonCount.setTitleText('Time')
-        self.axisXPhotonCount.setTickCount(11)  # 主分隔个数
-        self.axisXPhotonCount.setMinorTickCount(4)  # 次刻度数
-        self.axisXPhotonCount.setLabelFormat("%.1f")
-
-        self.axisYPhotonCount = QtChart.QValueAxis()  # Y axis: count or count rate
-        self.axisYPhotonCount.setTickCount(5)
-        self.axisYPhotonCount.setMinorTickCount(4)
-        self.axisYPhotonCount.setLabelFormat("%.2f")  # 标签格式
-        # axisY.setGridLineVisible(False)
-
-        # add axis on series
-        self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.seriesPhotonCount)
-        self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.seriesPhotonCount)
-
-        self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.scatterPhotonCount)
-        self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.scatterPhotonCount)
-
-        # set timer to update chart
-        self.timerPhotonCount = QTimer()
-        self.timerPhotonCount.timeout.connect(self.updatePhotonCountChart)
+        #
+        # ###################################
+        # # initialize photon count chart
+        # # data field: chart, series, axisX, axisY
+        # self.chartPhotonCount = QtChart.QChart()
+        # self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
+        # # self.ui.chartviewPhotonCount.addWidget
+        # self.seriesPhotonCount = QtChart.QLineSeries()
+        # self.scatterPhotonCount = QtChart.QScatterSeries()
+        # self.seriesPhotonCount.setName('Channel {} counting'.format(self.ui.comboBoxTaggerAPD.currentText()))
+        # self.chartPhotonCount.addSeries(self.seriesPhotonCount)
+        # self.chartPhotonCount.addSeries(self.scatterPhotonCount)
+        #
+        # self.axisXPhotonCount = QtChart.QValueAxis()  # X axis: Time
+        # self.axisXPhotonCount.setTitleText('Time')
+        # self.axisXPhotonCount.setTickCount(11)  # 主分隔个数
+        # self.axisXPhotonCount.setMinorTickCount(4)  # 次刻度数
+        # self.axisXPhotonCount.setLabelFormat("%.1f")
+        #
+        # self.axisYPhotonCount = QtChart.QValueAxis()  # Y axis: count or count rate
+        # self.axisYPhotonCount.setTickCount(5)
+        # self.axisYPhotonCount.setMinorTickCount(4)
+        # self.axisYPhotonCount.setLabelFormat("%.2f")  # 标签格式
+        # # axisY.setGridLineVisible(False)
+        #
+        # # add axis on series
+        # self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.seriesPhotonCount)
+        # self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.seriesPhotonCount)
+        #
+        # self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.scatterPhotonCount)
+        # self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.scatterPhotonCount)
+        #
+        # # set timer to update chart
+        # self.timerPhotonCount = QTimer()
+        # self.timerPhotonCount.timeout.connect(self.updatePhotonCountChart)
 
         ###################################
         # initialize frequency-domain ODMR chart
@@ -730,19 +757,39 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setSpacing(0)
 
     def updatePhotonCountChart(self):
-        self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
-        self.scatterPhotonCount.removePoints(0, self.scatterPhotonCount.count())
 
+
+
+        # # ======================================
+        # self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
+        # self.scatterPhotonCount.removePoints(0, self.scatterPhotonCount.count())
+        #
+        # counts = self.counter.getData().ravel()
+        # if self.ui.radioButtonPhotonCountRate.isChecked():
+        #     counts = counts / self.photonCountConfig['binwidth'] / C.pico
+        # cmin, cmax = min(counts), max(counts)
+        # delta = cmax - cmin
+        # self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
+        #
+        # for i, c in enumerate(counts):
+        #     self.seriesPhotonCount.append(i, c)
+        #     self.scatterPhotonCount.append(i,c)
+
+
+        # # ======================================
+        self.axesPhotonCount.clear()
         counts = self.counter.getData().ravel()
         if self.ui.radioButtonPhotonCountRate.isChecked():
             counts = counts / self.photonCountConfig['binwidth'] / C.pico
-        cmin, cmax = min(counts), max(counts)
-        delta = cmax - cmin
-        self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
+        self.axesPhotonCount.plot(counts)
+        self.axesPhotonCount.figure.canvas.draw()
 
-        for i, c in enumerate(counts):
-            self.seriesPhotonCount.append(i, c)
-            self.scatterPhotonCount.append(i,c)
+        # self._dynamic_ax.clear()
+        # t = np.linspace(0, 10, 101)
+        # Shift the sinusoid as a function of time.
+        # self._dynamic_ax.plot(t, np.sin(t + time.time()) + np.random.rand(len(t)))
+        # self._dynamic_ax.figure.canvas.draw()
+
 
     def updateODMRFrequencyChart(self):
         """
