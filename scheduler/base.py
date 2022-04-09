@@ -62,7 +62,7 @@ class Scheduler(abc.ABC):
         self.time_pad = 0.0
         self.time_total = 0.0  # total time for scanning frequencies (estimated)
         kwargs.setdefault('output_dir',
-                          os.path.join(os.path.expanduser('~'), 'Downloads', 'output-' + str(datetime.date.today)))
+                          os.path.join(os.path.expanduser('~'), 'Downloads', 'output-' + str(datetime.date.today())))
         self.output_dir = kwargs['output_dir']
         # self.output_dir = '../output/'
         if not os.path.exists(self.output_dir):
