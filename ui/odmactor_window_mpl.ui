@@ -771,8 +771,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>456</width>
-          <height>858</height>
+          <width>487</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1278,8 +1278,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>487</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1289,7 +1289,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tabPhotonCount">
         <attribute name="title">
@@ -1773,7 +1773,14 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_8">
             <item row="0" column="0">
-             <widget class="QtCharts::QChartView" name="chartviewODMRFrequency"/>
+             <widget class="QWidget" name="widgetODMRFrequencyVisualization" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -1843,7 +1850,14 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_14">
             <item row="0" column="0">
-             <widget class="QtCharts::QChartView" name="chartviewODMRTime"/>
+             <widget class="QWidget" name="widgetODMRTimeVisualization" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -1891,14 +1905,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QtCharts::QChartView</class>
-   <extends>QGraphicsView</extends>
-   <header location="global">QtCharts/QChartView&gt;
-#include &lt;QtCharts/chartsnamespace.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

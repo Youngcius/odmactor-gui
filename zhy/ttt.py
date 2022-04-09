@@ -54,3 +54,4 @@ print(timer.isActive())
 timer.stop()
 print('stopped')
 print(timer.isActive())
+

@@ -121,114 +121,47 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setSpacing(0)
 
         ###################################
-        # initialize photon count chart
-        self.countFigCanvas = FigureCanvas(plt.figure())
-        self.naviBarPhotonCount = NavigationToolbar(self.countFigCanvas,self.ui.widgetPhotonCountVisualization)
+        # initialize photon count chart: figure canvas, toolbar, axes, timer
+        self.canvasPhotonCount = FigureCanvas(plt.figure())  # figure canvas
+        self.naviBarPhotonCount = NavigationToolbar(self.canvasPhotonCount, self.ui.widgetPhotonCountVisualization)
         self.layoutPhotonCountVisualization = QtWidgets.QVBoxLayout(self.ui.widgetPhotonCountVisualization)
-
         self.layoutPhotonCountVisualization.addWidget(self.naviBarPhotonCount)
-        self.layoutPhotonCountVisualization.addWidget(self.countFigCanvas)
+        self.layoutPhotonCountVisualization.addWidget(self.canvasPhotonCount)
         self.layoutPhotonCountVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutPhotonCountVisualization.setSpacing(0)
-        self.axesPhotonCount = self.countFigCanvas.figure.subplots()
-        self.axesPhotonCount.set_xlabel('Time (s)',fontsize=13)
-        self.axesPhotonCount.set_ylabel('Count',fontsize=13)
-        self.timerPhotonCount = self.countFigCanvas.new_timer(100, [(self.updatePhotonCountChart, (), {})])
-
-        #
-        # self._static_ax = static_canvas.figure.subplots()
-        # f, ax = plt.subplots()
-        # ax.set_xalbel('')
-        # t = np.linspace(0, 10, 501)
-        # self._static_ax.plot(t, np.tan(t), ".")
-        #
-        # self._dynamic_ax = dynamic_canvas.figure.subplots()
-        # self._timer = dynamic_canvas.new_timer(100, [(self._update_canvas, (), {})])
-        # self._timer.start()
-
-        #
-        # ###################################
-        # # initialize photon count chart
-        # # data field: chart, series, axisX, axisY
-        # self.chartPhotonCount = QtChart.QChart()
-        # self.ui.chartviewPhotonCount.setChart(self.chartPhotonCount)
-        # # self.ui.chartviewPhotonCount.addWidget
-        # self.seriesPhotonCount = QtChart.QLineSeries()
-        # self.scatterPhotonCount = QtChart.QScatterSeries()
-        # self.seriesPhotonCount.setName('Channel {} counting'.format(self.ui.comboBoxTaggerAPD.currentText()))
-        # self.chartPhotonCount.addSeries(self.seriesPhotonCount)
-        # self.chartPhotonCount.addSeries(self.scatterPhotonCount)
-        #
-        # self.axisXPhotonCount = QtChart.QValueAxis()  # X axis: Time
-        # self.axisXPhotonCount.setTitleText('Time')
-        # self.axisXPhotonCount.setTickCount(11)  # 主分隔个数
-        # self.axisXPhotonCount.setMinorTickCount(4)  # 次刻度数
-        # self.axisXPhotonCount.setLabelFormat("%.1f")
-        #
-        # self.axisYPhotonCount = QtChart.QValueAxis()  # Y axis: count or count rate
-        # self.axisYPhotonCount.setTickCount(5)
-        # self.axisYPhotonCount.setMinorTickCount(4)
-        # self.axisYPhotonCount.setLabelFormat("%.2f")  # 标签格式
-        # # axisY.setGridLineVisible(False)
-        #
-        # # add axis on series
-        # self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.seriesPhotonCount)
-        # self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.seriesPhotonCount)
-        #
-        # self.chartPhotonCount.setAxisX(self.axisXPhotonCount, self.scatterPhotonCount)
-        # self.chartPhotonCount.setAxisY(self.axisYPhotonCount, self.scatterPhotonCount)
-        #
-        # # set timer to update chart
-        # self.timerPhotonCount = QTimer()
-        # self.timerPhotonCount.timeout.connect(self.updatePhotonCountChart)
+        self.axesPhotonCount = self.canvasPhotonCount.figure.subplots()
+        self.axesPhotonCount.set_xlabel('Time (s)', fontsize=13)
+        self.axesPhotonCount.set_ylabel('Count', fontsize=13)
+        self.timerPhotonCount = self.canvasPhotonCount.new_timer(100, [(self.updatePhotonCountChart, (), {})])
 
         ###################################
-        # initialize frequency-domain ODMR chart
-        self.chartODMRFrequency = QtChart.QChart()
-        self.ui.chartviewODMRFrequency.setChart(self.chartODMRFrequency)
-        self.seriesODMRFrequency = QtChart.QLineSeries()  # 有参考时就返回对比度，否则就是计数
-        self.chartODMRFrequency.addSeries(self.seriesODMRFrequency)
-
-        self.axisXODMRFrequency = QtChart.QValueAxis()  # X axis: frequency
-        self.axisXODMRFrequency.setTitleText('Frequency')
-        self.axisXODMRFrequency.setTickCount(11)
-        self.axisXODMRFrequency.setMinorTickCount(4)
-        self.axisXODMRFrequency.setLabelFormat("%.1f")
-
-        self.axisYODMRFrequency = QtChart.QValueAxis()  # Y axis: count or contrast
-        self.axisYODMRFrequency.setTickCount(5)
-        self.axisYODMRFrequency.setMinorTickCount(4)
-        self.axisYODMRFrequency.setLabelFormat("%.2f")  # 标签格式
-
-        self.chartODMRFrequency.setAxisX(self.axisXODMRFrequency, self.seriesODMRFrequency)
-        self.chartODMRFrequency.setAxisY(self.axisYODMRFrequency, self.seriesODMRFrequency)
-
-        self.timerODMRFrequency = QTimer()
-        self.timerODMRFrequency.timeout.connect(self.updateODMRFrequencyChart)
+        # initialize frequency-domain ODMR chart: figure canvas, toolbar, axes, timer
+        self.canvasODMRFrequency = FigureCanvas(plt.figure())  # figure canvas
+        self.naviBarODMRFrequency = NavigationToolbar(self.canvasODMRFrequency,
+                                                      self.ui.widgetODMRFrequencyVisualization)
+        self.layoutODMRFrequencyVisualization = QtWidgets.QVBoxLayout(self.ui.widgetODMRFrequencyVisualization)
+        self.layoutODMRFrequencyVisualization.addWidget(self.naviBarODMRFrequency)
+        self.layoutODMRFrequencyVisualization.addWidget(self.canvasODMRFrequency)
+        self.layoutODMRFrequencyVisualization.setContentsMargins(0, 0, 0, 0)
+        self.layoutODMRFrequencyVisualization.setSpacing(0)
+        self.axesODMRFrequency = self.canvasODMRFrequency.figure.subplots()
+        self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
+        self.axesODMRFrequency.set_ylabel('Count/Contrast', fontsize=13)
+        self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
 
         ###################################
         # initialized time-domain ODMR chart
-        self.chartODMRTime = QtChart.QChart()
-        self.ui.chartviewODMRTime.setChart(self.chartODMRTime)
-        self.seriesODMRTime = QtChart.QLineSeries()
-        self.chartODMRTime.addSeries(self.seriesODMRTime)
-
-        self.axisXODMRTime = QtChart.QValueAxis()  # X axis: time
-        self.axisXODMRTime.setTitleText('Time')
-        self.axisXODMRTime.setTickCount(11)
-        self.axisXODMRTime.setMinorTickCount(4)
-        self.axisXODMRTime.setLabelFormat("%.1f")
-
-        self.axisYODMRTime = QtChart.QValueAxis()  # T axis
-        self.axisYODMRTime.setTickCount(5)
-        self.axisYODMRTime.setMinorTickCount(4)
-        self.axisYODMRTime.setLabelFormat("%.2f")  # 标签格式
-
-        self.chartODMRTime.setAxisX(self.axisXODMRTime, self.seriesODMRTime)
-        self.chartODMRTime.setAxisY(self.axisYODMRTime, self.seriesODMRTime)
-
-        self.timerODMRTime = QTimer()
-        self.timerODMRTime.timeout.connect(self.updateODMRTimeChart)
+        self.canvasODMRTime = FigureCanvas(plt.figure())
+        self.naviBarODMRTime = NavigationToolbar(self.canvasODMRTime, self.ui.widgetODMRTimeVisualization)
+        self.layoutODMRTimeVisualization = QtWidgets.QVBoxLayout(self.ui.widgetODMRTimeVisualization)
+        self.layoutODMRTimeVisualization.addWidget(self.naviBarODMRTime)
+        self.layoutODMRTimeVisualization.addWidget(self.canvasODMRTime)
+        self.layoutODMRTimeVisualization.setContentsMargins(0, 0, 0, 0)
+        self.layoutODMRTimeVisualization.setSpacing(0)
+        self.axesODMRTime = self.canvasODMRTime.figure.subplots()
+        self.axesODMRTime.set_xlabel('Time (s)', fontsize=13)
+        self.axesODMRTime.set_ylabel('Count/Contrast', fontsize=13)
+        self.timerODMRTime = self.canvasODMRTime.new_timer(100, [(self.updateODMRTimeChart, (), {})])
 
     def fetchParameters(self):
         """
@@ -578,7 +511,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)  # TODO: 先连接
         t.start()
-        self.timerODMRFrequency.start(1000)
+        self.timerODMRFrequency.start()
         t.join()
         self.timerODMRFrequency.stop()
         self.progressBar.setValue(-1)
@@ -608,7 +541,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # conduct ODMR scheduling and update real-time chart
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
-        self.timerODMRTime.start(1000)
+        self.timerODMRTime.start()
         t.join()
         self.timerODMRTime.stop()
         self.progressBar.setValue(-1)
@@ -762,23 +695,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setSpacing(0)
 
     def updatePhotonCountChart(self):
-
-        # # ======================================
-        # self.seriesPhotonCount.removePoints(0, self.seriesPhotonCount.count())
-        # self.scatterPhotonCount.removePoints(0, self.scatterPhotonCount.count())
-        #
-        # counts = self.counter.getData().ravel()
-        # if self.ui.radioButtonPhotonCountRate.isChecked():
-        #     counts = counts / self.photonCountConfig['binwidth'] / C.pico
-        # cmin, cmax = min(counts), max(counts)
-        # delta = cmax - cmin
-        # self.axisYPhotonCount.setRange(cmin - 0.05 * delta, cmax + 0.05 * delta)
-        #
-        # for i, c in enumerate(counts):
-        #     self.seriesPhotonCount.append(i, c)
-        #     self.scatterPhotonCount.append(i,c)
-
-        # # ======================================
         self.axesPhotonCount.clear()
         self.axesPhotonCount.set_xlabel('Time (s)', fontsize=13)
         counts = self.counter.getData().ravel()
@@ -796,6 +712,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Update frequency-domain ODMR results periodically
         """
         # update series
+        self.axesODMRFrequency.clear()
+        self.axesODMRFrequency.set_title('{} Spectrum'.format(self.schedulerMode), fontsize=15)
+        self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
+        self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
+        if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
+            self.axesODMRFrequency.set_ylabel('Count')
+        else:  # plot contrast
+            self.axesODMRFrequency.set_ylabel('Contrast')
 
         # update progress bar
         freqs = self.schedulers[self.schedulerMode].frequencies
