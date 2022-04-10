@@ -105,6 +105,9 @@ class Scheduler(abc.ABC):
         self.tagger = kwargs['tagger']
         self.lockin = kwargs['lockin']
 
+
+
+
         # initialize instruments
         if self.laser is None:
             self.laser = Laser()

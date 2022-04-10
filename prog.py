@@ -447,6 +447,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         )
         if self.schedulerMode == 'CW':
             period = max(self.odmrSeqConfig['laserInit'], self.odmrSeqConfig['microwaveTime'])
+            print('period', period)
             self.schedulers[self.schedulerMode].configure_odmr_seq(period=period, N=self.odmrSeqConfig['N'])
         else:
             self.schedulers[self.schedulerMode].configure_odmr_seq(
