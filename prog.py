@@ -509,7 +509,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # print('成功！')
 
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
-        # t.start()
+        t.start()
         self.timerODMRFrequency.start(100)
         # t.join()
         # self.timerODMRFrequency.stop()
