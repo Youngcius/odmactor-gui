@@ -75,6 +75,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         else:
             self.counter = None
 
+        self.cache = []
+
         # initial charts
         self.initCharts()
 
@@ -331,7 +333,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             power *= utils.mW_to_dBm(power)
         self.mw.set_power(power)
 
-    @pyqtSlot()
+    @pyqtSlot(bool)
     def on_pushButtonMicrowaveOnOff_clicked(self, checked):
         if isinstance(self.mw, Microwave) and self.mw.connect():
             if checked:
@@ -448,16 +450,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             apd_ttl=1 if self.ui.checkBoxASGAPDTTL.isChecked() else 0,
             tagger_ttl=1 if self.ui.checkBoxASGTaggerTTL.isChecked() else 0,
         )
-        self.schedulers[self.schedulerMode].configure_odmr_seq(
-            t_init=self.odmrSeqConfig['laserInit'],
-            t_mw=self.odmrSeqConfig['microwaveTime'],
-            t_read_sig=self.odmrSeqConfig['signalReadout'],
-            inter_init_mw=self.odmrSeqConfig['laserMicrowaveInterval'],
-            pre_read=self.odmrSeqConfig['previousReadoutInterval'],
-            inter_read=self.odmrSeqConfig['signalReferenceInterval'],
-            inter_period=self.odmrSeqConfig['periodInterval'],
-            N=self.odmrSeqConfig['N'],
-        )
+        if self.schedulerMode == 'CW':
+            period = max(self.odmrSeqConfig['LaserInit'], self.odmrSeqConfig['microwaveOperation'])
+            self.schedulers[self.schedulerMode].configure_odmr_seq(period=period, N=self.odmrSeqConfig['N'])
+        else:
+            self.schedulers[self.schedulerMode].configure_odmr_seq(
+                t_init=self.odmrSeqConfig['laserInit'],
+                t_mw=self.odmrSeqConfig['microwaveTime'],
+                t_read_sig=self.odmrSeqConfig['signalReadout'],
+                inter_init_mw=self.odmrSeqConfig['laserMicrowaveInterval'],
+                pre_read=self.odmrSeqConfig['previousReadoutInterval'],
+                inter_read=self.odmrSeqConfig['signalReferenceInterval'],
+                inter_period=self.odmrSeqConfig['periodInterval'],
+                N=self.odmrSeqConfig['N'],
+            )
 
         if self.schedulerMode in timeDomainModes:
             self.schedulers[self.schedulerMode].gene_pseudo_detect_seq()
@@ -622,6 +628,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.counter.start()
             self.timerPhotonCount.start()
         else:
+            self.cache = self.counter.getData().ravel()
             self.counter.stop()
             self.timerPhotonCount.stop()
 
@@ -649,7 +656,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
         timestamp = datetime.datetime.now()
-        counts = self.counter.getData().ravel()
+        if not self.counter.isRunning() and not self.cache:
+            counts = self.cache
+        else:
+            counts = self.counter.getData().ravel()
         data = {
             'channel': self.photonCountConfig['channels'][0],
             'time': (self.counter.getIndex() * C.pico).tolist(),

@@ -106,26 +106,28 @@ class Scheduler(abc.ABC):
         self.lockin = kwargs['lockin']
 
         # initialize instruments
-        self.laser = Laser()
-        self.asg = ASG()
-        try:
-            self.mw = Microwave()
-        except:
-            self.mw = None
-
-        if self.use_lockin:
+        if self.laser is None:
+            self.laser = Laser()
+        if self.asg is None:
+            self.asg = ASG()
+        if self.mw is None:
             try:
-                self.lockin = LockInAmplifier()
+                self.mw = Microwave()
             except:
-                self.lockin = None
+                self.mw = None
+        if self.use_lockin:
+            if self.lockin is None:
+                try:
+                    self.lockin = LockInAmplifier()
+                except:
+                    self.lockin = None
         else:
-            if tt.scanTimeTagger():
+            if self.tagger is None and tt.scanTimeTagger():
                 self.tagger = tt.createTimeTagger()
             else:
                 self.tagger = None
 
     # TODO: connect和 odmactor中的reconnect需要整合
-    # TODO: 从外界传入仪器的接口，是的scheduler和GUI程序的仪器变量相同
     def connect(self):
         """
         Check and connect all instruments

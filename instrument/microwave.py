@@ -11,20 +11,20 @@ class Microwave(RsInstrument):
         super(Microwave, self).__init__('USB0::0x0AAD::0x0054::104174::INSTR', True, True)
 
     def set_frequency(self, freq):
-        # super(Microwave, self).write_float('FREQUENCY', freq)
-        print('MW frequency:', freq)
+        super(Microwave, self).write_float('FREQUENCY', freq)
+        # print('MW frequency:', freq)
 
     def get_frequency(self):
-        # return super(Microwave, self).query_float('FREQUENCY')
-        return 1e9
+        return super(Microwave, self).query_float('FREQUENCY?')
+        # return 1e9
 
     def set_power(self, power):
-        # super(Microwave, self).write_float('POW', power)
-        print('MW power:', power)
+        super(Microwave, self).write_float('POW', power)
+        # print('MW power:', power)
 
     def get_power(self):
-        # return super(Microwave, self).query_float_with_opc('POW')
-        return 1
+        return super(Microwave, self).query_float_with_opc('POW?')
+        # return 1
 
     def run_given_time(self, duration):
         self.start()
@@ -35,12 +35,12 @@ class Microwave(RsInstrument):
         return super(Microwave, self).reconnect(force_close)
 
     def start(self):
-        # self.write_bool('OUTPUT:STATE', True)
-        print('MW started')
+        self.write_bool('OUTPUT:STATE', True)
+        # print('MW started')
 
     def stop(self):
-        # self.write_bool('OUTPUT:STATE', False)
-        print('MW stopped')
+        self.write_bool('OUTPUT:STATE', False)
+        # print('MW stopped')
 
     def close(self):
         super(Microwave, self).close()

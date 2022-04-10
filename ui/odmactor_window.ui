@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1522</width>
-    <height>1042</height>
+    <width>1512</width>
+    <height>854</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,8 +38,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>487</width>
-          <height>879</height>
+          <width>521</width>
+          <height>814</height>
          </rect>
         </property>
         <attribute name="label">
@@ -62,7 +62,14 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowaveFrequency"/>
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowaveFrequency">
+                <property name="maximum">
+                 <double>999.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QComboBox" name="comboBoxMicrowaveFrequencyUnit">
@@ -100,7 +107,14 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePower"/>
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePower">
+                <property name="minimum">
+                 <double>-50.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>30.000000000000000</double>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QComboBox" name="comboBoxMicrowavePowerUnit">
@@ -514,6 +528,9 @@
               <property name="text">
                <string>High-level TTL </string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item row="2" column="0">
@@ -771,8 +788,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>487</width>
-          <height>879</height>
+          <width>521</width>
+          <height>962</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1278,8 +1295,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>487</width>
-          <height>879</height>
+          <width>521</width>
+          <height>670</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1874,8 +1891,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1522</width>
-     <height>26</height>
+     <width>1512</width>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">
