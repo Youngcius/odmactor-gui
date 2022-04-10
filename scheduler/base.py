@@ -519,6 +519,7 @@ class Scheduler(abc.ABC):
         with open(fname + '.json', 'w') as f:
             json.dump(self._result_detail, f)
         print('Detailed data result has been saved into {}'.format(fname + '.json'))
+        self.output_fname = fname  + '.json'
 
     def __str__(self):
         return self.name

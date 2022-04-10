@@ -337,6 +337,7 @@ class Ui_OdmactorMainWindow(object):
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
         self.radioButtonODMRCW = QtWidgets.QRadioButton(self.groupBox_10)
+        self.radioButtonODMRCW.setChecked(True)
         self.radioButtonODMRCW.setObjectName("radioButtonODMRCW")
         self.horizontalLayout_15.addWidget(self.radioButtonODMRCW)
         self.radioButtonODMRPulse = QtWidgets.QRadioButton(self.groupBox_10)

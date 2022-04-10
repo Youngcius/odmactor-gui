@@ -59,14 +59,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5
             ) for mode in schedulerModes
         }
-
-        # self.schedulers = {
-        #     'CW': scheduler.CWScheduler(),
-        #     'Pulse': scheduler.PulseScheduler(),
-        #     'Ramsey': scheduler.RamseyScheduler(),
-        #     'Rabi': scheduler.RabiScheduler(),
-        #     'Relaxation': scheduler.RelaxationScheduler()
-        # }
+        self.schedulerMode = 'CW'
 
         # photon count config (tagger counter measurement class)
         self.updatePhotonCountConfig()
@@ -75,8 +68,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.counter.stop()
         else:
             self.counter = None
-
-        self.cache = []
 
         # initial charts
         self.initCharts()
@@ -484,7 +475,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.startFrequencyDomainDetecting()
         else:
             self.startTimeDomainDetecting()
-        self.labelInstrStatus.setText('ODMR Scheduler: done')
 
     def startFrequencyDomainDetecting(self):
         """
@@ -618,7 +608,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.counter.start()
             self.timerPhotonCount.start()
         else:
-            # self.cache = self.counter.getData().ravel()
             self.counter.stop()
             self.timerPhotonCount.stop()
 
@@ -646,9 +635,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
         timestamp = datetime.datetime.now()
-        # if not self.counter.isRunning() and len(self.cache) > 0:
-        #     counts = self.cache
-        # else:
         counts = self.counter.getData().ravel()
         data = {
             'channel': self.photonCountConfig['channels'][0],
@@ -743,7 +729,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             length = len(sig)
             self.axesODMRFrequency.plot(freqs[:length], sig, 'o-')
             self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
-        # print(freqs[:length], sig)
         self.axesODMRFrequency.figure.canvas.draw()
 
         # update progress bar
@@ -751,6 +736,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.progressBar.setValue(freqs.index(cur_freq) + 1)
 
         if not self.schedulers[self.schedulerMode].is_running:
+            self.labelInstrStatus.setText(f'{self.schedulerMode} Scheduler: done. '
+                                          f'Data has been saved in {self.schedulers[self.schedulerMode].output_fname}')
             self.timerODMRFrequency.stop()
             self.progressBar.setValue(-1)
 
@@ -770,7 +757,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             contrast = [s / r for s, r in zip(sig[:length], ref)]
             self.axesODMRFrequency.plot(times[:length], contrast, 'o-')
             self.axesODMRTime.set_ylabel('Contrast', fontsize=13)
-        else:  # plot contrast
+        else:  # plot count
+            length = len(sig)
+            self.axesODMRFrequency.plot(time[:length], sig, 'o-')
             self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
         self.axesODMRTime.figure.canvas.draw()
 
@@ -779,6 +768,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.progressBar.setValue(times.index(cur_time) + 1)
 
         if not self.schedulers[self.schedulerMode].is_running:
+            self.labelInstrStatus.setText(f'{self.schedulerMode} Scheduler: done. '
+                                          f'Data has been saved in {self.schedulers[self.schedulerMode].output_fname}')
             self.timerODMRTime.stop()
             self.progressBar.setValue(-1)
 

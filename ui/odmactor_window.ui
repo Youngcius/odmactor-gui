@@ -848,6 +848,9 @@
                    <property name="text">
                     <string>Continous-Wave mode</string>
                    </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item>
