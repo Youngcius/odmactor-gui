@@ -651,7 +651,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
         timestamp = datetime.datetime.now()
-        if not self.counter.isRunning() and not self.cache:
+        if not self.counter.isRunning() and len(self.cache) > 0:
             counts = self.cache
         else:
             counts = self.counter.getData().ravel()
