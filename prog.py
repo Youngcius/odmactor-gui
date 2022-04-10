@@ -155,7 +155,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRFrequency = self.canvasODMRFrequency.figure.subplots()
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         self.axesODMRFrequency.set_ylabel('Count/Contrast', fontsize=13)
-        self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
+        self.timerODMRFrequency = QTimer()
+        self.timerODMRFrequency.timeout.connect(self.updateODMRFrequencyChart)
+        # self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
 
         ###################################
         # initialized time-domain ODMR chart
@@ -510,7 +512,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
-        self.timerODMRFrequency.start()
+        self.timerODMRFrequency.start(100)
         t.join()
         self.timerODMRFrequency.stop()
         self.progressBar.setValue(-1)

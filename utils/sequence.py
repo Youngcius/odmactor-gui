@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
 
+
 class SequenceString:
     """
     A OOP encapsulation: String representation of a sequence of pulses
@@ -185,7 +186,7 @@ def seq_to_fig(seq: List[List[Union[float, int]]]) -> Figure:
 #     return fig
 
 
-def seq_to_str(seq: List[List[float]]) -> str:
+def seq_to_str(seq: List[List[int]]) -> str:
     """
     Convert sequences (list of list) into a string
     """
