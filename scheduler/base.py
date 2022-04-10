@@ -105,9 +105,6 @@ class Scheduler(abc.ABC):
         self.tagger = kwargs['tagger']
         self.lockin = kwargs['lockin']
 
-
-
-
         # initialize instruments
         if self.laser is None:
             self.laser = Laser()
@@ -129,7 +126,10 @@ class Scheduler(abc.ABC):
                 self.tagger = tt.createTimeTagger()
             else:
                 self.tagger = None
-
+    def print_info(self):
+        print(self.name)
+        print('laser: {}, asg: {}, mw: {}, tagger: {}, lockin: {}'.format(self.laser,self.asg,self.mw,self.tagger,self.lockin))
+        print()
     # TODO: connect和 odmactor中的reconnect需要整合
     def connect(self):
         """

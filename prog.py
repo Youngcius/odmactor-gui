@@ -59,6 +59,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5
             ) for mode in schedulerModes
         }
+
+        for s in self.schedulers:
+            s.print_info()
         # self.schedulers = {
         #     'CW': scheduler.CWScheduler(),
         #     'Pulse': scheduler.PulseScheduler(),
@@ -431,7 +434,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Fetch sequences parameters to generate ASG sequences, load it into ASG and visualize
         """
-        print('before load sequences:', self.schedulers[self.schedulerMode].tagger,self.schedulers[self.schedulerMode].asg)
+        print('before load sequences:')
+        self.schedulers[self.schedulerMode].print_info()
+        # print('before load sequences:', self.schedulers[self.schedulerMode].tagger,self.schedulers[self.schedulerMode].asg)
         self.odmrSeqConfig = {
             'N': self.ui.spinBoxODMRPeriodNumber.value(),
             'withReference': self.ui.checkBoxODMRWithReference.isChecked(),
