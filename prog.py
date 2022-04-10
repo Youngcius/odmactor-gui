@@ -479,8 +479,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRStartDetecting_clicked(self):
         # 微波参数 --> 设置序列 ------> 频率范围 --> counting setting
-        # TODO: 不同 update pi pulse, asg channels 和 tagger cannels
-        # self.schedulers[self.schedulerMode].connect()
+        self.schedulers[self.schedulerMode].connect()
         if self.ui.groupBoxODMRFrequency.isChecked():
             self.startFrequencyDomainDetecting()
         else:
@@ -749,6 +748,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # update progress bar
         cur_freq = self.schedulers[self.schedulerMode].cur_freq
         self.progressBar.setValue(freqs.index(cur_freq) + 1)
+        print('progress: {:.3f}/{:.3f}'.format(freqs.index(cur_freq) + 1, len(freqs)))
 
     def updateODMRTimeChart(self):
         """
