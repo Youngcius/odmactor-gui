@@ -45,6 +45,7 @@ class Scheduler(abc.ABC):
         self._mw_conf = {'freq': C.giga, 'power': 0}  # current MW parameter settings
         self._configuration = {}
         self._laser_control = True
+        self.is_running = False
         self.two_pulse_readout = False  # whether to use double-pulse readout
 
         # connect to Laser, MW, ASG, Tagger/Lockin
@@ -722,6 +723,7 @@ class FrequencyDomainScheduler(Scheduler):
         2) acquire data timely
         :param mw_control: 'on' or 'off'
         """
+        self.is_running = True
         mw_seq_on = self.mw_control_seq()
         if mw_control == 'off':
             self.mw_control_seq([0, 0])
@@ -743,6 +745,7 @@ class FrequencyDomainScheduler(Scheduler):
         # recover the asg control sequence for MW to be 'on'
         if mw_control == 'off':
             self.mw_control_seq(mw_seq_on)
+        self.is_running = False
 
     @abc.abstractmethod
     def configure_odmr_seq(self, *args, **kwargs):
