@@ -94,6 +94,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         try:
             self.mw = Microwave()
+            self.ui.doubleSpinBoxMicrowaveFrequency.setValue(self.mw.get_frequency() / C.giga)
+            self.ui.doubleSpinBoxMicrowavePower.setValue(self.mw.get_power())
         except:
             self.mw = None
 
@@ -334,6 +336,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             if checked:
                 self.mw.start()
                 self.labelInstrStatus.setText('Microwave: started')
+                if self.ui.groupBoxMicrowaveTimer.isChecked():
+                    time.sleep(self.ui.doubleSpinBoxMicrowaveTimerTime.value() * timeUnitDict[
+                        self.ui.comboBoxMicrowaveTimerTimeUnit.currentText()])
+                    self.mw.stop()
+                    self.ui.pushButtonMicrowaveOnOff.setChecked(False)
+                    self.labelInstrStatus.setText('Microwave: stopped')
             else:
                 self.mw.stop()
                 self.labelInstrStatus.setText('Microwave: stopped')
@@ -423,7 +431,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Fetch sequences parameters to generate ASG sequences, load it into ASG and visualize
         """
-        # TODO: check 合法的 pulse duration 输入值
         self.odmrSeqConfig = {
             'N': self.ui.spinBoxODMRPeriodNumber.value(),
             'withReference': self.ui.checkBoxODMRWithReference.isChecked(),
@@ -815,7 +822,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_pushButtonASGClear_clicked(self):
-        self.ui.tableWidgetSequence.clear()
+        for i in range(self.ui.tableWidgetSequence.rowCount()):
+            for j in range(self.ui.tableWidgetSequence.columnCount()):
+                self.ui.tableWidgetSequence.item(i, j).setText(str(0))
+        self.sequences = [[0, 0] for _ in range(8)]
+        self.updateSequenceChart()
 
     @pyqtSlot()
     def on_pushButtonASGAdd_clicked(self):

@@ -167,7 +167,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_2">
+             <widget class="QGroupBox" name="groupBoxMicrowaveTimer">
               <property name="title">
                <string>Timer</string>
               </property>
@@ -186,7 +186,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="spinBoxMicrowaveTimerTime"/>
+                <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowaveTimerTime"/>
                </item>
                <item>
                 <widget class="QComboBox" name="comboBoxMicrowaveTimerTimeUnit">
