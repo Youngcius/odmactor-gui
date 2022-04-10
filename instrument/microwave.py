@@ -31,7 +31,7 @@ class Microwave(RsInstrument):
         time.sleep(duration)
         self.stop()
 
-    def connect(self, force_close: bool = False) -> bool:
+    def connect(self, force_close: bool = True) -> bool:
         return super(Microwave, self).reconnect(force_close)
 
     def start(self):
