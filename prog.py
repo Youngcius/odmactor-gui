@@ -446,7 +446,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             tagger_ttl=1 if self.ui.checkBoxASGTaggerTTL.isChecked() else 0,
         )
         if self.schedulerMode == 'CW':
-            period = max(self.odmrSeqConfig['LaserInit'], self.odmrSeqConfig['microwaveOperation'])
+            period = max(self.odmrSeqConfig['laserInit'], self.odmrSeqConfig['microwaveTime'])
             self.schedulers[self.schedulerMode].configure_odmr_seq(period=period, N=self.odmrSeqConfig['N'])
         else:
             self.schedulers[self.schedulerMode].configure_odmr_seq(
@@ -481,10 +481,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Start frequency-domain ODMR detecting experiments, i.e., CW or Pulse
         """
-        # configure parameters
-        self.seriesODMRFrequency.removePoints(0, self.seriesODMRFrequency.count())
-        self.seriesODMRFrequency.setName('{} Spectrum'.format(self.schedulerMode))
-
         # frequencies for scanning
         unit_freq = freqUnitDict[self.ui.comboBoxODMRFrequencyUnit.currentText()]
         freq_start = self.ui.doubleSpinBoxODMRFrequencyStart.value() * unit_freq
@@ -518,10 +514,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
         """
-        # configure chart parameters
-        self.seriesODMRTime.removePoints(0, self.seriesODMRTime.count())
-        self.seriesODMRFrequency.setName('{} Result'.format(self.schedulerMode))
-
         # configure pi pulse
         self.schedulers[self.schedulerMode].pi_pulse['freqs'] = self.piPulse['frequency']
         self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
@@ -613,13 +605,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
         # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
-        self.updatePhotonCountConfig()
-        try:
-            self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-        except:
-            self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
-
         if checked:
+            self.updatePhotonCountConfig()
+            try:
+                self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
+            except:
+                self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
             self.counter.start()
             self.timerPhotonCount.start()
         else:
