@@ -434,6 +434,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Fetch sequences parameters to generate ASG sequences, load it into ASG and visualize
         """
+        # self.schedulers[self.schedulerMode].connect()
         print('before load sequences:')
         self.schedulers[self.schedulerMode].print_info()
         # print('before load sequences:', self.schedulers[self.schedulerMode].tagger,self.schedulers[self.schedulerMode].asg)
@@ -487,6 +488,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_pushButtonODMRStartDetecting_clicked(self):
         # 微波参数 --> 设置序列 ------> 频率范围 --> counting setting
         # TODO: 不同 update pi pulse, asg channels 和 tagger cannels
+        # self.schedulers[self.schedulerMode].connect()
         if self.ui.groupBoxODMRFrequency.isChecked():
             self.startFrequencyDomainDetecting()
         else:
