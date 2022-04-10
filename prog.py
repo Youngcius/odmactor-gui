@@ -155,9 +155,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRFrequency = self.canvasODMRFrequency.figure.subplots()
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         self.axesODMRFrequency.set_ylabel('Count/Contrast', fontsize=13)
-        self.timerODMRFrequency = QTimer()
-        self.timerODMRFrequency.timeout.connect(self.updateODMRFrequencyChart)
-        # self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
+        self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
 
         ###################################
         # initialized time-domain ODMR chart
@@ -545,7 +543,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
         # TODO
-        print(self.timerODMRFrequency.isActive(),self.timerODMRFrequency.isActive(),self.timerODMRFrequency.isActive())
         # self.counter.getData()
         # pass
         self.labelInstrStatus.setText('Saved in {}'.format(self.schedulers[self.schedulerMode].output_dir))
@@ -621,7 +618,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.counter.start()
             self.timerPhotonCount.start()
         else:
-            self.cache = self.counter.getData().ravel()
+            # self.cache = self.counter.getData().ravel()
             self.counter.stop()
             self.timerPhotonCount.stop()
 
@@ -649,10 +646,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
         timestamp = datetime.datetime.now()
-        if not self.counter.isRunning() and len(self.cache) > 0:
-            counts = self.cache
-        else:
-            counts = self.counter.getData().ravel()
+        # if not self.counter.isRunning() and len(self.cache) > 0:
+        #     counts = self.cache
+        # else:
+        counts = self.counter.getData().ravel()
         data = {
             'channel': self.photonCountConfig['channels'][0],
             'time': (self.counter.getIndex() * C.pico).tolist(),
@@ -736,7 +733,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
-        print(self.counter.getData()[0][-10:])
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
@@ -753,11 +749,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # update progress bar
         cur_freq = self.schedulers[self.schedulerMode].cur_freq
         self.progressBar.setValue(freqs.index(cur_freq) + 1)
-        # print('progress: {:.3f}/{:.3f}'.format(freqs.index(cur_freq) + 1, len(freqs)))
 
         if not self.schedulers[self.schedulerMode].is_running:
             self.timerODMRFrequency.stop()
-            print('已经停止timer')
             self.progressBar.setValue(-1)
 
     def updateODMRTimeChart(self):
@@ -778,10 +772,15 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.axesODMRTime.set_ylabel('Contrast', fontsize=13)
         else:  # plot contrast
             self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
+        self.axesODMRTime.figure.canvas.draw()
 
         # update progress bar
         cur_time = self.schedulers[self.schedulerMode].cur_time
         self.progressBar.setValue(times.index(cur_time) + 1)
+
+        if not self.schedulers[self.schedulerMode].is_running:
+            self.timerODMRTime.stop()
+            self.progressBar.setValue(-1)
 
     @pyqtSlot()
     def on_pushButtonASGOpen_clicked(self):

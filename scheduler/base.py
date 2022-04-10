@@ -655,7 +655,7 @@ class FrequencyDomainScheduler(Scheduler):
         for _ in range(self.epoch_omit):
             self.mw.set_frequency(self._freqs[0])
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
-            print('scanning freq {:.3f} GHz (trivial)'.format(self._freqs[0] / C.giga))
+            # print('scanning freq {:.3f} GHz (trivial)'.format(self._freqs[0] / C.giga))
             time.sleep(self.time_pad + self.asg_dwell)
 
             if self.with_ref:
@@ -672,7 +672,7 @@ class FrequencyDomainScheduler(Scheduler):
             if self.mw_on_off:
                 self.mw.start()
 
-            print('scanning freq {:.3f} GHz'.format(freq / C.giga))
+            # print('scanning freq {:.3f} GHz'.format(freq / C.giga))
             self._get_data()
             # t = threading.Thread(target=self._get_data, name='thread-{}'.format(i))
             # time.sleep(self.time_pad)
@@ -790,7 +790,7 @@ class TimeDomainScheduler(Scheduler):
         # =======================================================
         for _ in range(self.epoch_omit):
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
-            print('scanning freq {:.3f} ns (trivial)'.format(self._times[0]))
+            # print('scanning freq {:.3f} ns (trivial)'.format(self._times[0]))
 
             self.gene_detect_seq(self._times[0])
             self.asg.start()
@@ -806,7 +806,7 @@ class TimeDomainScheduler(Scheduler):
             self.gene_detect_seq(duration)
             self.asg.start()
             # self._mw_instr.write_bool('OUTPUT:STATE', True)
-            print('scanning time interval: {:.3f} ns'.format(duration))
+            # print('scanning time interval: {:.3f} ns'.format(duration))
 
             # need to turn on MW again
             if self.mw_on_off:
