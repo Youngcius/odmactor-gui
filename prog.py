@@ -60,8 +60,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             ) for mode in schedulerModes
         }
 
-        for s in self.schedulers:
-            s.print_info()
         # self.schedulers = {
         #     'CW': scheduler.CWScheduler(),
         #     'Pulse': scheduler.PulseScheduler(),
@@ -376,7 +374,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_doubleSpinBoxMicrowavePiPulseDuration_valueChanged(self, duration):
         # self.piPulse['duration'] = self.ui.doubleSpinBoxMicrowavePiPulseDuration.value()
         self.piPulse['duration'] = duration * timeUnitDict[self.ui.comboBoxMicrowavePiPulseDurationUnit.currentText()]
-        print('pi duration', duration)
 
     @pyqtSlot(float)
     def on_doubleSpinBoxMicrowavePiPulseFrequency_valueChanged(self, freq):
@@ -434,10 +431,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Fetch sequences parameters to generate ASG sequences, load it into ASG and visualize
         """
-        # self.schedulers[self.schedulerMode].connect()
-        print('before load sequences:')
-        self.schedulers[self.schedulerMode].print_info()
-        # print('before load sequences:', self.schedulers[self.schedulerMode].tagger,self.schedulers[self.schedulerMode].asg)
+        self.schedulers[self.schedulerMode].connect()
         self.odmrSeqConfig = {
             'N': self.ui.spinBoxODMRPeriodNumber.value(),
             'withReference': self.ui.checkBoxODMRWithReference.isChecked(),
@@ -459,11 +453,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             apd_ttl=1 if self.ui.checkBoxASGAPDTTL.isChecked() else 0,
             tagger_ttl=1 if self.ui.checkBoxASGTaggerTTL.isChecked() else 0,
         )
-        print('load sequences:', self.schedulers[self.schedulerMode].tagger, self.schedulers[self.schedulerMode].asg)
 
         if self.schedulerMode == 'CW':
             period = max(self.odmrSeqConfig['laserInit'], self.odmrSeqConfig['microwaveTime'])
-            print('period', period)
             self.schedulers[self.schedulerMode].configure_odmr_seq(period=period, N=self.odmrSeqConfig['N'])
         else:
             self.schedulers[self.schedulerMode].configure_odmr_seq(
@@ -506,7 +498,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
         self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
-        print('start detecting:', self.schedulers[self.schedulerMode].tagger,self.schedulers[self.schedulerMode].asg)
         self.schedulers[self.schedulerMode].configure_tagger_counting(
             apd_channel=self.taggerChannels['apd'],
             asg_channel=self.taggerChannels['asg'],
