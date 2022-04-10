@@ -27,7 +27,9 @@ class Student:
         for _ in range(20):
             time.sleep(0.1)
             print(self.name)
-
+    @property
+    def ppp(self, a='asd'):
+        return a
 
 s = Student()
 t = threading.Thread(target=s.loop)
@@ -61,3 +63,5 @@ laser1 = getattr(instrument, 'Laser')
 print('1', laser1)
 laser2 = getattr(instrument, 'Laser')()
 print('2', laser2)
+
+print(s.ppp,s.ppp,s.ppp)

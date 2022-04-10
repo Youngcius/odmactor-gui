@@ -155,7 +155,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRFrequency = self.canvasODMRFrequency.figure.subplots()
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         self.axesODMRFrequency.set_ylabel('Count/Contrast', fontsize=13)
-        self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
+        self.timerODMRFrequency = QTimer()
+        self.timerODMRFrequency.timeout.connect(self.updateODMRFrequencyChart)
+        # self.timerODMRFrequency = self.canvasODMRFrequency.new_timer(100, [(self.updateODMRFrequencyChart, (), {})])
 
         ###################################
         # initialized time-domain ODMR chart
@@ -541,9 +543,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.progressBar.setValue(-1)
 
     @pyqtSlot()
-    def on_pushButtonODMRSaveData(self):
+    def on_pushButtonODMRSaveData_clicked(self):
         # TODO
-
+        print(self.timerODMRFrequency.isActive(),self.timerODMRFrequency.isActive(),self.timerODMRFrequency.isActive())
         # self.counter.getData()
         # pass
         self.labelInstrStatus.setText('Saved in {}'.format(self.schedulers[self.schedulerMode].output_dir))
@@ -734,6 +736,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
+        print(self.counter.getData()[0][-10:])
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
@@ -744,6 +747,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             length = len(sig)
             self.axesODMRFrequency.plot(freqs[:length], sig, 'o-')
             self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
+        # print(freqs[:length], sig)
+        self.axesODMRFrequency.figure.canvas.draw()
 
         # update progress bar
         cur_freq = self.schedulers[self.schedulerMode].cur_freq
@@ -752,6 +757,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         if not self.schedulers[self.schedulerMode].is_running:
             self.timerODMRFrequency.stop()
+            print('已经停止timer')
             self.progressBar.setValue(-1)
 
     def updateODMRTimeChart(self):

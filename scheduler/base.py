@@ -856,6 +856,7 @@ class TimeDomainScheduler(Scheduler):
         1) start device
         2) acquire data timely
         """
+        self.is_running = True
         print('Begin to run {}. Time intervals: {:.3f} - {:.3f} ns.'.format(self.name, self._times[0], self._times[-1]))
         print('N: {}, n_times: {}'.format(self._asg_conf['N'], len(self._times)))
         print('Estimated total running time: {:.2f} s'.format(self.time_total))
@@ -863,6 +864,7 @@ class TimeDomainScheduler(Scheduler):
         self._start_device()
         self._acquire_data()  # scanning time intervals in this loop
         self.stop()
+        self.is_running = False
 
     def gene_pseudo_detect_seq(self):
         """
