@@ -86,7 +86,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         self.laser = Laser()
         self.asg = ASG()
-        print(self.asg.connect(), 'asg 初始化了')
 
         if tt.scanTimeTagger():
             self.tagger = tt.createTimeTagger()
@@ -228,10 +227,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # progress bar
         self.progressBar = QtWidgets.QProgressBar(self)
         self.progressBar.setMinimumWidth(200)
-        # self.progressBar.setMinimum(5)
-        # self.progressBar.setValue(101)
-        print(self.progressBar.maximum(), self.progressBar.minimum(), self.progressBar.value())
-        # self.progressBar.setMaximum(50)
         self.progressBar.setFormat('%p%')  # %p%, %v
         self.ui.statusbar.addPermanentWidget(self.progressBar)
 
@@ -567,7 +562,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # for k, scheduler in self.schedulers.keys():
         #     if k != mode:
         #         scheduler.close() # TODO: 不用释放仪器，因为仪器变量是 shared
-        self.schedulers[mode].connect()
+        # self.schedulers[mode].connect()
 
     @pyqtSlot()
     def on_radioButtonODMRCW_clicked(self):
