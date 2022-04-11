@@ -18,6 +18,9 @@ class Ui_Form(object):
         self.toolButton = QtWidgets.QToolButton(Form)
         self.toolButton.setGeometry(QtCore.QRect(100, 80, 121, 31))
         self.toolButton.setObjectName("toolButton")
+        self.radioButton = QtWidgets.QRadioButton(Form)
+        self.radioButton.setGeometry(QtCore.QRect(110, 160, 100, 20))
+        self.radioButton.setObjectName("radioButton")
 
         self.retranslateUi(Form)
         self.toolButton.clicked.connect(Form.close)
@@ -27,3 +30,4 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "TITLE"))
         self.toolButton.setText(_translate("Form", "我和我的祖国"))
+        self.radioButton.setText(_translate("Form", "RadioButton"))

@@ -1,11 +1,9 @@
-import sys
 import os
 import json
 import time
 import datetime
-import asyncio
 import threading
-# import nidaqmx
+import nidaqmx
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as C
@@ -56,17 +54,23 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # initialize data variables
         self.schedulers = {
             mode: getattr(scheduler, mode + 'Scheduler')(
-                laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5
+                laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5, use_lockin=self.useLockin
             ) for mode in schedulerModes
         }
 
         # photon count config (tagger counter measurement class)
         self.updatePhotonCountConfig()
-        if self.tagger:
+        if self.tagger:  # initialize Counter on Tagger
             self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
             self.counter.stop()
         else:
             self.counter = None
+        if self.lockin:  # initialize DAQ task on Lockin
+            self.daqtask = nidaqmx.Task()
+            self.daqtask.ai_channels.add_ai_voltage_chan("Dev1/ai0")
+            self.daqcache = []
+        else:
+            self.daqtask = None
 
         # initial charts
         self.initCharts()
@@ -78,11 +82,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.laser = Laser()
         self.asg = ASG()
 
-        if tt.scanTimeTagger():
-            self.tagger = tt.createTimeTagger()
-        else:
-            self.tagger = None
-
         try:
             self.mw = Microwave()
             self.ui.doubleSpinBoxMicrowaveFrequency.setValue(self.mw.get_frequency() / C.giga)
@@ -90,11 +89,15 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         except:
             self.mw = None
 
-        # try:
-        #     self.lockin = LockInAmplifier()
-        # except:
-        #     self.lockin = None
-        self.lockin = None
+        if tt.scanTimeTagger():
+            self.tagger = tt.createTimeTagger()
+        else:
+            self.tagger = None
+
+        try:
+            self.lockin = LockInAmplifier()
+        except:
+            self.lockin = None
 
     def releaseInstruments(self):
         """
@@ -210,6 +213,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'binwidth': int(unit * self.ui.spinBoxBinwidth.value() / C.pico),  # unit: ps
             'n_values': self.ui.spinBoxCountNumber.value()
         }
+        self.daqcache = [0] * self.photonCountConfig['n_values']
 
     def buildUI(self):
         # status bar
@@ -235,7 +239,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.ui.groupBoxODMRFrequency.setChecked(True)
         self.ui.radioButtonODMRCW.setChecked(True)
         self.schedulerMode = 'CW'
-
+        self.ui.radioButtonUseLockin.setChecked(True)
+        self.useLockin = True
 
     def checkInstruments(self):
         """
@@ -284,13 +289,15 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     # Generic instruments configuration
     ################
     # Laser
-    @pyqtSlot()
-    def on_radioButtonLaserCW_clicked(self):
-        self.laserMode = 'CW'
+    @pyqtSlot(bool)
+    def on_radioButtonLaserCW_clicked(self, checked):
+        if checked:
+            self.laserMode = 'CW'
 
-    @pyqtSlot()
-    def on_radioButtonLaserPulse_clicked(self):
-        self.laserMode = 'Pulse'
+    @pyqtSlot(bool)
+    def on_radioButtonLaserPulse_clicked(self, checked):
+        if checked:
+            self.laserMode = 'Pulse'
 
     @pyqtSlot(bool)
     def on_pushButtonLaserOnOff_clicked(self, checked):
@@ -422,6 +429,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.ui.groupBoxODMRFrequency.setChecked(False)
 
     # Operation
+    @pyqtSlot(bool)
+    def on_radioButtonUseLockin_clicked(self, checked):
+        self.useLockin = checked
+
     @pyqtSlot()
     def on_pushButtonODMRLoadSequences_clicked(self):
         """
@@ -449,6 +460,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             apd_ttl=1 if self.ui.checkBoxASGAPDTTL.isChecked() else 0,
             tagger_ttl=1 if self.ui.checkBoxASGTaggerTTL.isChecked() else 0,
         )
+        self.schedulers[self.schedulerMode].use_lockin = self.useLockin
 
         if self.schedulerMode == 'CW':
             period = max(self.odmrSeqConfig['laserInit'], self.odmrSeqConfig['microwaveTime'])
@@ -555,45 +567,50 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         #         scheduler.close() # TODO: 不用释放仪器，因为仪器变量是 shared
         # self.schedulers[mode].connect()
 
-    @pyqtSlot()
-    def on_radioButtonODMRCW_clicked(self):
-        try:
-            self.connectScheduler('CW')
-            self.labelInstrStatus.setText('CW Scheduler: ready')
-        except:
-            self.labelInstrStatus.setText(color_str('CW Scheduler: not ready'))
+    @pyqtSlot(bool)
+    def on_radioButtonODMRCW_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('CW')
+                self.labelInstrStatus.setText('CW Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('CW Scheduler: not ready'))
 
-    @pyqtSlot()
-    def on_radioButtonODMRPulse_clicked(self):
-        try:
-            self.connectScheduler('Pulse')
-            self.labelInstrStatus.setText('Pulse Scheduler: ready')
-        except:
-            self.labelInstrStatus.setText(color_str('Pulse Scheduler: not ready'))
+    @pyqtSlot(bool)
+    def on_radioButtonODMRPulse_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('Pulse')
+                self.labelInstrStatus.setText('Pulse Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('Pulse Scheduler: not ready'))
 
-    @pyqtSlot()
-    def on_radioButtonODMRRamsey_clicked(self):
-        try:
-            self.connectScheduler('Ramsey')
-            self.labelInstrStatus.setText('Ramsey Scheduler: ready')
-        except:
-            self.labelInstrStatus.setText(color_str('Ramsey Scheduler: not ready'))
+    @pyqtSlot(bool)
+    def on_radioButtonODMRRamsey_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('Ramsey')
+                self.labelInstrStatus.setText('Ramsey Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('Ramsey Scheduler: not ready'))
 
-    @pyqtSlot()
-    def on_radioButtonODMRRabi_clicked(self):
-        try:
-            self.connectScheduler('Rabi')
-            self.labelInstrStatus.setText('Rabi Scheduler: ready')
-        except:
-            self.labelInstrStatus.setText(color_str('Rabi Scheduler: not ready'))
+    @pyqtSlot(bool)
+    def on_radioButtonODMRRabi_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('Rabi')
+                self.labelInstrStatus.setText('Rabi Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('Rabi Scheduler: not ready'))
 
-    @pyqtSlot()
-    def on_radioButtonODMRRelaxation_clicked(self):
-        try:
-            self.connectScheduler('Relaxation')
-            self.labelInstrStatus.setText('Relaxation Scheduler: ready')
-        except:
-            self.labelInstrStatus.setText(color_str('Relaxation Scheduler: not ready'))
+    @pyqtSlot(bool)
+    def on_radioButtonODMRRelaxation_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('Relaxation')
+                self.labelInstrStatus.setText('Relaxation Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('Relaxation Scheduler: not ready'))
 
     ###########################################
     # Photon count configuration
@@ -601,19 +618,29 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot(bool)
     def on_pushButtonPhotonCountOnOff_clicked(self, checked):
         """
+        Start to count using Time Tagger of Lockin Amplifier
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
         # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         if checked:
             self.updatePhotonCountConfig()
-            try:
-                self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
-            except:
-                self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
-            self.counter.start()
+            if self.useLockin:  # using Lockin Amplifier
+                pass
+            else:  # using Time Tagger
+                try:
+                    self.counter = tt.Counter(self.tagger, **self.photonCountConfig)
+                    self.counter.start()
+                except:
+                    self.labelInstrStatus.setText(color_str('No Time Tagger to detect photons'))
             self.timerPhotonCount.start()
         else:
-            self.counter.stop()
+            if self.useLockin:  # using Lockin Amplifier
+                pass
+            else:  # using Time Tagger
+                try:
+                    self.counter.stop()
+                except:
+                    pass
             self.timerPhotonCount.stop()
 
     @pyqtSlot()
@@ -640,14 +667,24 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
         timestamp = datetime.datetime.now()
-        counts = self.counter.getData().ravel()
-        data = {
-            'channel': self.photonCountConfig['channels'][0],
-            'time': (self.counter.getIndex() * C.pico).tolist(),
-            'count': counts.tolist(),
-            'count rate (1/s)': (counts / self.photonCountConfig['binwidth'] / C.pico).tolist(),
-            'timestamp': str(timestamp),
-        }
+        if self.useLockin:
+            data = {
+                'channel': self.photonCountConfig['channels'][0],
+                'time': (np.arange(0, self.photonCountConfig['n_values']) * 0.1).tolist(),
+                'magnitude': self.daqcache,
+                'timestamp': str(timestamp),
+                'device': 'Lockin Amplifier'
+            }
+        else:
+            counts = self.counter.getData().ravel()
+            data = {
+                'channel': self.photonCountConfig['channels'][0],
+                'time': (self.counter.getIndex() * C.pico).tolist(),
+                'count': counts.tolist(),
+                'count rate (1/s)': (counts / self.photonCountConfig['binwidth'] / C.pico).tolist(),
+                'timestamp': str(timestamp),
+                'device': 'Time Tagger'
+            }
         fname = 'odmactor-counts_' + timestamp.strftime('%Y-%m-%d_%H-%M-%S') + '.json'
         fname = os.path.join(os.path.expanduser('~'), 'Downloads', fname)  # 暂时只考虑 windows 的文件路径
         with open(fname, 'w') as f:
@@ -704,13 +741,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def updatePhotonCountChart(self):
         self.axesPhotonCount.clear()
         self.axesPhotonCount.set_xlabel('Time (s)', fontsize=13)
-        counts = self.counter.getData().ravel()
-        times = self.counter.getIndex() * C.pico
-        if self.ui.radioButtonPhotonCountRate.isChecked():
-            counts = counts / self.photonCountConfig['binwidth'] / C.pico
-            self.axesPhotonCount.set_ylabel('Count rate', fontsize=13)
+        if self.useLockin:
+            self.daqcache.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
+            self.daqcache.pop(0)
+            counts = self.daqcache
+            times = np.arange(0, self.photonCountConfig['n_values']) * 0.1
+            self.axesPhotonCount.set_ylabel('Magnitude', fontsize=13)
         else:
-            self.axesPhotonCount.set_ylabel('Count number', fontsize=13)
+            counts = self.counter.getData().ravel()
+            times = self.counter.getIndex() * C.pico
+            if self.ui.radioButtonPhotonCountRate.isChecked():
+                counts = counts / self.photonCountConfig['binwidth'] / C.pico
+                self.axesPhotonCount.set_ylabel('Count rate', fontsize=13)
+            else:
+                self.axesPhotonCount.set_ylabel('Count number', fontsize=13)
         self.axesPhotonCount.plot(times, counts)
         self.axesPhotonCount.figure.canvas.draw()
 

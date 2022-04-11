@@ -9,6 +9,15 @@ class MyWidget(QtWidgets.QWidget):
         super(MyWidget, self).__init__()
         self.ui = ui01.Ui_Form()
         self.ui.setupUi(self)
+        # self.radio = QtWidgets.QRadioButton(self)
+        # QtCore.QMetaObject.connectSlotsByName(self)
+        # self.radio.setText('====')
+        # self.ui.radio
+
+    @QtCore.pyqtSlot(bool)
+    def on_radioButton_clicked(self, checked):
+        # print('clicked:', self.radio.isChecked())
+        pass
 
     @QtCore.pyqtSlot()
     def on_toolButton_clicked(self):

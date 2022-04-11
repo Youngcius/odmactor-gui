@@ -205,10 +205,9 @@ class Scheduler(abc.ABC):
 
     def configure_lockin_counting(self, channel: str = 'Dev1/ai0'):
         """
-
         :param channel: output channel from NIDAQ to PC
         """
-        self.lockin = LockInAmplifier(N=self._asg_conf['N'])
+        self.lockin = LockInAmplifier()
         self.daqtask = nidaqmx.Task()
         self.daqtask.ai_channels.add_ai_voltage_chan(channel)
 

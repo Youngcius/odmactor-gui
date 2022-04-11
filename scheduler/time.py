@@ -239,8 +239,8 @@ class RelaxationScheduler(TimeDomainScheduler):
 
         self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
 
-    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000, inter_readout=200,
-                           pre_read=50, inter_period=200, N: int = 10000):
+    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000,
+                           pre_read=50, inter_readout=200, inter_period=200, N: int = 10000):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -252,7 +252,7 @@ class RelaxationScheduler(TimeDomainScheduler):
                     |   | (<--------->)    ms = 1
             --------|   |--------------------------
             or
-                 (<----------------->)  ms = 0
+                  (<----------------->)  ms = 0
             ---------------------------------------
             asg tagger acquisition channel:
                                          ---  ---
@@ -346,8 +346,8 @@ class HahnEchoScheduler(TimeDomainScheduler):
 
         self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
 
-    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200, pre_read=50,
-                           inter_readout=200, inter_period=200, N: int = 100000):
+    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200,
+                           pre_read=50, inter_readout=200, inter_period=200, N: int = 100000):
         """
         Wave form for single period:
             laser (no asg control sequence):
