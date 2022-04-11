@@ -59,7 +59,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5
             ) for mode in schedulerModes
         }
-        self.schedulerMode = 'CW'
 
         # photon count config (tagger counter measurement class)
         self.updatePhotonCountConfig()
@@ -231,6 +230,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 item = QtWidgets.QTableWidgetItem(str(0))
                 item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 self.ui.tableWidgetSequence.setItem(i, j, item)
+
+        # other settings
+        self.ui.groupBoxODMRFrequency.setChecked(True)
+        self.ui.radioButtonODMRCW.setChecked(True)
+        self.schedulerMode = 'CW'
+
 
     def checkInstruments(self):
         """

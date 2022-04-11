@@ -164,15 +164,16 @@ class Scheduler(abc.ABC):
             self.tagger_ttl = tagger_ttl
 
     def download_asg_sequences(self, laser_seq: List[int] = None, mw_seq: List[int] = None,
-                               tagger_seq: List[int] = None, N: int = 100000):
+                               tagger_seq: List[int] = None, lockin_seq: List[int] = None, N: int = 100000):
         """
         Download control sequences into the memory of ASG
         :param laser_seq: laser control sequence
         :param mw_seq: MW control sequence
         :param tagger_seq: tagger readout control sequence
+        :param lockin_seq: lock-in amplifier control sequence
         :param N: repetition number of sequences periods for each detection point
         """
-        sequences = [laser_seq, mw_seq, tagger_seq]
+        sequences = [laser_seq, mw_seq, tagger_seq, lockin_seq]
         if not any(sequences):
             raise ValueError('laser_seq, mw_seq and tagger_seq cannot be all None')
         sequences = [seq for seq in sequences if seq is not None]  # non-None sequences
@@ -187,6 +188,7 @@ class Scheduler(abc.ABC):
         idx_laser_channel = self.channel['laser'] - 1
         idx_mw_channel = self.channel['mw'] - 1
         idx_tagger_channel = self.channel['tagger'] - 1
+        idx_lockin_channel = self.channel['lockin'] - 1
 
         self.reset_asg_sequence()
         if laser_seq is not None:
@@ -195,6 +197,8 @@ class Scheduler(abc.ABC):
             self._asg_sequences[idx_mw_channel] = mw_seq
         if tagger_seq is not None:
             self._asg_sequences[idx_tagger_channel] = tagger_seq
+        if lockin_seq is not None:
+            self._asg_sequences[idx_lockin_channel] = lockin_seq
 
         # connect & download pulse data
         self.asg.load_data(self._asg_sequences)
@@ -262,12 +266,14 @@ class Scheduler(abc.ABC):
 
     def _get_data(self):
         if self.use_lockin:
+            time.sleep(self.asg_dwell)
+            self._data.append(self.daqtask.read(number_of_samples_per_channel=100))
             # from lockin
-            tmp = []
-            for _ in range(self._asg_conf['N']):
-                time.sleep(self._asg_conf['t'])
-                tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
-            self._data.append(tmp)
+            # tmp = []
+            # for _ in range(self._asg_conf['N']):
+            #     time.sleep(self._asg_conf['t'])
+            #     tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
+            # self._data.append(tmp)
         else:
             # from tagger
             self.counter.clear()
@@ -277,12 +283,14 @@ class Scheduler(abc.ABC):
 
     def _get_data_ref(self):
         if self.use_lockin:
+            time.sleep(self.asg_dwell)
+            self._data_ref.append(self.daqtask.read(number_of_samples_per_channel=100))
             # from lockin
-            tmp = []
-            for _ in range(self._asg_conf['N']):
-                time.sleep(self._asg_conf['t'])
-                tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
-            self._data_ref.append(tmp)
+            # tmp = []
+            # for _ in range(self._asg_conf['N']):
+            #     time.sleep(self._asg_conf['t'])
+            #     tmp.append(np.mean(self.daqtask.read(number_of_samples_per_channel=100)))
+            # self._data_ref.append(tmp)
         else:
             # from tagger
             self.counter.clear()
@@ -519,7 +527,7 @@ class Scheduler(abc.ABC):
         with open(fname + '.json', 'w') as f:
             json.dump(self._result_detail, f)
         print('Detailed data result has been saved into {}'.format(fname + '.json'))
-        self.output_fname = fname  + '.json'
+        self.output_fname = fname + '.json'
 
     def __str__(self):
         return self.name
