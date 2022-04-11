@@ -14,6 +14,7 @@ import threading
 import numpy as np
 import scipy.constants as C
 import TimeTagger as tt
+from tqdm import tqdm
 from instrument import ASG, Microwave, LockInAmplifier, Laser
 from utils import dBm_to_mW, mW_to_dBm
 from typing import List, Any, Optional, Union
@@ -672,7 +673,7 @@ class FrequencyDomainScheduler(Scheduler):
         # ===================================================================
 
         mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
-        for i, freq in enumerate(self._freqs):
+        for freq in tqdm(self._freqs):
             self._cur_freq = freq
             self.mw.set_frequency(freq)
 
@@ -809,7 +810,7 @@ class TimeDomainScheduler(Scheduler):
                 time.sleep(self.time_pad + self.asg_dwell)
 
         # =======================================================
-        for i, duration in enumerate(self._times):
+        for duration in tqdm(self._times):
             self._cur_time = duration
             self.gene_detect_seq(duration)
             self.asg.start()
