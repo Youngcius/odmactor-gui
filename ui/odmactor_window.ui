@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1512</width>
-    <height>854</height>
+    <height>851</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -788,7 +788,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>521</width>
+          <width>532</width>
           <height>962</height>
          </rect>
         </property>
@@ -802,6 +802,16 @@
             <string>Operation</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QRadioButton" name="radioButtonUseLockin">
+              <property name="text">
+               <string>Use Lockin</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QPushButton" name="pushButtonODMRLoadSequences">
               <property name="text">
@@ -1298,8 +1308,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>521</width>
-          <height>670</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="label">
