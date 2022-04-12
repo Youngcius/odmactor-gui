@@ -88,8 +88,9 @@ class Scheduler(abc.ABC):
         kwargs.setdefault('epoch_omit', 0)
         self.epoch_omit = kwargs['epoch_omit']
 
+        # synchronization frequency between MW and Lockin, unit: Hz
         kwargs.setdefault('sync_freq', 50)
-        self.sync_freq = kwargs['sync_freq']  # synchronization frequency between MW and Lockin, unit: Hz
+        self.sync_freq = kwargs['sync_freq']
 
         # on/off MW when on/off ASG's MW channel
         kwargs.setdefault('mw_on_off', False)
@@ -533,12 +534,10 @@ class Scheduler(abc.ABC):
         if not self._result or not self._result_detail:
             raise ValueError('empty result cannot be saved')
         if fname is None:
-            fname = os.path.join(self.output_dir,
-                                 '{}-result-{}-{}'.format(self.name, str(datetime.date.today()), uuid.uuid1()))
+            fname = self._gene_data_result_fname()
         with open(fname + '.json', 'w') as f:
             json.dump(self._result_detail, f)
         print('Detailed data result has been saved into {}'.format(fname + '.json'))
-        self.output_fname = fname + '.json'
 
     def __str__(self):
         return self.name
@@ -734,7 +733,7 @@ class FrequencyDomainScheduler(Scheduler):
         self._cal_counts_result()
 
         # 3. save result
-        self.save_result(self._gene_data_result_fname())
+        self.save_result()
 
     def run_scanning(self, mw_control: str = 'on'):
         """
@@ -868,7 +867,7 @@ class TimeDomainScheduler(Scheduler):
         self._cal_counts_result()
 
         # 3. save result
-        self.save_result(self._gene_data_result_fname())
+        self.save_result()
 
     def run_scanning(self):
         """
