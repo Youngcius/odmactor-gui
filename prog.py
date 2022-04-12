@@ -805,7 +805,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # update progress bar
         cur_freq = self.schedulers[self.schedulerMode].cur_freq
-        self.progressBar.setValue(freqs.index(cur_freq) + 1)
+        if cur_freq in freqs:
+            self.progressBar.setValue(freqs.index(cur_freq) + 1)
 
         if not self.schedulers[self.schedulerMode].is_running:
             self.labelInstrStatus.setText(f'{self.schedulerMode} Scheduler: done. '
@@ -837,7 +838,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # update progress bar
         cur_time = self.schedulers[self.schedulerMode].cur_time
-        self.progressBar.setValue(times.index(cur_time) + 1)
+        if cur_time in times:
+            self.progressBar.setValue(times.index(cur_time) + 1)
 
         if not self.schedulers[self.schedulerMode].is_running:
             self.labelInstrStatus.setText(f'{self.schedulerMode} Scheduler: done. '
