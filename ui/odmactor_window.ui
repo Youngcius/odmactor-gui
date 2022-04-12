@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1551</width>
-    <height>1057</height>
+    <width>1512</width>
+    <height>851</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>432</width>
-          <height>782</height>
+          <width>533</width>
+          <height>874</height>
          </rect>
         </property>
         <attribute name="label">
@@ -108,6 +108,9 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePower">
+                <property name="suffix">
+                 <string/>
+                </property>
                 <property name="minimum">
                  <double>-50.000000000000000</double>
                 </property>
@@ -942,8 +945,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>515</width>
-          <height>894</height>
+          <width>533</width>
+          <height>996</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1074,7 +1077,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxODMRFrequencyStart"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxODMRFrequencyStart">
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -1088,7 +1095,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxODMRFrequencyEnd"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxODMRFrequencyEnd">
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -1102,7 +1113,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxODMRFrequencyStep"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxODMRFrequencyStep">
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -1302,13 +1317,13 @@
             <item row="1" column="1">
              <widget class="QSpinBox" name="spinBoxODMRPeriodNumber">
               <property name="minimum">
-               <number>1000</number>
+               <number>100</number>
               </property>
               <property name="maximum">
                <number>10000000</number>
               </property>
               <property name="singleStep">
-               <number>1000</number>
+               <number>100</number>
               </property>
              </widget>
             </item>
@@ -1481,8 +1496,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>533</width>
+          <height>667</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2077,8 +2092,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1551</width>
-     <height>26</height>
+     <width>1512</width>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">

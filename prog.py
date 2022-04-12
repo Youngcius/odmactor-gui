@@ -7,7 +7,7 @@ import nidaqmx
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as C
-import TimeTagger as tt
+import TimeTaggerRPC as tt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5 import QtWidgets, QtCore, QtGui, QtChart
@@ -537,7 +537,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
-        self.timerODMRFrequency.start(100)
+        self.timerODMRFrequency.start()
 
     def startTimeDomainDetecting(self):
         """
@@ -560,9 +560,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
         self.timerODMRTime.start()
-        t.join()
-        self.timerODMRTime.stop()
-        self.progressBar.setValue(-1)
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
@@ -756,6 +753,15 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.layoutSequenceVisualization.setSpacing(0)
 
     def updatePhotonCountChart(self):
+        """
+        Update the real-time photon couting chart
+        ---
+        1. with Time Tagger
+            read `n_values` counts to update the last `n_values` counts, there might be data overlapping
+        2. with Lockin Amplifier:
+            read new data with fixed length and average aggregation to obtain a single value,
+            then add it into the cache queue for every fixed time interval, 0.1 second in default
+        """
         self.axesPhotonCount.clear()
         self.axesPhotonCount.set_xlabel('Time (s)', fontsize=13)
         if self.useLockin:
@@ -778,6 +784,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def updateODMRFrequencyChart(self):
         """
         Update frequency-domain ODMR results periodically
+        ---
+        1. with Time Tagger
+            read one value in each ASG operation period, totally N values
+        2. with Lockin Amplifier
+            read M values after the last ASG operation period, M is not necessarily equal to N
         """
         # update series
         self.axesODMRFrequency.clear()
@@ -905,7 +916,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 self.ui.tableWidgetSequence.setItem(i, j, item)
 
-    @pyqtSlot(float)
+    @pyqtSlot(int)
     def on_spinBoxODMRSyncFrequency_valueChanged(self, freq):
         self.schedulers[self.schedulerMode].sync_freq = freq
 

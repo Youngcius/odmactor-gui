@@ -209,7 +209,7 @@ class Scheduler(abc.ABC):
         # connect & download pulse data
         self.asg.load_data(self._asg_sequences)
 
-    def configure_lockin_counting(self, channel: str = 'Dev1/ai0', freq: float = None):
+    def configure_lockin_counting(self, channel: str = 'Dev1/ai0', freq: int = None):
         """
         需要在 config_odmr_seq 之前调用
         :param channel: output channel from NIDAQ to PC
@@ -275,6 +275,7 @@ class Scheduler(abc.ABC):
 
     def _get_data(self):
         if self.use_lockin:
+            time.sleep(self.time_pad)
             time.sleep(self.asg_dwell)
             self._data.append(self.daqtask.read(number_of_samples_per_channel=100))
             # from lockin
@@ -292,6 +293,7 @@ class Scheduler(abc.ABC):
 
     def _get_data_ref(self):
         if self.use_lockin:
+            time.sleep(self.time_pad)
             time.sleep(self.asg_dwell)
             self._data_ref.append(self.daqtask.read(number_of_samples_per_channel=100))
             # from lockin

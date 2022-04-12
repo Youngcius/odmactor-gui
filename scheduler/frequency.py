@@ -46,7 +46,7 @@ class CWScheduler(FrequencyDomainScheduler):
         :param N: n_values for TimeTagger.Counter
         """
         if self.use_lockin:  # use parameter self.sync_freq
-            half_period = int(1 / self.sync_freq / 2)
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
             sync_seq = [half_period, half_period]
             cont_seq = [half_period * 2, 0]
             self.download_asg_sequences(
@@ -151,7 +151,7 @@ class PulseScheduler(FrequencyDomainScheduler):
             # apd_seq = [sum(tagger_seq[:2]), sum(tagger_seq[-2:])]
 
         if self.use_lockin:
-            half_period = int(1 / self.sync_freq / 2)
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
             sync_seq = [half_period, half_period]
             t1, t2 = sum(laser_seq), half_period * 2
             t = math.lcm(t1, t2)
