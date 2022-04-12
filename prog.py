@@ -197,7 +197,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'laser': int(self.ui.comboBoxASGLaser.currentText()),
             'mw': int(self.ui.comboBoxASGMicrowave.currentText()),
             'apd': int(self.ui.comboBoxTaggerAPD.currentText()),
-            'tagger': int(self.ui.comboBoxASGTagger.currentText())
+            'tagger': int(self.ui.comboBoxASGTagger.currentText()),
+            'mw_sync': int(self.ui.comboBoxASGMicrowaveSync.currentText()),
+            'lockin_sync': int(self.ui.comboBoxASGLockinSync.currentText())
         }
 
     def updateTaggerChannels(self):
@@ -240,6 +242,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.ui.radioButtonODMRCW.setChecked(True)
         self.schedulerMode = 'CW'
         self.ui.radioButtonUseLockin.setChecked(True)
+        self.ui.radioButtonUseTagger.setChecked(False)
         self.useLockin = True
 
     def checkInstruments(self):
@@ -405,6 +408,14 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_comboBoxASGTagger_valueChanged(self):
         self.asgChannels['tagger'] = int(self.ui.comboBoxASGTagger.currentText())
 
+    @pyqtSlot()
+    def on_comboBoxASGMicrowaveSync_valueChanged(self):
+        self.asgChannels['mw_sync'] = int(self.ui.comboBoxASGMicrowaveSync.currentText())
+
+    @pyqtSlot()
+    def on_comboBoxASGLockinSync_valueChanged(self):
+        self.asgChannels['lockin_sync'] = int(self.ui.comboBoxASGLockinSync.currentText())
+
     # Tagger channels
     @pyqtSlot()
     def on_comboBoxTaggerAPD_valueChanged(self):
@@ -432,6 +443,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot(bool)
     def on_radioButtonUseLockin_clicked(self, checked):
         self.useLockin = checked
+
+    @pyqtSlot(bool)
+    def on_radioButtonUseTagger_clicked(self, checked):
+        self.useLockin = not checked
 
     @pyqtSlot()
     def on_pushButtonODMRLoadSequences_clicked(self):
@@ -504,11 +519,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
         self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
-        self.schedulers[self.schedulerMode].configure_tagger_counting(
-            apd_channel=self.taggerChannels['apd'],
-            asg_channel=self.taggerChannels['asg'],
-            reader='counter' if self.schedulerMode == 'CW' else 'cbm'
-        )
+        if self.useLockin:
+            self.schedulers[self.schedulerMode].configure_lockin_counting(
+                freq=self.ui.spinBoxODMRSyncFrequency.value()
+            )
+        else:
+            self.schedulers[self.schedulerMode].configure_tagger_counting(
+                apd_channel=self.taggerChannels['apd'],
+                asg_channel=self.taggerChannels['asg'],
+                reader='counter' if self.schedulerMode == 'CW' else 'cbm'
+            )
 
         # conduct ODMR scheduling and update real-time chart
         # self.releaseInstruments()
@@ -518,9 +538,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
         self.timerODMRFrequency.start(100)
-        # t.join()
-        # self.timerODMRFrequency.stop()
-        # self.progressBar.setValue(-1)
 
     def startTimeDomainDetecting(self):
         """
@@ -887,6 +904,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 item = QtWidgets.QTableWidgetItem(str(0))
                 item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 self.ui.tableWidgetSequence.setItem(i, j, item)
+
+    @pyqtSlot(float)
+    def on_spinBoxODMRSyncFrequency_valueChanged(self, freq):
+        self.schedulers[self.schedulerMode].sync_freq = freq
 
     ###########################################
     # Frequency-domain measurement panel (CW, Pulse)

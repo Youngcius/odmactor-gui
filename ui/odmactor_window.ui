@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1512</width>
-    <height>851</height>
+    <width>1551</width>
+    <height>1057</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>521</width>
-          <height>814</height>
+          <width>432</width>
+          <height>782</height>
          </rect>
         </property>
         <attribute name="label">
@@ -324,7 +324,7 @@
          <item row="1" column="0">
           <widget class="QGroupBox" name="groupBoxLaserControl">
            <property name="title">
-            <string>Laser control</string>
+            <string>Laser Control</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
@@ -412,6 +412,13 @@
               </property>
              </widget>
             </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelSplit">
+              <property name="text">
+               <string>Microwave</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="1">
              <widget class="QComboBox" name="comboBoxASGLaser">
               <item>
@@ -456,21 +463,105 @@
               </item>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QCheckBox" name="checkBoxASGLaserTTL">
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>High-level TTL </string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
+               <string>Tagger Trigger</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="labelSplit">
-              <property name="text">
-               <string>Microwave</string>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="comboBoxASGTagger">
+              <property name="currentIndex">
+               <number>4</number>
               </property>
+              <item>
+               <property name="text">
+                <string>1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>7</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>8</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="comboBoxASGAPD">
+              <property name="currentIndex">
+               <number>2</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>7</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>8</string>
+               </property>
+              </item>
              </widget>
             </item>
             <item row="1" column="1">
@@ -523,6 +614,33 @@
               </item>
              </widget>
             </item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="checkBoxASGLaserTTL">
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Photon Detector</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2">
+             <widget class="QCheckBox" name="checkBoxASGTaggerTTL">
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="2">
              <widget class="QCheckBox" name="checkBoxASGMicrowaveTTL">
               <property name="text">
@@ -533,61 +651,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_11">
-              <property name="text">
-               <string>Photon detector</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QComboBox" name="comboBoxASGAPD">
-              <property name="currentIndex">
-               <number>2</number>
-              </property>
-              <item>
-               <property name="text">
-                <string>1</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>2</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>3</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>4</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>5</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>6</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>7</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>8</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="2" column="2">
+            <item row="3" column="2">
              <widget class="QCheckBox" name="checkBoxASGAPDTTL">
               <property name="text">
                <string>High-level TTL </string>
@@ -597,17 +661,50 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_12">
+            <item row="2" column="0">
+             <widget class="QLabel" name="label">
               <property name="text">
-               <string>Tagger trigger</string>
+               <string>Microwave Sync</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QComboBox" name="comboBoxASGTagger">
+            <item row="2" column="2">
+             <widget class="QCheckBox" name="checkBoxASGMicrowaveSync">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Lockin Sync</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="2">
+             <widget class="QCheckBox" name="checkBoxASGLockinSyncTTL">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>High-level TTL </string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QComboBox" name="comboBoxASGLockinSync">
               <property name="currentIndex">
-               <number>4</number>
+               <number>7</number>
               </property>
               <item>
                <property name="text">
@@ -651,14 +748,54 @@
               </item>
              </widget>
             </item>
-            <item row="3" column="2">
-             <widget class="QCheckBox" name="checkBoxASGTaggerTTL">
-              <property name="text">
-               <string>High-level TTL </string>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="comboBoxASGMicrowaveSync">
+              <property name="currentText">
+               <string>4</string>
               </property>
-              <property name="checked">
-               <bool>true</bool>
+              <property name="currentIndex">
+               <number>3</number>
               </property>
+              <item>
+               <property name="text">
+                <string>1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>7</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>8</string>
+               </property>
+              </item>
              </widget>
             </item>
            </layout>
@@ -667,13 +804,13 @@
          <item row="3" column="0">
           <widget class="QGroupBox" name="groupBoxTaggerChannels">
            <property name="title">
-            <string>Tagger Input Channels</string>
+            <string>Tagger/Lockin Configuration</string>
            </property>
-           <layout class="QFormLayout" name="formLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_14">
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="2">
+             <widget class="QRadioButton" name="radioButtonUseTagger">
               <property name="text">
-               <string>Photon detector</string>
+               <string>Use Tagger</string>
               </property>
              </widget>
             </item>
@@ -724,7 +861,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_15">
               <property name="text">
-               <string>ASG trigger</string>
+               <string>Trigger to Tagger</string>
               </property>
              </widget>
             </item>
@@ -778,6 +915,23 @@
               </item>
              </widget>
             </item>
+            <item row="1" column="2">
+             <widget class="QRadioButton" name="radioButtonUseLockin">
+              <property name="text">
+               <string>Use Lockin</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>APD to Tagger</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -788,8 +942,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>532</width>
-          <height>962</height>
+          <width>515</width>
+          <height>894</height>
          </rect>
         </property>
         <attribute name="label">
@@ -802,16 +956,6 @@
             <string>Operation</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
-            <item>
-             <widget class="QRadioButton" name="radioButtonUseLockin">
-              <property name="text">
-               <string>Use Lockin</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
             <item>
              <widget class="QPushButton" name="pushButtonODMRLoadSequences">
               <property name="text">
@@ -1129,16 +1273,6 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_11">
             <item row="10" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRPreReadoutInterval">
-              <property name="maximum">
-               <number>100000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
              <widget class="QSpinBox" name="spinBoxODMRMicrowaveReadoutInterval">
               <property name="maximum">
                <number>100000</number>
@@ -1148,29 +1282,8 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="checkBoxODMRWithReference">
-              <property name="text">
-               <string>With Reference Signal</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Microwave operation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>Laser/Microwave interval</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRMicrowaveTime">
+            <item row="11" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRPreReadoutInterval">
               <property name="maximum">
                <number>100000</number>
               </property>
@@ -1179,88 +1292,10 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRLaserTime">
-              <property name="maximum">
-               <number>100000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="0">
+            <item row="11" column="0">
              <widget class="QLabel" name="label_23">
               <property name="text">
                <string>Pre-readout interval</string>
-              </property>
-             </widget>
-            </item>
-            <item row="13" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRSignalReadoutTime">
-              <property name="maximum">
-               <number>100000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
-            <item row="13" column="0">
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>Signal readout</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRLaserMicrowaveInterval">
-              <property name="maximum">
-               <number>100000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
-            <item row="14" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRSignalReferenceInterval">
-              <property name="maximum">
-               <number>100000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Laser initialization</string>
-              </property>
-             </widget>
-            </item>
-            <item row="16" column="0">
-             <widget class="QLabel" name="label_20">
-              <property name="text">
-               <string>Period interval</string>
-              </property>
-             </widget>
-            </item>
-            <item row="14" column="0">
-             <widget class="QLabel" name="label_21">
-              <property name="text">
-               <string>Sig/Ref readout interval</string>
-              </property>
-             </widget>
-            </item>
-            <item row="16" column="1">
-             <widget class="QSpinBox" name="spinBoxODMRPeriodInterval">
-              <property name="maximum">
-               <number>100000</number>
-              </property>
-              <property name="singleStep">
-               <number>10</number>
               </property>
              </widget>
             </item>
@@ -1277,10 +1312,61 @@
               </property>
              </widget>
             </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="label_24">
+            <item row="14" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRSignalReadoutTime">
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRMicrowaveTime">
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="checkBoxODMRMicrowaveOnOff">
               <property name="text">
-               <string>Microwave/Readout interval</string>
+               <string>With Microwave On/Off</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Laser initialization</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="0">
+             <widget class="QLabel" name="label_22">
+              <property name="text">
+               <string>Signal readout</string>
+              </property>
+             </widget>
+            </item>
+            <item row="17" column="0">
+             <widget class="QLabel" name="label_20">
+              <property name="text">
+               <string>Period interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="17" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRPeriodInterval">
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
               </property>
              </widget>
             </item>
@@ -1291,10 +1377,97 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="checkBoxODMRMicrowaveOnOff">
+            <item row="9" column="0">
+             <widget class="QLabel" name="label_6">
               <property name="text">
-               <string>With Microwave On/Off</string>
+               <string>Microwave operation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Laser/Microwave interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="label_24">
+              <property name="text">
+               <string>Microwave/Readout interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="checkBoxODMRWithReference">
+              <property name="text">
+               <string>With Reference Signal</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRLaserTime">
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRLaserMicrowaveInterval">
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="0">
+             <widget class="QLabel" name="label_21">
+              <property name="text">
+               <string>Sig/Ref readout interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRSignalReferenceInterval">
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Lockin sync frequency</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="spinBoxODMRSyncFrequency">
+              <property name="suffix">
+               <string>Hz</string>
+              </property>
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="minimum">
+               <number>10</number>
+              </property>
+              <property name="maximum">
+               <number>1000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="value">
+               <number>50</number>
               </property>
              </widget>
             </item>
@@ -1904,8 +2077,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1512</width>
-     <height>37</height>
+     <width>1551</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">

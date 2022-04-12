@@ -53,8 +53,9 @@ class Scheduler(abc.ABC):
 
         self.mw_exec_mode = ''
         self.mw_exec_modes_optional = {'scan-center-span', 'scan-start-stop'}
-        self.channel = {'laser': 1, 'mw': 2, 'apd': 3, 'tagger': 5}
+        self.channel = {'laser': 1, 'mw': 2, 'apd': 3, 'tagger': 5, 'mw_sync': 4, 'lockin_sync': 8}
         self.tagger_input = {'apd': 1, 'asg': 2}
+        self.daqtask: nidaqmx.Task = None
         self.counter: tt.IteratorBase = None
 
         # properties or method for debugging
@@ -86,6 +87,9 @@ class Scheduler(abc.ABC):
 
         kwargs.setdefault('epoch_omit', 0)
         self.epoch_omit = kwargs['epoch_omit']
+
+        kwargs.setdefault('sync_freq', 50)
+        self.sync_freq = kwargs['sync_freq']  # synchronization frequency between MW and Lockin, unit: Hz
 
         # on/off MW when on/off ASG's MW channel
         kwargs.setdefault('mw_on_off', False)
@@ -129,8 +133,7 @@ class Scheduler(abc.ABC):
 
     def print_info(self):
         print(self.name)
-        print('laser: {}, asg: {}, mw: {}, tagger: {}, lockin: {}'.format(self.laser, self.asg, self.mw, self.tagger,
-                                                                          self.lockin))
+        print(f'laser: {self.laser}, asg: {self.asg}, mw: {self.mw}, tagger: {self.tagger}, lockin: {self.lockin}')
         print()
 
     # TODO: connect和 odmactor中的reconnect需要整合
@@ -165,16 +168,16 @@ class Scheduler(abc.ABC):
             self.tagger_ttl = tagger_ttl
 
     def download_asg_sequences(self, laser_seq: List[int] = None, mw_seq: List[int] = None,
-                               tagger_seq: List[int] = None, lockin_seq: List[int] = None, N: int = 100000):
+                               tagger_seq: List[int] = None, sync_seq: List[int] = None, N: int = 100000):
         """
         Download control sequences into the memory of ASG
         :param laser_seq: laser control sequence
         :param mw_seq: MW control sequence
         :param tagger_seq: tagger readout control sequence
-        :param lockin_seq: lock-in amplifier control sequence
+        :param sync_seq: synchronization sequence between Lock-in amplifier and MW
         :param N: repetition number of sequences periods for each detection point
         """
-        sequences = [laser_seq, mw_seq, tagger_seq, lockin_seq]
+        sequences = [laser_seq, mw_seq, tagger_seq, sync_seq]
         if not any(sequences):
             raise ValueError('laser_seq, mw_seq and tagger_seq cannot be all None')
         sequences = [seq for seq in sequences if seq is not None]  # non-None sequences
@@ -189,7 +192,8 @@ class Scheduler(abc.ABC):
         idx_laser_channel = self.channel['laser'] - 1
         idx_mw_channel = self.channel['mw'] - 1
         idx_tagger_channel = self.channel['tagger'] - 1
-        idx_lockin_channel = self.channel['lockin'] - 1
+        idx_mw_sync_channel = self.channel['mw_sync'] - 1
+        idx_lockin_sync_channel = self.channel['lockin_sync'] - 1
 
         self.reset_asg_sequence()
         if laser_seq is not None:
@@ -198,22 +202,27 @@ class Scheduler(abc.ABC):
             self._asg_sequences[idx_mw_channel] = mw_seq
         if tagger_seq is not None:
             self._asg_sequences[idx_tagger_channel] = tagger_seq
-        if lockin_seq is not None:
-            self._asg_sequences[idx_lockin_channel] = lockin_seq
+        if sync_seq is not None:
+            self._asg_sequences[idx_mw_sync_channel] = sync_seq
+            self._asg_sequences[idx_lockin_sync_channel] = sync_seq
 
         # connect & download pulse data
         self.asg.load_data(self._asg_sequences)
 
-    def configure_lockin_counting(self, channel: str = 'Dev1/ai0'):
+    def configure_lockin_counting(self, channel: str = 'Dev1/ai0', freq: float = None):
         """
+        需要在 config_odmr_seq 之前调用
         :param channel: output channel from NIDAQ to PC
+        :param freq: synchronization frequency between MW and Lockin
         """
-        self.lockin = LockInAmplifier()
         self.daqtask = nidaqmx.Task()
         self.daqtask.ai_channels.add_ai_voltage_chan(channel)
+        if freq is not None:
+            self.sync_freq = freq
 
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
+        需要在 config_odmr_seq 之后调用
         Configure asg-channel and apd-channel for ASG. For Swabian Time Tagger, channel number range: [1, 8].
         :param apd_channel: APD channel number
         :param asg_channel: ASG channel number

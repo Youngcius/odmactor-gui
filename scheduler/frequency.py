@@ -7,12 +7,14 @@ Remarks: 连续波谱不是典型的量子传感过程，实验中系统处于�
 ---
 2. Pulse detection (frequency-domain method)
 """
-
+import math
 import time
 import scipy.constants as C
+from operator import add
+from functools import reduce
 from typing import List
 from .base import FrequencyDomainScheduler
-import utils
+from utils import flip_sequence
 
 
 class CWScheduler(FrequencyDomainScheduler):
@@ -24,7 +26,7 @@ class CWScheduler(FrequencyDomainScheduler):
         super(CWScheduler, self).__init__(*args, **kwargs)
         self.name = 'CW ODMR Scheduler'
 
-    def configure_odmr_seq(self, period, N: int):
+    def configure_odmr_seq(self, period, N: int, *args, **kwargs):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -43,18 +45,20 @@ class CWScheduler(FrequencyDomainScheduler):
         :param period: binwidth parameter for TimeTagger.Counter
         :param N: n_values for TimeTagger.Counter
         """
-        if self.use_lockin:
-            mw_seq = [period, period]
-            cont_seq = [period * 2, 0]
-            self.download_asg_sequences(laser_seq=cont_seq, mw_seq=mw_seq, lockin_seq=mw_seq, N=N)
-
-        else:
+        if self.use_lockin:  # use parameter self.sync_freq
+            half_period = int(1 / self.sync_freq / 2)
+            sync_seq = [half_period, half_period]
+            cont_seq = [half_period * 2, 0]
+            self.download_asg_sequences(
+                laser_seq=cont_seq, mw_seq=flip_sequence(cont_seq) if self.mw_ttl == 0 else cont_seq,
+                sync_seq=sync_seq, N=N
+            )
+        else:  # use parameter period
             cont_seq = [period, 0]
-            if self.mw_ttl == 0:
-                mw_seq = utils.flip_sequence(cont_seq)
-            else:
-                mw_seq = cont_seq
-            self.download_asg_sequences(laser_seq=cont_seq, mw_seq=mw_seq, tagger_seq=cont_seq, N=N)
+            self.download_asg_sequences(
+                laser_seq=cont_seq, mw_seq=flip_sequence(cont_seq) if self.mw_ttl == 0 else cont_seq,
+                tagger_seq=cont_seq, N=N
+            )
 
     def run_single_step(self, power, freq, mw_control='on') -> List[float]:
         """
@@ -101,7 +105,7 @@ class PulseScheduler(FrequencyDomainScheduler):
         self.name = 'Pulse ODMR Scheduler'
 
     def configure_odmr_seq(self, t_init, t_mw, t_read_sig, inter_init_mw=3000, pre_read=200,
-                           inter_mw_read=500, inter_readout=200, inter_period=200, N: int = 1000):
+                           inter_mw_read=500, inter_readout=200, inter_period=200, N: int = 1000, *args, **kwargs):
         """
         Wave form for single period:
             asg laser channel:
@@ -131,27 +135,35 @@ class PulseScheduler(FrequencyDomainScheduler):
         """
         # unit: ns
         # total time for 'N' period, also for MW operation time at each frequency point
-        if self.with_ref:
-            self.two_pulse_readout = True
+        sync_seq = [0, 0]
+        if self.two_pulse_readout:
             laser_seq = [t_init, inter_init_mw + t_mw + inter_mw_read,
                          pre_read + t_read_sig + inter_readout + t_read_sig + inter_period, 0]
-            mw_seq = [0, t_init + inter_init_mw, t_mw,
-                      inter_mw_read + pre_read + t_read_sig + inter_readout + t_read_sig + inter_period]
-            tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read, t_read_sig, inter_readout,
-                          t_read_sig, inter_period]
+            mw_seq = [0, t_init + inter_init_mw,
+                      t_mw, inter_mw_read + pre_read + t_read_sig + inter_readout + t_read_sig + inter_period]
+            tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read,
+                          t_read_sig, inter_readout, t_read_sig, inter_period]
             # apd_seq = [sum(tagger_seq[:-4]), sum(tagger_seq[-4:])]
-        else:
-            # single-pulse readout
+        else:  # single-pulse readout
             laser_seq = [t_init, inter_init_mw + t_mw + inter_mw_read, pre_read + t_read_sig + inter_period, 0]
             mw_seq = [0, t_init + inter_init_mw, t_mw, inter_mw_read + pre_read + t_read_sig + inter_period]
             tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read, t_read_sig, inter_period]
-            # apd_seq = [sum(tagger_seq[:-2], sum(tagger_seq[-2:]))]
+            # apd_seq = [sum(tagger_seq[:2]), sum(tagger_seq[-2:])]
 
-        if self.mw_ttl == 0:
-            #     # low-level effective
-            mw_seq = utils.flip_sequence(mw_seq)
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2)
+            sync_seq = [half_period, half_period]
+            t1, t2 = sum(laser_seq), half_period * 2
+            t = math.lcm(t1, t2)
+            laser_seq *= int(t / t1)
+            mw_seq *= int(t / t1)
+            tagger_seq *= int(t / t1)
+            sync_seq *= int(t / t2)
 
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
+        self.download_asg_sequences(
+            laser_seq=laser_seq, mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=tagger_seq, sync_seq=sync_seq, N=N
+        )
 
     def run_single_step(self, freq, power=None, mw_control='on') -> List[float]:
         """
