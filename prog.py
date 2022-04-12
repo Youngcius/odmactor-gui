@@ -7,7 +7,7 @@ import nidaqmx
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as C
-import TimeTaggerRPC as tt
+import TimeTagger as tt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5 import QtWidgets, QtCore, QtGui, QtChart
@@ -529,11 +529,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 asg_channel=self.taggerChannels['asg'],
                 reader='counter' if self.schedulerMode == 'CW' else 'cbm'
             )
-
-        # conduct ODMR scheduling and update real-time chart
-        # self.releaseInstruments()
-        # self.schedulers[self.schedulerMode].connect()
-        # print('成功！')
 
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()

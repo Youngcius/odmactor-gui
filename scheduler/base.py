@@ -324,7 +324,10 @@ class Scheduler(abc.ABC):
         """
         Stop hardware (ASG, MW, Tagger) scheduling
         """
-        self.counter.stop()
+        if self.counter is not None:
+            self.counter.stop()
+        if self.daqtask is not None:
+            self.daqtask.stop()
         self.asg.stop()
         self.mw.stop()
         print('Stopped: Scheduling process has stopped')
@@ -537,6 +540,7 @@ class Scheduler(abc.ABC):
             fname = self._gene_data_result_fname()
         with open(fname + '.json', 'w') as f:
             json.dump(self._result_detail, f)
+        self.output_fname = fname + '.json'
         print('Detailed data result has been saved into {}'.format(fname + '.json'))
 
     def __str__(self):
