@@ -63,10 +63,8 @@ class ASG(ASG8005):
                                 j += 1
                         seq_new.append(seq_old[-1])
                         if len(seq_new) % 2 != 0:
-                            # if seq_new[-1] == 0:
-                            #     seq_new.pop()
-                            # else:
                             seq_new.append(0)
+                        asg_data[i] = seq_new
 
         return asg_data
 
