@@ -774,7 +774,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             else:
                 self.axesPhotonCount.set_ylabel('Count number', fontsize=13)
         self.axesPhotonCount.plot(times, counts)
+        ## TODO: delete this
         self.axesPhotonCount.figure.canvas.draw()
+
 
     def updateODMRFrequencyChart(self):
         """
