@@ -150,17 +150,17 @@ class PulseScheduler(FrequencyDomainScheduler):
             tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read, t_read_sig, inter_period]
             # apd_seq = [sum(tagger_seq[:2]), sum(tagger_seq[-2:])]
 
-        if self.use_lockin:
-            half_period = int(1 / self.sync_freq / 2 / C.nano)
-            sync_seq = [half_period, half_period]
-            t1, t2 = int(sum(laser_seq)), int(half_period * 2)
-            t = t1 * t2 / math.gcd(t1, t2)
-            N_mult = int(t / t1)
-            laser_seq *= N_mult
-            mw_seq *= N_mult
-            tagger_seq *= N_mult
-            sync_seq *= int(t / t2)
-            N = max(int(N / N_mult), 2)
+        # if self.use_lockin:
+        #     half_period = int(1 / self.sync_freq / 2 / C.nano)
+        #     sync_seq = [half_period, half_period]
+        #     t1, t2 = int(sum(laser_seq)), int(half_period * 2)
+        #     t = t1 * t2 / math.gcd(t1, t2)
+        #     N_mult = int(t / t1)
+        #     laser_seq *= N_mult
+        #     mw_seq *= N_mult
+        #     tagger_seq *= N_mult
+        #     sync_seq *= int(t / t2)
+        #     N = max(int(N / N_mult), 2)
 
         self._conf_time_paras(sum(tagger_seq), N)
         self.download_asg_sequences(
