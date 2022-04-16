@@ -16,7 +16,7 @@ from PyQt5.QtCore import Qt, pyqtSlot, QThread, QTimer
 import scheduler
 import utils
 from instrument import ASG, Microwave, Laser, LockInAmplifier
-from utils.sequence import seq_to_fig
+from utils.sequence import sequences_to_figure
 
 from ui import odmactor_window
 
@@ -115,7 +115,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         ###################################
         # visualize ASG sequences
-        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
+        self.seqFigCanvas = FigureCanvas(sequences_to_figure(self.sequences))
         self.layoutSequenceVisualization = QtWidgets.QVBoxLayout(self.ui.widgetSequenceVisualization)
         self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
@@ -742,7 +742,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Update sequences chart and add it to the layout widget
         """
         self.layoutSequenceVisualization.removeWidget(self.seqFigCanvas)
-        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
+        self.seqFigCanvas = FigureCanvas(sequences_to_figure(self.sequences))
         self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutSequenceVisualization.setSpacing(0)
@@ -784,7 +784,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         ---
         1. with Time Tagger
             read one value in each ASG operation period, totally N values
-        2. with Lockin Amplifier
+        2. with Lock-in Amplifier
             read M values after the last ASG operation period, M is not necessarily equal to N
         """
         # update series
@@ -819,6 +819,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def updateODMRTimeChart(self):
         """
         Update time-domain ODMR results periodically
+        ---
+        1. with Time Tagger
+            read one value in each ASG operation period, totally N values
+        2. with Lock-in Amplifier
+            read M values after the last ASG operation period, M is not necessarily equal to N
         """
         # update series
         self.axesODMRTime.clear()

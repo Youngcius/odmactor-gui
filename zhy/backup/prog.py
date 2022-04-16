@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, pyqtSlot, QTimer
 import scheduler
 import utils
 from instrument import ASG, Microwave, Laser
-from utils.sequence import seq_to_fig
+from utils.sequence import sequences_to_figure
 
 from zhy.backup import odmactor_window
 
@@ -106,7 +106,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         ###################################
         # visualize ASG sequences
-        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？
+        self.seqFigCanvas = FigureCanvas(sequences_to_figure(self.sequences))  # TODO: check 是不是只更新 seqFigCanvas 就行了？
         self.layoutSequenceVisualization = QtWidgets.QVBoxLayout(self.ui.widgetSequenceVisualization)
         self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
@@ -721,7 +721,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Update sequences chart and add it to the layout widget
         """
         self.layoutSequenceVisualization.removeWidget(self.seqFigCanvas)
-        self.seqFigCanvas = FigureCanvas(seq_to_fig(self.sequences))
+        self.seqFigCanvas = FigureCanvas(sequences_to_figure(self.sequences))
         self.layoutSequenceVisualization.addWidget(self.seqFigCanvas)  # 添加FigureCanvas对象
         self.layoutSequenceVisualization.setContentsMargins(0, 0, 0, 0)
         self.layoutSequenceVisualization.setSpacing(0)

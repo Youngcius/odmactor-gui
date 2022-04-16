@@ -10,11 +10,9 @@ Remarks: 连续波谱不是典型的量子传感过程，实验中系统处于�
 import math
 import time
 import scipy.constants as C
-from operator import add
-from functools import reduce
 from typing import List
 from .base import FrequencyDomainScheduler
-from utils import flip_sequence
+from utils.sequence import flip_sequence
 
 
 class CWScheduler(FrequencyDomainScheduler):
@@ -49,15 +47,17 @@ class CWScheduler(FrequencyDomainScheduler):
             half_period = int(1 / self.sync_freq / 2 / C.nano)
             sync_seq = [half_period, half_period]
             cont_seq = [half_period * 2, 0]
+            self._conf_time_paras(sum(cont_seq), N)
             self.download_asg_sequences(
                 laser_seq=cont_seq, mw_seq=flip_sequence(cont_seq) if self.mw_ttl == 0 else cont_seq,
-                sync_seq=sync_seq, N=N
+                sync_seq=sync_seq
             )
         else:  # use parameter period
             cont_seq = [period, 0]
+            self._conf_time_paras(sum(cont_seq), N)
             self.download_asg_sequences(
                 laser_seq=cont_seq, mw_seq=flip_sequence(cont_seq) if self.mw_ttl == 0 else cont_seq,
-                tagger_seq=cont_seq, N=N
+                tagger_seq=cont_seq
             )
 
     def run_single_step(self, power, freq, mw_control='on') -> List[float]:
@@ -155,14 +155,17 @@ class PulseScheduler(FrequencyDomainScheduler):
             sync_seq = [half_period, half_period]
             t1, t2 = int(sum(laser_seq)), int(half_period * 2)
             t = t1 * t2 / math.gcd(t1, t2)
-            laser_seq *= int(t / t1)
-            mw_seq *= int(t / t1)
-            tagger_seq *= int(t / t1)
+            N_mult = int(t / t1)
+            laser_seq *= N_mult
+            mw_seq *= N_mult
+            tagger_seq *= N_mult
             sync_seq *= int(t / t2)
+            N = max(int(N / N_mult), 2)
 
+        self._conf_time_paras(sum(tagger_seq), N)
         self.download_asg_sequences(
             laser_seq=laser_seq, mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
-            tagger_seq=tagger_seq, sync_seq=sync_seq, N=N
+            tagger_seq=tagger_seq, sync_seq=sync_seq
         )
 
     def run_single_step(self, freq, power=None, mw_control='on') -> List[float]:

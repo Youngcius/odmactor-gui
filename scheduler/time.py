@@ -15,7 +15,7 @@ Time-domain ODMR detecting classes
 
 from .base import TimeDomainScheduler
 import scipy.constants as C
-from utils import flip_sequence
+from utils.sequence import flip_sequence
 
 
 class RamseyScheduler(TimeDomainScheduler):
@@ -59,7 +59,8 @@ class RamseyScheduler(TimeDomainScheduler):
         if self.mw_ttl == 0:
             mw_seq = flip_sequence(mw_seq)
 
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
+        self._conf_time_paras(sum(tagger_seq), N)
+        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=200,
                            inter_readout=200, pre_read=50, inter_period=200, N: int = 1000, *args, **kwargs):
@@ -142,7 +143,8 @@ class RabiScheduler(TimeDomainScheduler):
         if self.mw_ttl == 0:
             mw_seq = flip_sequence(mw_seq)
 
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
+        self._conf_time_paras(sum(tagger_seq), N)
+        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=100,
                            pre_read=200, inter_readout=200, inter_period=200, N: int = 1000, *args, **kwargs):
@@ -237,7 +239,8 @@ class RelaxationScheduler(TimeDomainScheduler):
         if self.mw_ttl == 0:
             mw_seq = flip_sequence(mw_seq)
 
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
+        self._conf_time_paras(sum(tagger_seq), N)
+        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000,
                            pre_read=50, inter_readout=200, inter_period=200, N: int = 10000, *args, **kwargs):
@@ -344,7 +347,8 @@ class HahnEchoScheduler(TimeDomainScheduler):
         if self.mw_ttl == 0:
             mw_seq = flip_sequence(mw_seq)
 
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq, N=N)
+        self._conf_time_paras(sum(tagger_seq), N)
+        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200,
                            pre_read=50, inter_readout=200, inter_period=200, N: int = 100000, *args, **kwargs):

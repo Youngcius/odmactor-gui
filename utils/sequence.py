@@ -2,12 +2,13 @@
 Utils functions processing ASG sequences
 """
 import math
+import numpy as np
+import matplotlib.pyplot as plt
+from copy import deepcopy
 from functools import reduce
 from typing import List, Union
-from operator import concat
-import matplotlib.pyplot as plt
+from operator import add
 from matplotlib.figure import Figure
-import numpy as np
 
 
 class SequenceString:
@@ -51,7 +52,7 @@ def add_axes_to_fig(seq: List[List[int]], fig: Figure, num_row, num_col, index):
     n = len(idx_exist)  # effective number of channels
     channels = ['ch {}'.format(i + 1) for i in range(N)]
     seq_eff = [seq[i] for i in idx_exist]
-    gcd = reduce(math.gcd, list(map(int, reduce(concat, seq_eff))))
+    gcd = reduce(math.gcd, list(map(int, reduce(add, seq_eff))))
     for i in range(n):
         seq_eff[i] = [int(t / gcd) for t in seq_eff[i]]
     baselines = []
@@ -91,20 +92,21 @@ def add_axes_to_fig(seq: List[List[int]], fig: Figure, num_row, num_col, index):
     ax.set_xticks(fontsize=13)
 
 
-def seq_to_fig(seq: List[List[Union[float, int]]]) -> Figure:
+def sequences_to_figure(sequences: List[List[Union[float, int]]]) -> Figure:
     """
     Convert sequences (list of list) into a Figure instance
     """
+    sequences = expand_to_same_length(sequences)
     fig = plt.figure()
-    if np.sum(seq) == 0:
+    if np.sum(sequences) == 0:
         return fig
 
-    N = len(seq)  # num_channels
-    idx_exist = [i for i, l in enumerate(seq) if sum(l) > 0]
+    N = len(sequences)  # num_channels
+    idx_exist = [i for i, l in enumerate(sequences) if sum(l) > 0]
     n = len(idx_exist)  # effective number of channels
     channels = ['ch {}'.format(i + 1) for i in range(N)]
-    seq_eff = [seq[i] for i in idx_exist]
-    gcd = reduce(math.gcd, list(map(int, reduce(concat, seq_eff))))
+    seq_eff = [sequences[i] for i in idx_exist]
+    gcd = reduce(math.gcd, list(map(int, reduce(add, seq_eff))))
     for i in range(n):
         seq_eff[i] = [int(t / gcd) for t in seq_eff[i]]
     baselines = []
@@ -186,27 +188,60 @@ def seq_to_fig(seq: List[List[Union[float, int]]]) -> Figure:
 #     return fig
 
 
-def seq_to_str(seq: List[List[int]]) -> str:
+def sequences_to_string(sequences: List[List[int]]) -> str:
     """
     Convert sequences (list of list) into a string
     """
-    idx_exist = [i for i, l in enumerate(seq) if sum(l) > 0]
+    sequences = expand_to_same_length(sequences)
+    idx_exist = [i for i, l in enumerate(sequences) if sum(l) > 0]
 
     # flatten; float --> integer; calculate gcd
-    gcd = reduce(math.gcd, list(map(int, reduce(concat, seq))))
+    gcd = reduce(math.gcd, list(map(int, reduce(add, sequences))))
 
     str_dict = {'channel {}'.format(i + 1): SequenceString() for i in idx_exist}
 
     for i in idx_exist:
-        length = len(seq[i])
+        length = len(sequences[i])
         j = 0
         while j < length:
             # pair of a high pulse and a low pulse
-            high_width = int(seq[i][j] / gcd)
-            low_width = int(seq[i][j + 1] / gcd)
+            high_width = int(sequences[i][j] / gcd)
+            low_width = int(sequences[i][j + 1] / gcd)
             str_dict['channel {}'.format(i + 1)].append_high_pulse(high_width)
             str_dict['channel {}'.format(i + 1)].append_low_pulse(low_width)
             j += 2
 
     str_list = ['\n'.join([k, str(v)]) for k, v in str_dict.items()]
     return '\n\n'.join(str_list)
+
+
+def expand_to_same_length(sequences: List[List[int]]) -> List[List[int]]:
+    """
+    Expand eac sequence to the same length, by calculating the LCM of all sequences lengths
+    """
+    sequences_expanded = deepcopy(sequences)
+    lengths = [int(sum(seq)) for seq in sequences]
+    if len(np.unique(lengths)) == 1:
+        return sequences_expanded
+    else:
+        tm = np.lcm.reduce(lengths)
+        for i, t in enumerate(lengths):
+            sequences_expanded[i] *= int(tm / t)
+        return sequences_expanded
+
+
+def flip_sequence(seq: list) -> list:
+    """
+    Flip the control sequence
+    i.e., high-level effective <---> low level effective
+    """
+    if seq[0] == 0:
+        if seq[-1] == 0:
+            return seq[1:-1]
+        else:
+            return seq[1:] + [0]
+    else:
+        if seq[-1] == 0:
+            return [0] + seq[:-1]
+        else:
+            return [0] + seq + [0]
