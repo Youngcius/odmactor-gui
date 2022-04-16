@@ -153,8 +153,8 @@ class PulseScheduler(FrequencyDomainScheduler):
         if self.use_lockin:
             half_period = int(1 / self.sync_freq / 2 / C.nano)
             sync_seq = [half_period, half_period]
-            t1, t2 = sum(laser_seq), half_period * 2
-            t = math.lcm(t1, t2)
+            t1, t2 = int(sum(laser_seq)), int(half_period * 2)
+            t = t1 * t2 / math.gcd(t1, t2)
             laser_seq *= int(t / t1)
             mw_seq *= int(t / t1)
             tagger_seq *= int(t / t1)
