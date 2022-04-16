@@ -7,7 +7,6 @@ Remarks: 连续波谱不是典型的量子传感过程，实验中系统处于�
 ---
 2. Pulse detection (frequency-domain method)
 """
-import math
 import time
 import scipy.constants as C
 from typing import List
