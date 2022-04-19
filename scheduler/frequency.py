@@ -161,10 +161,17 @@ class PulseScheduler(FrequencyDomainScheduler):
         #     sync_seq *= int(t / t2)
         #     N = max(int(N / N_mult), 2)
 
+        sync_seq = [0, 0]
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
+            sync_seq = [half_period, half_period]
+
         self._conf_time_paras(sum(tagger_seq), N)
         self.download_asg_sequences(
-            laser_seq=laser_seq, mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
-            tagger_seq=tagger_seq, sync_seq=sync_seq
+            laser_seq=flip_sequence(laser_seq) if self.laser_ttl == 0 else laser_seq,
+            mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=flip_sequence(tagger_seq) if self.tagger_ttl == 0 else tagger_seq,
+            sync_seq=sync_seq
         )
 
     def run_single_step(self, freq, power=None, mw_control='on') -> List[float]:

@@ -56,11 +56,18 @@ class RamseyScheduler(TimeDomainScheduler):
             tagger_seq = [0, t_init + inter_init_mw + t_mw * 2 + t_free + inter_mw_read + pre_read, t_read_sig,
                           inter_period]
 
-        if self.mw_ttl == 0:
-            mw_seq = flip_sequence(mw_seq)
+        sync_seq = [0, 0]
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
+            sync_seq = [half_period, half_period]
 
         self._conf_time_paras(sum(tagger_seq), N)
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
+        self.download_asg_sequences(
+            laser_seq=flip_sequence(laser_seq) if self.laser_ttl == 0 else laser_seq,
+            mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=flip_sequence(tagger_seq) if self.tagger_ttl == 0 else tagger_seq,
+            sync_seq=sync_seq
+        )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=200,
                            inter_readout=200, pre_read=50, inter_period=200, N: int = 1000, *args, **kwargs):
@@ -140,11 +147,18 @@ class RabiScheduler(TimeDomainScheduler):
             mw_seq = [0, t_init + inter_init_mw, t_mw, inter_mw_read + pre_read + t_read_sig + inter_period]
             tagger_seq = [0, t_init + inter_init_mw + t_mw + inter_mw_read + pre_read, t_read_sig, inter_period]
 
-        if self.mw_ttl == 0:
-            mw_seq = flip_sequence(mw_seq)
+        sync_seq = [0, 0]
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
+            sync_seq = [half_period, half_period]
 
         self._conf_time_paras(sum(tagger_seq), N)
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
+        self.download_asg_sequences(
+            laser_seq=flip_sequence(laser_seq) if self.laser_ttl == 0 else laser_seq,
+            mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=flip_sequence(tagger_seq) if self.tagger_ttl == 0 else tagger_seq,
+            sync_seq=sync_seq
+        )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=100,
                            pre_read=200, inter_readout=200, inter_period=200, N: int = 1000, *args, **kwargs):
@@ -236,11 +250,18 @@ class RelaxationScheduler(TimeDomainScheduler):
                 mw_seq = [0, sum(laser_seq)]
                 tagger_seq = [0, t_init + t_free, t_read_sig, inter_period]
 
-        if self.mw_ttl == 0:
-            mw_seq = flip_sequence(mw_seq)
+        sync_seq = [0, 0]
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
+            sync_seq = [half_period, half_period]
 
         self._conf_time_paras(sum(tagger_seq), N)
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
+        self.download_asg_sequences(
+            laser_seq=flip_sequence(laser_seq) if self.laser_ttl == 0 else laser_seq,
+            mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=flip_sequence(tagger_seq) if self.tagger_ttl == 0 else tagger_seq,
+            sync_seq=sync_seq
+        )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000,
                            pre_read=50, inter_readout=200, inter_period=200, N: int = 10000, *args, **kwargs):
@@ -344,11 +365,18 @@ class HahnEchoScheduler(TimeDomainScheduler):
                           t_read_sig,
                           inter_period]
 
-        if self.mw_ttl == 0:
-            mw_seq = flip_sequence(mw_seq)
+        sync_seq = [0, 0]
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
+            sync_seq = [half_period, half_period]
 
         self._conf_time_paras(sum(tagger_seq), N)
-        self.download_asg_sequences(laser_seq=laser_seq, mw_seq=mw_seq, tagger_seq=tagger_seq)
+        self.download_asg_sequences(
+            laser_seq=flip_sequence(laser_seq) if self.laser_ttl == 0 else laser_seq,
+            mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=flip_sequence(tagger_seq) if self.tagger_ttl == 0 else tagger_seq,
+            sync_seq=sync_seq
+        )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200,
                            pre_read=50, inter_readout=200, inter_period=200, N: int = 100000, *args, **kwargs):
