@@ -9,6 +9,7 @@ import uuid
 import json
 import os
 import pickle
+import copy
 import nidaqmx
 import threading
 import numpy as np
@@ -17,6 +18,7 @@ import TimeTagger as tt
 from tqdm import tqdm
 from instrument import ASG, Microwave, LockInAmplifier, Laser
 from utils import dBm_to_mW, mW_to_dBm
+from utils.sequence import expand_to_same_length
 from typing import List, Any, Optional, Union
 from utils.sequence import sequences_to_string, sequences_to_figure
 from matplotlib.figure import Figure
@@ -99,6 +101,10 @@ class Scheduler(abc.ABC):
         # with lockin or tagger
         kwargs.setdefault('use_lockin', False)
         self.use_lockin = kwargs['use_lockin']
+
+        # output lock-in sync sequence from ASG or not
+        kwargs.setdefault('output_lockin', False)
+        self.output_lockin = kwargs['output_lockin']
 
         # configure instruments from external variables
         kwargs.setdefault('laser', None)
@@ -198,7 +204,13 @@ class Scheduler(abc.ABC):
             self._asg_sequences[self.channel['lockin_sync'] - 1] = sync_seq
 
         # connect & download pulse data
-        # self._asg_sequences = self.asg.normalize_data(self._asg_sequences)
+        if self.output_lockin:
+            seqs = expand_to_same_length(self._asg_sequences)
+        else:
+            seqs = copy.deepcopy(self._asg_sequences)
+            seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
+        self.asg.load_data(seqs)
+
         self.asg.load_data(self._asg_sequences)
 
     def configure_lockin_counting(self, channel: str = 'Dev1/ai0', freq: int = None):
@@ -644,7 +656,9 @@ class Scheduler(abc.ABC):
 
     @property
     def sequences_figure(self) -> Figure:
-        return sequences_to_figure(self._asg_sequences)
+        seqs = copy.deepcopy(self._asg_sequences)
+        seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
+        return sequences_to_figure(seqs)
 
 
 class FrequencyDomainScheduler(Scheduler):
