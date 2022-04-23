@@ -70,7 +70,7 @@ class RamseyScheduler(TimeDomainScheduler):
         )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=200,
-                           inter_readout=200, pre_read=50, inter_period=200, N: int = 1000, *args, **kwargs):
+                           inter_readout=200, pre_read=50, inter_period=200, N: int = 1000):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -111,6 +111,7 @@ class RamseyScheduler(TimeDomainScheduler):
         self._asg_conf['N'] = N
         if self.with_ref:
             self.two_pulse_readout = True
+        self.two_pulse_readout = False
 
 
 class RabiScheduler(TimeDomainScheduler):
@@ -161,7 +162,7 @@ class RabiScheduler(TimeDomainScheduler):
         )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=100,
-                           pre_read=200, inter_readout=200, inter_period=200, N: int = 1000, *args, **kwargs):
+                           pre_read=200, inter_readout=200, inter_period=200, N: int = 1000):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -200,6 +201,7 @@ class RabiScheduler(TimeDomainScheduler):
         self._asg_conf['N'] = N
         if self.with_ref:
             self.two_pulse_readout = True
+        self.two_pulse_readout = False
 
 
 class RelaxationScheduler(TimeDomainScheduler):
@@ -263,8 +265,8 @@ class RelaxationScheduler(TimeDomainScheduler):
             sync_seq=sync_seq
         )
 
-    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000,
-                           pre_read=50, inter_readout=200, inter_period=200, N: int = 10000, *args, **kwargs):
+    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000, inter_readout=200,
+                           pre_read=50, inter_period=200, N: int = 10000):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -276,7 +278,7 @@ class RelaxationScheduler(TimeDomainScheduler):
                     |   | (<--------->)    ms = 1
             --------|   |--------------------------
             or
-                  (<----------------->)  ms = 0
+                 (<----------------->)  ms = 0
             ---------------------------------------
             asg tagger acquisition channel:
                                          ---  ---
@@ -306,6 +308,7 @@ class RelaxationScheduler(TimeDomainScheduler):
         self._asg_conf['N'] = N
         if self.with_ref:
             self.two_pulse_readout = True
+        self.two_pulse_readout = False
 
 
 class HahnEchoScheduler(TimeDomainScheduler):
@@ -378,8 +381,8 @@ class HahnEchoScheduler(TimeDomainScheduler):
             sync_seq=sync_seq
         )
 
-    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200,
-                           pre_read=50, inter_readout=200, inter_period=200, N: int = 100000, *args, **kwargs):
+    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200, pre_read=50,
+                           inter_readout=200, inter_period=200, N: int = 100000):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -420,6 +423,7 @@ class HahnEchoScheduler(TimeDomainScheduler):
         self._asg_conf['N'] = N
         if self.with_ref:
             self.two_pulse_readout = True
+        self.two_pulse_readout = False
 
 
 class HighDecouplingScheduler(TimeDomainScheduler):

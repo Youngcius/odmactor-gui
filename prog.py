@@ -10,17 +10,14 @@ import scipy.constants as C
 import TimeTagger as tt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5 import QtWidgets, QtCore, QtGui, QtChart
-from PyQt5.QtCore import Qt, pyqtSlot, QThread, QTimer
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt, pyqtSlot
 
 import scheduler
 import utils
+import ui
 from instrument import ASG, Microwave, Laser, LockInAmplifier
 from utils.sequence import sequences_to_figure
-
-from ui import odmactor_window
-
-# 继承关系：QGraphicsItem --> QGraphicsObject --> QGraphicsWidget --> QChart --> QPolarChart
 
 timeUnitDict = {'s': 1, 'ms': C.milli, 'us': C.micro, 'ns': C.nano, 'ps': C.pico}
 freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
@@ -38,7 +35,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(OdmactorGUI, self).__init__()
-        self.ui = odmactor_window.Ui_OdmactorMainWindow()
+        self.ui = ui.Ui_OdmactorMainWindow()
         self.ui.setupUi(self)
 
         # initialize other UI components
@@ -173,8 +170,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.fetchSequencesfromTableWidget()  # sequences with each element equal to 0 has been set in self.buildUI()
         # self.sequences[-1] = [10, 0]
 
-        # Laser, MW, ASG, tagger counter # TODO: 似乎没必要预读取和设置仪器参数
-        # TODO: 似乎不需要 laserConfig MWConfig之类的字段
+        # Laser, MW, ASG, tagger counter #
 
         # initialize other necessary parameters
         self.updatePiPulse()
@@ -314,7 +310,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonLaserConnect_clicked(self):
         self.laser.connect()
-        self.labelInstrStatus.setText('Laser: connected')  # TODO: connect fail还是success呢？？？
+        self.labelInstrStatus.setText('Laser: connected')  # connect fail or success?
 
     @pyqtSlot()
     def on_pushButtonLaserClose_clicked(self):
@@ -558,7 +554,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
-        # TODO
         # self.counter.getData()
         # pass
         self.labelInstrStatus.setText('Saved in {}'.format(self.schedulers[self.schedulerMode].output_dir))
@@ -573,7 +568,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             raise ValueError('{} is not a supported scheduler type'.format(mode))
         # for k, scheduler in self.schedulers.keys():
         #     if k != mode:
-        #         scheduler.close() # TODO: 不用释放仪器，因为仪器变量是 shared
+        #         scheduler.close() # no need to release instruments, because instruments are shared variables
         # self.schedulers[mode].connect()
 
     @pyqtSlot(bool)
@@ -630,7 +625,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Start to count using Time Tagger of Lockin Amplifier
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
-        # self.tagger.setTestSignal(int(self.ui.comboBoxTaggerAPD.currentText()), True)  # TODO: delete this
         if checked:
             self.updatePhotonCountConfig()
             if self.useLockin:  # using Lockin Amplifier
@@ -775,7 +769,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 self.axesPhotonCount.set_ylabel('Count number', fontsize=13)
         self.axesPhotonCount.plot(times, counts)
         self.axesPhotonCount.figure.canvas.draw()
-
 
     def updateODMRFrequencyChart(self):
         """

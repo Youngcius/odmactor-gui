@@ -1,8 +1,6 @@
+import numpy as np
 from copy import deepcopy
 from typing import List
-
-import numpy as np
-
 from utils.asg import ASG8005
 
 """
