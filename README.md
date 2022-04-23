@@ -52,6 +52,16 @@ of them are like the following figure.
 
 ![](./asset/figure/odmr-magnet.png)
 
+### Operation example
+
+
+![usage-count](./asset/figure/usage-count.png)
+
+
+
+![usage-sequence](./asset/figure/usage-sequence.png)
+
+
 ## Hardware support
 
 ### General ODMR platform
