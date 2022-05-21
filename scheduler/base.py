@@ -274,6 +274,22 @@ class Scheduler(abc.ABC):
         self.mw.start()
         print('MW on/off status:', self.mw.instrument_status_checking)
 
+    def _acquire_data_to_cache(self, cache):
+        """
+        Acquire data and save it to a buffer region
+        :param cache: data cache, e.g., a list instance
+        """
+        if self.use_lockin:
+            time.sleep(self.time_pad)
+            time.sleep(self.asg_dwell)
+            cache.append(self.daqtask.read(number_of_samples_per_channel=1000))
+        else:
+            # from tagger
+            self.counter.clear()
+            time.sleep(self.time_pad)
+            time.sleep(self.asg_dwell)
+            cache.append(self.counter.getData().ravel().tolist())
+
     def _get_data(self):
         """
         Read signal data from data acquisition devices, i.e., APD + Tagger, or Lock-in + DAQ
@@ -283,17 +299,7 @@ class Scheduler(abc.ABC):
         2. with Lock-in Amplifier
             read M values after the last ASG operation period, M is not necessarily equal to N
         """
-        if self.use_lockin:
-            # from lockin
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)
-            self._data.append(self.daqtask.read(number_of_samples_per_channel=1000))
-        else:
-            # from tagger
-            self.counter.clear()
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)
-            self._data.append(self.counter.getData().ravel().tolist())
+        self._acquire_data_to_cache(self._data)
 
     def _get_data_ref(self):
         """
@@ -304,17 +310,7 @@ class Scheduler(abc.ABC):
         2. with Lock-in Amplifier
             read M values after the last ASG operation period, M is not necessarily equal to N
         """
-        if self.use_lockin:
-            # from lockin
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)
-            self._data_ref.append(self.daqtask.read(number_of_samples_per_channel=1000))
-        else:
-            # from tagger
-            self.counter.clear()
-            time.sleep(self.time_pad)
-            time.sleep(self.asg_dwell)
-            self._data_ref.append(self.counter.getData().ravel().tolist())
+        self._acquire_data_to_cache(self._data_ref)
 
     def run(self):
         """
@@ -469,7 +465,7 @@ class Scheduler(abc.ABC):
         self._asg_conf['t'] = t * C.nano  # unit: s
         self._asg_conf['N'] = N
         self.asg_dwell = self._asg_conf['N'] * self._asg_conf['t']  # duration without padding
-        self.time_pad = 0.035 * self.asg_dwell  # 0.035
+        self.time_pad = 0.01 * self.asg_dwell  # 0.035
 
     def _cal_counts_result(self):
         """
@@ -678,15 +674,15 @@ class FrequencyDomainScheduler(Scheduler):
         """
         Scanning frequencies & getting data of Counter
         """
-        # ===================================================================
+        # omit several scanning points
         for _ in range(self.epoch_omit):
             self.mw.set_frequency(self._freqs[0])
             time.sleep(self.time_pad + self.asg_dwell)
-
             if self.with_ref:
                 time.sleep(self.time_pad + self.asg_dwell)
-        # ===================================================================
-        mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
+
+        # formal data acquisition
+        mw_on_seq = copy.deepcopy(self._asg_sequences[self.channel['mw'] - 1])
         for freq in tqdm(self._freqs):
             self._cur_freq = freq
             self.mw.set_frequency(freq)
@@ -798,7 +794,7 @@ class TimeDomainScheduler(Scheduler):
         """
         Scanning time intervals & getting data of Counter
         """
-        # =======================================================
+        # omit several scanning points
         for _ in range(self.epoch_omit):
             self.gene_detect_seq(self._times[0])
             self.asg.start()
@@ -806,7 +802,8 @@ class TimeDomainScheduler(Scheduler):
 
             if self.with_ref:
                 time.sleep(self.time_pad + self.asg_dwell)
-        # =======================================================
+
+        # formal data acquisition
         for duration in tqdm(self._times):
             self._cur_time = duration
             self.gene_detect_seq(duration)
