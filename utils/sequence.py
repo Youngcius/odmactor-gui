@@ -219,6 +219,8 @@ def expand_to_same_length(sequences: List[List[int]]) -> List[List[int]]:
     """
     Expand eac sequence to the same length, by calculating the LCM of all sequences lengths
     """
+    if sum(reduce(add, sequences)) == 0:
+        return sequences
     sequences_expanded = deepcopy(sequences)
     len_eff = [(i, int(sum(seq))) for i, seq in enumerate(sequences) if int(sum(seq)) > 0]
     if len(np.unique(len_eff)) == 1:
