@@ -338,9 +338,14 @@ class Scheduler(abc.ABC):
         """
         Release instrument (ASG, MW, Tagger) resources
         """
-        self.asg.close()
-        self.mw.close()
-        tt.freeTimeTagger(self.tagger)
+        if self.asg is not None:
+            self.asg.close()
+        if self.mw is not None:
+            self.mw.close()
+        if not self.use_lockin and self.tagger is not None:
+            tt.freeTimeTagger(self.tagger)
+        if self.use_lockin and self.daqtask is not None:
+            self.daqtask.close()
         print('Closed: All instrument resources has been released')
 
     def configure_mw_paras(self, power: float = None, freq: float = None, regulate_pi: bool = False, *args, **kwargs):
