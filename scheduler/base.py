@@ -96,7 +96,7 @@ class Scheduler(abc.ABC):
         kwargs.setdefault('mw_on_off', False)
         self.mw_on_off = kwargs['mw_on_off']
 
-        # with lockin or tagger
+        # use lockin or tagger
         kwargs.setdefault('use_lockin', False)
         self.use_lockin = kwargs['use_lockin']
 
@@ -272,7 +272,7 @@ class Scheduler(abc.ABC):
 
         # 3. run MW then
         self.mw.start()
-        print('MW on/off status:', self.mw.instrument_status_checking)
+        # print('MW on/off status:', self.mw.instrument_status_checking)
 
     def _acquire_data_to_cache(self, cache):
         """
@@ -402,7 +402,7 @@ class Scheduler(abc.ABC):
             fname = '{} {}'.format(self.name, datetime.date.today())
         with open(fname, 'wr') as f:
             pickle.dump(self, f)
-        print('object has been save to {}'.format(fname))
+        print('Scheduler configuration has been save to {}'.format(fname))
 
     def laser_on_seq(self):
         """
@@ -518,18 +518,23 @@ class Scheduler(abc.ABC):
                     'origin_data': self._data
                 }
 
-    def _gene_data_result_fname(self) -> str:
+    def _gene_data_result_fname(self, fmt: str = None) -> str:
         """
         Generate file name of data acquisition result, based on time, data and random numbers
         :return: file name, str type
         """
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        sub_dir = os.path.join(self.output_dir, str(datetime.date.today()))
+        if not os.path.exists(sub_dir):
+            os.mkdir(sub_dir)
         if self.with_ref:
             # calculate signals and reference counts
-            fname = os.path.join(self.output_dir, '{}-counts-with-ref-{}'.format(self.name.split()[0], timestamp))
+            fname = os.path.join(sub_dir, '{}-counts-with-ref-{}'.format(self.name.split()[0], timestamp))
         else:
             # just calculate signal counts
-            fname = os.path.join(self.output_dir, '{}-counts-{}'.format(self.name.split()[0], timestamp))
+            fname = os.path.join(sub_dir, '{}-counts-{}'.format(self.name.split()[0], timestamp))
+        if fmt is not None:
+            fname = fname + '.{}'.format(fmt)
         return fname
 
     def save_result(self, fname: str = None):
@@ -540,7 +545,7 @@ class Scheduler(abc.ABC):
         if not self._result or not self._result_detail:
             raise ValueError('empty result cannot be saved')
         if fname is None:
-            fname = self._gene_data_result_fname()
+            fname = self._gene_data_result_fname('json')
         with open(fname + '.json', 'w') as f:
             json.dump(self._result_detail, f)
         self.output_fname = fname + '.json'
@@ -692,21 +697,22 @@ class FrequencyDomainScheduler(Scheduler):
             self._cur_freq = freq
             self.mw.set_frequency(freq)
 
-            # need to turn on MW again
+            # need to turn on MW itself again (optional)
             if self.mw_on_off:
                 self.mw.start()
 
+            # 1. signal data acquisition
             self._get_data()
 
+            # 2. reference data acquisition (optional)
             if self.with_ref:
                 # turn off MW via ASG
                 self.mw_control_seq([0, 0])
 
-                # turn off MW directly
+                # turn off MW itself (optional)
                 if self.mw_on_off:
                     self.mw.stop()
 
-                # reference data acquisition
                 self._get_data_ref()
 
                 # recover the sequences
@@ -814,19 +820,19 @@ class TimeDomainScheduler(Scheduler):
             self.gene_detect_seq(duration)
             self.asg.start()
 
-            # need to turn on MW again
+            # need to turn on MW itself again (optional)
             if self.mw_on_off:
                 self.mw.start()
 
-            # Signal readout
+            # 1. signal data acquisition
             self._get_data()
 
-            # Reference readout
+            # 2. reference data acquisition
             if self.with_ref:
                 # turn off MW via ASG
                 self.mw_control_seq([0, 0])
 
-                # turn off MW directly
+                # turn off MW itself (optional)
                 if self.mw_on_off:
                     self.mw.stop()
 
@@ -842,7 +848,6 @@ class TimeDomainScheduler(Scheduler):
         self._scan_times_and_get_data()
 
         # 2. calculate result (count with/without reference)
-        print('two pulses:', self.two_pulse_readout)
         self._cal_counts_result()
 
         # 3. save result
@@ -893,7 +898,7 @@ class TimeDomainScheduler(Scheduler):
 
         # start sequence for time: N * t
         self._start_device()
-        time.sleep(2)  # 先让激光和微波开几秒
+        time.sleep(2)  # let Laser and MW firstly start for several seconds
         time.sleep(self.asg_dwell)
         counts = self.counter.getData().ravel().tolist()
         self.stop()

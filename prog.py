@@ -786,6 +786,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
+            print('# plot contrast')
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
             contrast = [s / r for s, r in zip(sig[:length], ref)]
