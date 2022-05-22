@@ -489,14 +489,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 N=self.odmrSeqConfig['N'],
             )
 
-
         if self.schedulerMode in timeDomainModes:
             self.schedulers[self.schedulerMode].gene_pseudo_detect_seq()
         if self.schedulerMode == 'CW':
             self.sequences = self.schedulers[self.schedulerMode].sequences
         else:
             self.sequences = self.schedulers[self.schedulerMode].sequences_no_sync  # not plot sync seqs
-        print('=='*20)
+        print('==' * 20)
         print(self.sequences)
         self.feedSequencesToTabkeWidget()
         self.updateSequenceChart()
