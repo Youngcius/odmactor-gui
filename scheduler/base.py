@@ -202,13 +202,11 @@ class Scheduler(abc.ABC):
 
         # connect & download pulse data
         if self.output_lockin:
-            seqs = expand_to_same_length(self._asg_sequences)
+            self.asg.load_data(self._asg_sequences)
         else:
             seqs = copy.deepcopy(self._asg_sequences)
             seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
-        self.asg.load_data(seqs)
-
-        self.asg.load_data(self._asg_sequences)
+            self.asg.load_data(seqs)
 
     def configure_lockin_counting(self, channel: str = 'Dev1/ai0', freq: int = None):
         """
@@ -649,6 +647,9 @@ class Scheduler(abc.ABC):
 
     @property
     def sequences_figure(self) -> Figure:
+        """
+        Ignore the lock-in frequency synchronization channel outputted to MW and Lock-in Amplifier
+        """
         seqs = copy.deepcopy(self._asg_sequences)
         seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
         return sequences_to_figure(seqs)
@@ -692,7 +693,7 @@ class FrequencyDomainScheduler(Scheduler):
                 time.sleep(self.time_pad + self.asg_dwell)
 
         # formal data acquisition
-        mw_on_seq = copy.deepcopy(self._asg_sequences[self.channel['mw'] - 1])
+        mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
         for freq in tqdm(self._freqs):
             self._cur_freq = freq
             self.mw.set_frequency(freq)
