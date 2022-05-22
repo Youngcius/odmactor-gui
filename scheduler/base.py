@@ -560,8 +560,13 @@ class Scheduler(abc.ABC):
         self.asg.load_data(sequences)
 
     @property
-    def sequences(self):
-        return self._asg_sequences
+    def sequences(self, return_sync_seq:bool=True):
+        if return_sync_seq:
+            return self._asg_sequences
+        else:
+            seqs = copy.deepcopy(self._asg_sequences)
+            seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
+            return seqs
 
     @property
     def frequencies(self):

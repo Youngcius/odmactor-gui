@@ -490,14 +490,21 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         if self.schedulerMode in timeDomainModes:
             self.schedulers[self.schedulerMode].gene_pseudo_detect_seq()
-        self.sequences = self.schedulers[self.schedulerMode].sequences
+        self.sequences = self.schedulers[self.schedulerMode].sequences(return_sync_seq=False)  # not plot sync seqs
         self.feedSequencesToTabkeWidget()
         self.updateSequenceChart()
         self.asg.load_data(self.sequences)
 
     @pyqtSlot()
     def on_pushButtonODMRStartDetecting_clicked(self):
-        # 微波参数 --> 设置序列 ------> 频率范围 --> counting setting
+        """
+        Action:
+            1) set MW paras
+            2) set ASG sequences
+            3) set scanned frequency range or time intervals range
+            4) set counter (Time Tagger or Lock-in Amplifier)
+        The series of actions are conducted by `startFrequencyDomainDetecting` or `startTimeDomainDetecting` function
+        """
         self.schedulers[self.schedulerMode].connect()
         if self.ui.groupBoxODMRFrequency.isChecked():
             self.startFrequencyDomainDetecting()
@@ -786,13 +793,20 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
-            print('# plot contrast')
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
-            contrast = [s / r for s, r in zip(sig[:length], ref)]
-            self.axesODMRFrequency.plot(freqs[:length], contrast, 'o-')
-            self.axesODMRFrequency.set_ylabel('Contrast', fontsize=13)
-        else:  # plot count
+            if self.ui.radioButtonODMRFrequencyShowCount():  # plot two count curves
+                print('# plot count (with reference)')
+                self.axesODMRFrequency.plot(freqs[:length], sig[:length], 'o-')
+                self.axesODMRFrequency.plot(freqs[:length], ref, 'o--')
+                self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
+            else:  # plot one single contrast curve
+                print('# plot contrast')
+                contrast = [s / r for s, r in zip(sig[:length], ref)]
+                self.axesODMRFrequency.plot(freqs[:length], contrast, 'o-')
+                self.axesODMRFrequency.set_ylabel('Contrast', fontsize=13)
+        else:  # plot one single count curve
+            print('# plot count')
             length = len(sig)
             self.axesODMRFrequency.plot(freqs[:length], sig, 'o-')
             self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
