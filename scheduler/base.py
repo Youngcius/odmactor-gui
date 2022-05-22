@@ -95,6 +95,8 @@ class Scheduler(abc.ABC):
         # on/off MW when on/off ASG's MW channel
         kwargs.setdefault('mw_on_off', False)
         self.mw_on_off = kwargs['mw_on_off']
+        kwargs.setdefault('asg_control_mw_on_off', True)  # set False when MW switch controlled  by ASG is no available
+        self.asg_control_mw_on_off = kwargs['asg_control_mw_on_off']
 
         # use lockin or tagger
         kwargs.setdefault('use_lockin', False)
@@ -692,7 +694,6 @@ class FrequencyDomainScheduler(Scheduler):
         Scanning frequencies & getting data of Counter
         """
         # omit several scanning points
-        print('omit several scanning points')
         for _ in range(self.epoch_omit):
             self.mw.set_frequency(self._freqs[0])
             time.sleep(self.time_pad + self.asg_dwell)
@@ -700,7 +701,6 @@ class FrequencyDomainScheduler(Scheduler):
                 time.sleep(self.time_pad + self.asg_dwell)
 
         # formal data acquisition
-        print('formal data acquisition')
         mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
         for freq in tqdm(self._freqs):
             self._cur_freq = freq
@@ -715,8 +715,9 @@ class FrequencyDomainScheduler(Scheduler):
 
             # 2. reference data acquisition (optional)
             if self.with_ref:
-                # turn off MW via ASG
-                # self.mw_control_seq([0, 0])
+                # turn off MW via ASG (usually necessary)
+                if self.asg_control_mw_on_off:
+                    self.mw_control_seq([0, 0])
 
                 # turn off MW itself (optional)
                 if self.mw_on_off:
@@ -724,8 +725,9 @@ class FrequencyDomainScheduler(Scheduler):
 
                 self._get_data_ref()
 
-                # recover the sequences
-                # self.mw_control_seq(mw_on_seq)
+                # recover the sequences (usually necessary)
+                if self.asg_control_mw_on_off:
+                    self.mw_control_seq(mw_on_seq)
 
         print('finished data acquisition')
 
@@ -839,8 +841,9 @@ class TimeDomainScheduler(Scheduler):
 
             # 2. reference data acquisition
             if self.with_ref:
-                # turn off MW via ASG
-                self.mw_control_seq([0, 0])
+                # turn off MW via ASG (usually necessary)
+                if self.asg_control_mw_on_off:
+                    self.mw_control_seq([0, 0])
 
                 # turn off MW itself (optional)
                 if self.mw_on_off:
