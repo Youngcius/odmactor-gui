@@ -455,7 +455,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             'withReference': self.ui.checkBoxODMRWithReference.isChecked(),
             'MicrowaveOnOff': self.ui.checkBoxODMRMicrowaveOnOff.isChecked(),
             'laserInit': self.ui.spinBoxODMRLaserTime.value(),
-            'laserMicrowaveInterval': self.ui.spinBoxODMRLaserTime.value(),
+            'laserMicrowaveInterval': self.ui.spinBoxODMRLaserMicrowaveInterval.value(),
             'microwaveTime': self.ui.spinBoxODMRMicrowaveTime.value(),
             'microwaveReadoutInterval': self.ui.spinBoxODMRMicrowaveReadoutInterval.value(),
             'previousReadoutInterval': self.ui.spinBoxODMRPreReadoutInterval.value(),
@@ -483,17 +483,21 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 t_read_sig=self.odmrSeqConfig['signalReadout'],
                 inter_init_mw=self.odmrSeqConfig['laserMicrowaveInterval'],
                 pre_read=self.odmrSeqConfig['previousReadoutInterval'],
-                inter_read=self.odmrSeqConfig['signalReferenceInterval'],
+                inter_mw_read=self.odmrSeqConfig['microwaveReadoutInterval'],
+                inter_readout=self.odmrSeqConfig['signalReferenceInterval'],
                 inter_period=self.odmrSeqConfig['periodInterval'],
                 N=self.odmrSeqConfig['N'],
             )
+
 
         if self.schedulerMode in timeDomainModes:
             self.schedulers[self.schedulerMode].gene_pseudo_detect_seq()
         if self.schedulerMode == 'CW':
             self.sequences = self.schedulers[self.schedulerMode].sequences
         else:
-            self.sequences = self.schedulers[self.schedulerMode].sequences(return_sync_seq=False)  # not plot sync seqs
+            self.sequences = self.schedulers[self.schedulerMode].sequences_no_sync  # not plot sync seqs
+        print('=='*20)
+        print(self.sequences)
         self.feedSequencesToTabkeWidget()
         self.updateSequenceChart()
         self.asg.load_data(self.sequences)
@@ -790,13 +794,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             read M values after the last ASG operation period, M is not necessarily equal to N
         """
         # update series
-        print('updating series')
+        # print('updating series')
         self.axesODMRFrequency.clear()
         self.axesODMRFrequency.set_title('{} Spectrum'.format(self.schedulerMode), fontsize=15)
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
-        print('prepare to plot {}, {}'.format(freqs, sig))
+        # print('prepare to plot {}, {}'.format(freqs, sig))
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)

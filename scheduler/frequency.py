@@ -134,7 +134,6 @@ class PulseScheduler(FrequencyDomainScheduler):
         """
         # unit: ns
         # total time for 'N' period, also for MW operation time at each frequency point
-        sync_seq = [0, 0]
         if self.two_pulse_readout:
             laser_seq = [t_init, inter_init_mw + t_mw + inter_mw_read,
                          pre_read + t_read_sig + inter_readout + t_read_sig + inter_period, 0]

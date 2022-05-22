@@ -560,13 +560,14 @@ class Scheduler(abc.ABC):
         self.asg.load_data(sequences)
 
     @property
-    def sequences(self, return_sync_seq:bool=True):
-        if return_sync_seq:
-            return self._asg_sequences
-        else:
-            seqs = copy.deepcopy(self._asg_sequences)
-            seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
-            return seqs
+    def sequences(self):
+        return self._asg_sequences
+
+    @property
+    def sequences_no_sync(self):
+        seqs = copy.deepcopy(self._asg_sequences)
+        seqs[self.channel['mw_sync'] - 1], seqs[self.channel['lockin_sync'] - 1] = [0, 0], [0, 0]
+        return seqs
 
     @property
     def frequencies(self):
@@ -691,13 +692,16 @@ class FrequencyDomainScheduler(Scheduler):
         Scanning frequencies & getting data of Counter
         """
         # omit several scanning points
+        print('omit several scanning points')
         for _ in range(self.epoch_omit):
+            print('scanning ',self._freqs[0], 'omitted')
             self.mw.set_frequency(self._freqs[0])
             time.sleep(self.time_pad + self.asg_dwell)
             if self.with_ref:
                 time.sleep(self.time_pad + self.asg_dwell)
 
         # formal data acquisition
+        print('formal data acquisition')
         mw_on_seq = self._asg_sequences[self.channel['mw'] - 1]
         for freq in tqdm(self._freqs):
             self._cur_freq = freq
@@ -763,6 +767,7 @@ class FrequencyDomainScheduler(Scheduler):
         print('Estimated total running time: {:.2f} s'.format(self.time_total))
 
         self._start_device()
+        print('started')
         self._acquire_data()  # scanning MW frequencies in this loop
         self.stop()
 
