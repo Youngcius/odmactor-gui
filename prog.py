@@ -490,7 +490,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         if self.schedulerMode in timeDomainModes:
             self.schedulers[self.schedulerMode].gene_pseudo_detect_seq()
-        self.sequences = self.schedulers[self.schedulerMode].sequences(return_sync_seq=False)  # not plot sync seqs
+        if self.schedulerMode == 'CW':
+            self.sequences = self.schedulers[self.schedulerMode].sequences
+        else:
+            self.sequences = self.schedulers[self.schedulerMode].sequences(return_sync_seq=False)  # not plot sync seqs
         self.feedSequencesToTabkeWidget()
         self.updateSequenceChart()
         self.asg.load_data(self.sequences)
@@ -787,11 +790,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             read M values after the last ASG operation period, M is not necessarily equal to N
         """
         # update series
+        print('updating series')
         self.axesODMRFrequency.clear()
         self.axesODMRFrequency.set_title('{} Spectrum'.format(self.schedulerMode), fontsize=15)
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
+        print('prepare to plot {}, {}'.format(freqs, sig))
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
