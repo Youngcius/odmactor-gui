@@ -793,28 +793,23 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             read M values after the last ASG operation period, M is not necessarily equal to N
         """
         # update series
-        # print('updating series')
         self.axesODMRFrequency.clear()
         self.axesODMRFrequency.set_title('{} Spectrum'.format(self.schedulerMode), fontsize=15)
         self.axesODMRFrequency.set_xlabel('Frequency (Hz)', fontsize=13)
         freqs = self.schedulers[self.schedulerMode].frequencies
         sig = self.schedulers[self.schedulerMode].cur_data
-        # print('prepare to plot {}, {}'.format(freqs, sig))
         if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
-            if self.ui.radioButtonODMRFrequencyShowCount():  # plot two count curves
-                print('# plot count (with reference)')
+            if self.ui.radioButtonODMRFrequencyShowCount.isChecked():  # plot two count curves
                 self.axesODMRFrequency.plot(freqs[:length], sig[:length], 'o-')
                 self.axesODMRFrequency.plot(freqs[:length], ref, 'o--')
                 self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
             else:  # plot one single contrast curve
-                print('# plot contrast')
                 contrast = [s / r for s, r in zip(sig[:length], ref)]
                 self.axesODMRFrequency.plot(freqs[:length], contrast, 'o-')
                 self.axesODMRFrequency.set_ylabel('Contrast', fontsize=13)
         else:  # plot one single count curve
-            print('# plot count')
             length = len(sig)
             self.axesODMRFrequency.plot(freqs[:length], sig, 'o-')
             self.axesODMRFrequency.set_ylabel('Count', fontsize=13)

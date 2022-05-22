@@ -694,7 +694,6 @@ class FrequencyDomainScheduler(Scheduler):
         # omit several scanning points
         print('omit several scanning points')
         for _ in range(self.epoch_omit):
-            print('scanning ',self._freqs[0], 'omitted')
             self.mw.set_frequency(self._freqs[0])
             time.sleep(self.time_pad + self.asg_dwell)
             if self.with_ref:
@@ -717,7 +716,7 @@ class FrequencyDomainScheduler(Scheduler):
             # 2. reference data acquisition (optional)
             if self.with_ref:
                 # turn off MW via ASG
-                self.mw_control_seq([0, 0])
+                # self.mw_control_seq([0, 0])
 
                 # turn off MW itself (optional)
                 if self.mw_on_off:
@@ -726,7 +725,7 @@ class FrequencyDomainScheduler(Scheduler):
                 self._get_data_ref()
 
                 # recover the sequences
-                self.mw_control_seq(mw_on_seq)
+                # self.mw_control_seq(mw_on_seq)
 
         print('finished data acquisition')
 
