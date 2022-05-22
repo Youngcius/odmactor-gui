@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1512</width>
-    <height>1051</height>
+    <height>851</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
-          <height>888</height>
+          <width>533</width>
+          <height>874</height>
          </rect>
         </property>
         <attribute name="label">
@@ -67,14 +67,14 @@
                  <double>999.000000000000000</double>
                 </property>
                 <property name="value">
-                 <double>100.000000000000000</double>
+                 <double>1.000000000000000</double>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QComboBox" name="comboBoxMicrowaveFrequencyUnit">
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <item>
                  <property name="text">
@@ -951,8 +951,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
-          <height>888</height>
+          <width>533</width>
+          <height>996</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1505,8 +1505,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
-          <height>888</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2102,7 +2102,7 @@
      <x>0</x>
      <y>0</y>
      <width>1512</width>
-     <height>26</height>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">
