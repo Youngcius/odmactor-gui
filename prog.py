@@ -51,7 +51,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # initialize data variables
         self.schedulers = {
             mode: getattr(scheduler, mode + 'Scheduler')(
-                laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg, epoch_omit=5, use_lockin=self.useLockin
+                laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg,
+                epoch_omit=5, use_lockin=self.useLockin
             ) for mode in schedulerModes
         }
 
@@ -465,6 +466,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         }
         self.schedulers[self.schedulerMode].with_ref = self.odmrSeqConfig['withReference']
         self.schedulers[self.schedulerMode].mw_on_off = self.odmrSeqConfig['MicrowaveOnOff']
+        self.schedulers[self.schedulerMode].asg_control_mw_on_off = not self.odmrSeqConfig['MicrowaveOnOff'] # hardware fault
         self.schedulers[self.schedulerMode].set_asg_sequences_ttl(
             laser_ttl=1 if self.ui.checkBoxASGLaserTTL.isChecked() else 0,
             mw_ttl=1 if self.ui.checkBoxASGMicrowaveTTL.isChecked() else 0,
