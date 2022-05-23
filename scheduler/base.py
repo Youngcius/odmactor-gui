@@ -212,7 +212,7 @@ class Scheduler(abc.ABC):
 
     def configure_lockin_counting(self, channel: str = 'Dev1/ai0', freq: int = None):
         """
-        需要在 config_odmr_seq 之前调用
+        Configure counter building on Lock-in Amplifier and NI DAQ
         :param channel: output channel from NIDAQ to PC
         :param freq: synchronization frequency between MW and Lockin
         """
@@ -224,6 +224,7 @@ class Scheduler(abc.ABC):
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
         需要在 config_odmr_seq 之后调用 (依赖于 N)
+        Configure counter building on APD and Time Tagger
         Configure asg-channel and apd-channel for ASG. For Swabian Time Tagger, channel number range: [1, 8].
         :param apd_channel: APD channel number
         :param asg_channel: ASG channel number
@@ -812,6 +813,8 @@ class TimeDomainScheduler(Scheduler):
             raise ValueError('"N" is None currently. Please set ODMR sequences parameters firstly.')
         else:
             self.time_total = sum(self._times) * C.nano * N  # estimated total time
+            if self.with_ref:
+                self.time_total *= 2
 
     def _scan_times_and_get_data(self):
         """
@@ -888,7 +891,7 @@ class TimeDomainScheduler(Scheduler):
         """
         ts = list(self._cache.values())[:-1]
         t_sum = sum([t for t in ts if t is not None])
-        self.gene_detect_seq(int(t_sum / 40) * 10)
+        self.gene_detect_seq(int(t_sum / 4))
 
     @abc.abstractmethod
     def gene_detect_seq(self, *args, **kwargs):

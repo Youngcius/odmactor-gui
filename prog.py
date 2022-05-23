@@ -555,20 +555,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
         self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)  # frequencies for scanning
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
-        # if self.useLockin:
-        #     self.schedulers[self.schedulerMode].configure_lockin_counting(
-        #         freq=self.ui.spinBoxODMRSyncFrequency.value()
-        #     )
-        # else:
-        #     self.schedulers[self.schedulerMode].configure_tagger_counting(
-        #         apd_channel=self.taggerChannels['apd'],
-        #         asg_channel=self.taggerChannels['asg'],
-        #         reader='counter' if self.schedulerMode == 'CW' else 'cbm'
-        #     )
-
-        # t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
-        # t.start()
-        # self.timerODMRFrequency.start()
 
     def startTimeDomainDetecting(self):
         """
@@ -586,11 +572,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         print(unit_time, time_start, time_end, time_step, self.ui.comboBoxODMRTimeUnit.currentText())
         self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)  # times for scanning
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].times))
-        #
-        # # conduct ODMR scheduling and update real-time chart
-        # t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
-        # t.start()
-        # self.timerODMRTime.start()
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
@@ -1003,6 +984,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRTimeFit_clicked(self):
         # 必须等run结束曲线画出来后拟合
+        # TODO: implement this if necessary
         if not self.timerODMRTime.isActive() and ...:
             self.labelInstrStatus.setText(color_str('Data fitting: done'))
         else:
