@@ -795,7 +795,7 @@ class TimeDomainScheduler(Scheduler):
         super(TimeDomainScheduler, self).__init__(*args, **kwargs)
         self.name = 'Time-domain ODMR Scheduler'
 
-    def set_delay_times(self, start=None, end=None, step=None, times=None):
+    def set_delay_times(self, start=None, end=None, step=None, times=None, length=None, logarithm=False):
         """
         Set time intervals for scanning detection (e.g. Ramsey, Rabi, DD, Relaxation)
         All unit is "ns"
@@ -803,11 +803,22 @@ class TimeDomainScheduler(Scheduler):
         :param end: end time interval
         :param step: time interval step
         :param times: time duration list
+        :param length: approximate number of time intervals; if designated, parameter `step` usually is not designated
+        :param logarithm: whether to use exponential steps when `length` is designated; it is set True when the difference of `start` and `end` is large, e.g., T1 detection
         """
         if times is not None:
             self._times = list(times)
-        else:
+        elif step is not None:
             self._times = np.arange(start, end + step / 2, step).tolist()
+        elif length is not None:
+            if logarithm:
+                self._times = np.unique(
+                    (np.logspace(np.log10(start), np.log10(end), length) / 10).round() * 10).tolist()
+            else:
+                self._times = np.unique((np.linspace(start, end, step) / 10).round() * 10).tolist()
+        else:
+            raise ValueError('Please input sufficient parameters for time intervals generation')
+
         N = self._asg_conf['N']
         if N is None:
             raise ValueError('"N" is None currently. Please set ODMR sequences parameters firstly.')

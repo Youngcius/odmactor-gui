@@ -212,10 +212,8 @@ class RelaxationScheduler(TimeDomainScheduler):
     def __init__(self, *args, **kwargs):
         super(RelaxationScheduler, self).__init__(*args, **kwargs)
         self.name = 'T1 Relaxation Scheduler'
-        if 'ms' in kwargs.keys():
-            self.ms = 0
-        else:
-            self.ms = 1
+        kwargs.setdefault('ms', 0)
+        self.ms = kwargs['ms']
 
     def gene_detect_seq(self, t_free):
         """
@@ -242,14 +240,14 @@ class RelaxationScheduler(TimeDomainScheduler):
                 laser_seq = [t_init, inter_init_mw + t_mw + t_free, pre_read + t_read_sig + inter_period, 0]
                 mw_seq = [0, t_init + inter_init_mw, t_mw, t_free + pre_read + t_read_sig + inter_period]
                 tagger_seq = [0, t_init + inter_init_mw + t_mw + t_free + pre_read, t_read_sig, inter_period]
-        else:
+        else:  # when measure Ms=0 T1, no MW operation
             if self.two_pulse_readout:
                 laser_seq = [t_init, t_free, t_read_sig + inter_readout + t_read_ref, inter_period]
-                mw_seq = [0, sum(laser_seq)]
+                mw_seq = [0, 0]
                 tagger_seq = [0, t_init + t_free, t_read_sig, inter_readout, t_read_ref, inter_period]
             else:
                 laser_seq = [t_init, t_free, t_read_sig, inter_period]
-                mw_seq = [0, sum(laser_seq)]
+                mw_seq = [0, 0]
                 tagger_seq = [0, t_init + t_free, t_read_sig, inter_period]
 
         sync_seq = [0, 0]

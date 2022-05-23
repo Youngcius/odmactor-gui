@@ -572,16 +572,12 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
         """
-        # # configure pi pulse
-        # self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
-        # self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
-        # self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
-
         unit_time = timeUnitDict[self.ui.comboBoxODMRTimeUnit.currentText()]
         time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time / C.nano
         time_end = self.ui.doubleSpinBoxODMRTimeEnd.value() * unit_time / C.nano
         time_step = self.ui.doubleSpinBoxODMRTimeStep.value() * unit_time / C.nano
         print(unit_time, time_start, time_end, time_step, self.ui.comboBoxODMRTimeUnit.currentText())
+        # if self.ui.spinBoxODMRTimeLength
         self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)  # times for scanning
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].times))
 
@@ -861,10 +857,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRTime.set_xlabel('Time (s)', fontsize=13)
         times = self.schedulers[self.schedulerMode].times
         sig = self.schedulers[self.schedulerMode].cur_data
-        if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast TODO: add a new radio button
+        if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
-            if self.ui.radioButtonODMRFrequencyShowCount.isChecked():  # plot two count curves
+            if self.ui.radioButtonODMRTimeShowCount.isChecked():  # plot two count curves
                 self.axesODMRTime.plot(times[:length], sig[:length], 'o-')
                 self.axesODMRTime.plot(times[:length], ref, 'o--')
                 self.axesODMRTime.set_ylabel('Count', fontsize=13)

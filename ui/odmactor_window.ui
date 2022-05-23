@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1512</width>
-    <height>851</height>
+    <height>1042</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>521</width>
-          <height>874</height>
+          <width>484</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -969,8 +969,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>521</width>
-          <height>996</height>
+          <width>463</width>
+          <height>944</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1302,6 +1302,49 @@
                  </item>
                 </layout>
                </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                 <item>
+                  <widget class="QLabel" name="label_35">
+                   <property name="text">
+                    <string>Interval length</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxODMRTimeLength">
+                   <property name="maximum">
+                    <number>102</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_23">
+                 <item>
+                  <widget class="QRadioButton" name="radioButton">
+                   <property name="text">
+                    <string>RadioButton</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButton_2">
+                   <property name="text">
+                    <string>RadioButton</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButton_3">
+                   <property name="text">
+                    <string>RadioButton</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
               </layout>
              </widget>
             </item>
@@ -1523,8 +1566,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>521</width>
-          <height>667</height>
+          <width>484</width>
+          <height>879</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1534,7 +1577,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tabPhotonCount">
         <attribute name="title">
@@ -2057,13 +2100,6 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QPushButton" name="pushButton_11">
-              <property name="text">
-               <string>(reserved)</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="pushButtonODMRTimeFit">
               <property name="text">
@@ -2078,10 +2114,20 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QPushButton" name="pushButton_14">
+            <item row="0" column="2">
+             <widget class="QRadioButton" name="radioButtonODMRTimeShowCount">
               <property name="text">
-               <string>(reserved)</string>
+               <string>Show count</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QRadioButton" name="radioButtonODMRTimeShowContrast">
+              <property name="text">
+               <string>Show contrast</string>
               </property>
              </widget>
             </item>
@@ -2120,7 +2166,7 @@
      <x>0</x>
      <y>0</y>
      <width>1512</width>
-     <height>37</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout_A">
