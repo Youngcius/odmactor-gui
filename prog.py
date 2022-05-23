@@ -556,9 +556,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # times for scanning
         unit_time = timeUnitDict[self.ui.comboBoxODMRTimeUnit.currentText()]
-        time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time
-        time_end = self.ui.doubleSpinBoxODMRTimeEnd.value() * unit_time
-        time_step = self.ui.doubleSpinBoxODMRTimeStep.value() * unit_time
+        time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time / C.nano
+        time_end = self.ui.doubleSpinBoxODMRTimeEnd.value() * unit_time / C.nano
+        time_step = self.ui.doubleSpinBoxODMRTimeStep.value() * unit_time / C.nano
+        print(unit_time, time_start, time_end, time_step,self.ui.comboBoxODMRTimeUnit.currentText())
         self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].times))
 
