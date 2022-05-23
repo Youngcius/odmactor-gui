@@ -189,7 +189,7 @@ class Scheduler(abc.ABC):
         sequences = [laser_seq, mw_seq, tagger_seq]
         if not any(sequences):
             raise ValueError('laser_seq, mw_seq and tagger_seq cannot be all None')
-        sequences = [seq for seq in sequences if seq is not None]  # non-None sequences
+        sequences = [seq for seq in sequences if seq is not None and sum(seq) > 0]  # non-None sequences
         lengths = np.unique(list(map(sum, sequences)))
         if len(lengths) != 1:
             raise ValueError('laser/mw/tagger sequences should have the same length')
