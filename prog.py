@@ -466,7 +466,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         }
         self.schedulers[self.schedulerMode].with_ref = self.odmrSeqConfig['withReference']
         self.schedulers[self.schedulerMode].mw_on_off = self.odmrSeqConfig['MicrowaveOnOff']
-        self.schedulers[self.schedulerMode].asg_control_mw_on_off = not self.odmrSeqConfig['MicrowaveOnOff'] # hardware fault
+        self.schedulers[self.schedulerMode].asg_control_mw_on_off = not self.odmrSeqConfig[
+            'MicrowaveOnOff']  # hardware fault
         self.schedulers[self.schedulerMode].set_asg_sequences_ttl(
             laser_ttl=1 if self.ui.checkBoxASGLaserTTL.isChecked() else 0,
             mw_ttl=1 if self.ui.checkBoxASGMicrowaveTTL.isChecked() else 0,
@@ -508,28 +509,21 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Action:
             1) set MW paras
-            2) set ASG sequences
+            2) set ASG sequences (done in `on_pushButtonODMRLoadSequences_clicked` action)
             3) set scanned frequency range or time intervals range
             4) set counter (Time Tagger or Lock-in Amplifier)
+            5) run scanning
         The series of actions are conducted by `startFrequencyDomainDetecting` or `startTimeDomainDetecting` function
         """
         self.schedulers[self.schedulerMode].connect()
+
+        # configure frequencies or timer intervals for scanning
         if self.ui.groupBoxODMRFrequency.isChecked():
             self.startFrequencyDomainDetecting()
         else:
-            self.startTimeDomainDetecting()
+            self.startTimeDomainDetecting()  # configure time intervals fro scanning
 
-    def startFrequencyDomainDetecting(self):
-        """
-        Start frequency-domain ODMR detecting experiments, i.e., CW or Pulse
-        """
-        # frequencies for scanning
-        unit_freq = freqUnitDict[self.ui.comboBoxODMRFrequencyUnit.currentText()]
-        freq_start = self.ui.doubleSpinBoxODMRFrequencyStart.value() * unit_freq
-        freq_end = self.ui.doubleSpinBoxODMRFrequencyEnd.value() * unit_freq
-        freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
-        self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
-        self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
+        # configure counter
         if self.useLockin:
             self.schedulers[self.schedulerMode].configure_lockin_counting(
                 freq=self.ui.spinBoxODMRSyncFrequency.value()
@@ -541,9 +535,40 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 reader='counter' if self.schedulerMode == 'CW' else 'cbm'
             )
 
+        # conduct ODMR scheduling and update real-time chart
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
-        self.timerODMRFrequency.start()
+
+        if self.ui.groupBoxODMRFrequency.isChecked():
+            self.timerODMRFrequency.start()
+        else:
+            self.timerODMRTime.start()
+
+    def startFrequencyDomainDetecting(self):
+        """
+        Start frequency-domain ODMR detecting experiments, i.e., CW or Pulse
+        """
+
+        unit_freq = freqUnitDict[self.ui.comboBoxODMRFrequencyUnit.currentText()]
+        freq_start = self.ui.doubleSpinBoxODMRFrequencyStart.value() * unit_freq
+        freq_end = self.ui.doubleSpinBoxODMRFrequencyEnd.value() * unit_freq
+        freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
+        self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)  # frequencies for scanning
+        self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
+        # if self.useLockin:
+        #     self.schedulers[self.schedulerMode].configure_lockin_counting(
+        #         freq=self.ui.spinBoxODMRSyncFrequency.value()
+        #     )
+        # else:
+        #     self.schedulers[self.schedulerMode].configure_tagger_counting(
+        #         apd_channel=self.taggerChannels['apd'],
+        #         asg_channel=self.taggerChannels['asg'],
+        #         reader='counter' if self.schedulerMode == 'CW' else 'cbm'
+        #     )
+
+        # t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
+        # t.start()
+        # self.timerODMRFrequency.start()
 
     def startTimeDomainDetecting(self):
         """
@@ -554,19 +579,18 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
         self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
 
-        # times for scanning
         unit_time = timeUnitDict[self.ui.comboBoxODMRTimeUnit.currentText()]
         time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time / C.nano
         time_end = self.ui.doubleSpinBoxODMRTimeEnd.value() * unit_time / C.nano
         time_step = self.ui.doubleSpinBoxODMRTimeStep.value() * unit_time / C.nano
-        print(unit_time, time_start, time_end, time_step,self.ui.comboBoxODMRTimeUnit.currentText())
-        self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)
+        print(unit_time, time_start, time_end, time_step, self.ui.comboBoxODMRTimeUnit.currentText())
+        self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)  # times for scanning
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].times))
-
-        # conduct ODMR scheduling and update real-time chart
-        t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
-        t.start()
-        self.timerODMRTime.start()
+        #
+        # # conduct ODMR scheduling and update real-time chart
+        # t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
+        # t.start()
+        # self.timerODMRTime.start()
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
@@ -849,7 +873,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             length = len(ref)
             if self.ui.radioButtonODMRFrequencyShowCount.isChecked():  # plot two count curves
                 self.axesODMRTime.plot(times[:length], sig[:length], 'o-')
-                self.axesODMRTime.plot(times[:length], ref,'o--')
+                self.axesODMRTime.plot(times[:length], ref, 'o--')
                 self.axesODMRTime.set_ylabel('Count', fontsize=13)
             else:
                 contrast = [s / r for s, r in zip(sig[:length], ref)]

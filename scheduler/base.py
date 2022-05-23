@@ -223,7 +223,7 @@ class Scheduler(abc.ABC):
 
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
-        需要在 config_odmr_seq 之后调用
+        需要在 config_odmr_seq 之后调用 (依赖于 N)
         Configure asg-channel and apd-channel for ASG. For Swabian Time Tagger, channel number range: [1, 8].
         :param apd_channel: APD channel number
         :param asg_channel: ASG channel number
