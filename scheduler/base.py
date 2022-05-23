@@ -816,10 +816,9 @@ class TimeDomainScheduler(Scheduler):
             self._times = np.arange(start, end + step / 2, step).tolist()
         elif length is not None:
             if logarithm:
-                self._times = np.unique(
-                    (np.logspace(np.log10(start), np.log10(end), length) / 10).round() * 10).tolist()
+                self._times = np.unique((np.logspace(np.log10(start), np.log10(end), length) / 10).round() * 10).tolist()
             else:
-                self._times = np.unique((np.linspace(start, end, step) / 10).round() * 10).tolist()
+                self._times = np.unique((np.linspace(start, end, length) / 10).round() * 10).tolist()
         else:
             raise ValueError('Please input sufficient parameters for time intervals generation')
 
