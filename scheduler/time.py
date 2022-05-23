@@ -70,7 +70,7 @@ class RamseyScheduler(TimeDomainScheduler):
         )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=200,
-                           inter_readout=200, pre_read=50, inter_period=200, N: int = 1000):
+                           inter_readout=200, pre_read=50, inter_period=200, N: int = 1000, *args, **kwargs):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -162,7 +162,7 @@ class RabiScheduler(TimeDomainScheduler):
         )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=1000, inter_mw_read=100,
-                           pre_read=200, inter_readout=200, inter_period=200, N: int = 1000):
+                           pre_read=200, inter_readout=200, inter_period=200, N: int = 1000, *args, **kwargs):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -266,7 +266,7 @@ class RelaxationScheduler(TimeDomainScheduler):
         )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=10000, inter_readout=200,
-                           pre_read=50, inter_period=200, N: int = 10000):
+                           pre_read=50, inter_period=200, N: int = 10000, *args, **kwargs):
         """
         Wave form for single period:
             laser (no asg control sequence):
@@ -382,7 +382,7 @@ class HahnEchoScheduler(TimeDomainScheduler):
         )
 
     def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200, pre_read=50,
-                           inter_readout=200, inter_period=200, N: int = 100000):
+                           inter_readout=200, inter_period=200, N: int = 100000, *args, **kwargs):
         """
         Wave form for single period:
             laser (no asg control sequence):
