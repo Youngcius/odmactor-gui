@@ -842,17 +842,22 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.axesODMRTime.set_title('{} Measurement'.format(self.schedulerMode), fontsize=15)
         self.axesODMRTime.set_xlabel('Time (s)', fontsize=13)
         times = self.schedulers[self.schedulerMode].times
-        sig = self.schedulers[self.schedulerMode].data_ref
-        if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast
+        sig = self.schedulers[self.schedulerMode].cur_data
+        if self.ui.checkBoxODMRWithReference.isChecked():  # plot contrast TODO: add a new radio button
             ref = self.schedulers[self.schedulerMode].cur_data_ref
             length = len(ref)
-            contrast = [s / r for s, r in zip(sig[:length], ref)]
-            self.axesODMRFrequency.plot(times[:length], contrast, 'o-')
-            self.axesODMRTime.set_ylabel('Contrast', fontsize=13)
+            if self.ui.radioButtonODMRFrequencyShowCount.isChecked():  # plot two count curves
+                self.axesODMRTime.plot(times[:length], sig[:length], 'o-')
+                self.axesODMRTime.plot(times[:length], ref,'o--')
+                self.axesODMRTime.set_ylabel('Count', fontsize=13)
+            else:
+                contrast = [s / r for s, r in zip(sig[:length], ref)]
+                self.axesODMRTime.plot(times[:length], contrast, 'o-')
+                self.axesODMRTime.set_ylabel('Contrast', fontsize=13)
         else:  # plot count
             length = len(sig)
-            self.axesODMRFrequency.plot(time[:length], sig, 'o-')
-            self.axesODMRFrequency.set_ylabel('Count', fontsize=13)
+            self.axesODMRTime.plot(time[:length], sig, 'o-')
+            self.axesODMRTime.set_ylabel('Count', fontsize=13)
         self.axesODMRTime.figure.canvas.draw()
 
         # update progress bar
