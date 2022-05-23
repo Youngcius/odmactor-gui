@@ -191,9 +191,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         if self.ui.comboBoxMicrowavePiPulsePowerUnit.currentText() == 'mW':
             self.piPulse['power'] = utils.mW_to_dBm(self.piPulse['power'])
 
-        self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
-        self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
-        self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
+        for mode in schedulerModes:
+            self.schedulers[mode].pi_pulse['freq'] = self.piPulse['frequency']
+            self.schedulers[mode].pi_pulse['power'] = self.piPulse['power']
+            self.schedulers[mode].pi_pulse['time'] = self.piPulse['duration']
 
     def updateASGChannels(self):
         self.asgChannels = {
@@ -383,19 +384,22 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_doubleSpinBoxMicrowavePiPulseDuration_valueChanged(self, duration):
         # self.piPulse['duration'] = self.ui.doubleSpinBoxMicrowavePiPulseDuration.value()
         self.piPulse['duration'] = duration * timeUnitDict[self.ui.comboBoxMicrowavePiPulseDurationUnit.currentText()]
-        self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
+        for mode in schedulerModes:
+            self.schedulers[mode].pi_pulse['time'] = self.piPulse['duration']
 
     @pyqtSlot(float)
     def on_doubleSpinBoxMicrowavePiPulseFrequency_valueChanged(self, freq):
         self.piPulse['frequency'] = freq * freqUnitDict[self.ui.comboBoxMicrowavePiPulseFrequencyUnit.currentText()]
-        self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
+        for mode in schedulerModes:
+            self.schedulers[mode].pi_pulse['freq'] = self.piPulse['frequency']
 
     @pyqtSlot(float)
     def on_doubleSpinBoxMicrowavePiPulsePower_valueChanged(self, power):
         self.piPulse['power'] = power
         if self.ui.comboBoxMicrowavePiPulsePowerUnit.currentText() == 'mW':
             self.piPulse['power'] = utils.mW_to_dBm(self.piPulse['power'])
-        self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
+        for mode in schedulerModes:
+            self.schedulers[mode].pi_pulse['power'] = self.piPulse['power']
 
     # ASG channels
     @pyqtSlot()
@@ -568,10 +572,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
         """
-        # configure pi pulse
-        self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
-        self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
-        self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
+        # # configure pi pulse
+        # self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
+        # self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
+        # self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
 
         unit_time = timeUnitDict[self.ui.comboBoxODMRTimeUnit.currentText()]
         time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time / C.nano
