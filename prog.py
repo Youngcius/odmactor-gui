@@ -49,14 +49,13 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.schedulers = {
             mode: getattr(scheduler, mode + 'Scheduler')(
                 laser=self.laser, mw=self.mw, tagger=self.tagger, asg=self.asg,
-                epoch_omit=5, use_lockin=self.useLockin
+                epoch_omit=5, use_lockin=self.useLockin,
+                output_dir=os.path.join(os.path.expanduser('~'), 'Downloads', 'odmactor-output')
             ) for mode in schedulerModes
         }
 
         # fetch parameters from initial UI
         self.fetchParameters()
-
-
 
         # photon count config (tagger counter measurement class)
         self.updatePhotonCountConfig()
@@ -532,9 +531,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # configure frequencies or timer intervals for scanning
         if self.ui.groupBoxODMRFrequency.isChecked():
-            self.startFrequencyDomainDetecting()
+            self.configureFrequencyDomainDetecting()
         else:
-            self.startTimeDomainDetecting()  # configure time intervals fro scanning
+            self.configureTimeDomainDetecting()
 
         # configure counter
         if self.useLockin:
@@ -556,7 +555,8 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         else:
             self.timerODMRTime.start()
 
-    def startFrequencyDomainDetecting(self):
+
+    def configureFrequencyDomainDetecting(self):
         """
         Start frequency-domain ODMR detecting experiments, i.e., CW or Pulse
         """
@@ -565,10 +565,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         freq_start = self.ui.doubleSpinBoxODMRFrequencyStart.value() * unit_freq
         freq_end = self.ui.doubleSpinBoxODMRFrequencyEnd.value() * unit_freq
         freq_step = self.ui.doubleSpinBoxODMRFrequencyStep.value() * unit_freq
-        self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)  # frequencies for scanning
+        self.schedulers[self.schedulerMode].set_mw_freqs(freq_start, freq_end, freq_step)
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].frequencies))
 
-    def startTimeDomainDetecting(self):
+    def configureTimeDomainDetecting(self):
         """
         Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
         """
@@ -576,21 +576,35 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time / C.nano
         time_end = self.ui.doubleSpinBoxODMRTimeEnd.value() * unit_time / C.nano
         time_step = self.ui.doubleSpinBoxODMRTimeStep.value() * unit_time / C.nano
-        print(unit_time, time_start, time_end, time_step, self.ui.comboBoxODMRTimeUnit.currentText())
-        # if self.ui.spinBoxODMRTimeLength
-        self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)  # times for scanning
+        time_length = self.ui.spinBoxODMRTimeLength.value()
+        if self.ui.radioButtonODMRTimeUseStep.isChecked():
+            self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, time_step)
+        elif self.ui.radioButtonODMRTimeUseLength.isChecked():
+            self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, length=time_length)
+        elif self.ui.radioButtonODMRTimeUseLengthAndLogarithm.isChecked():
+            self.schedulers[self.schedulerMode].set_delay_times(time_start, time_end, length=time_length,
+                                                                logarithm=True)
         self.progressBar.setMaximum(len(self.schedulers[self.schedulerMode].times))
 
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
-        # self.counter.getData()
-        # TODO: implement this
+        """
+        Open a dialog --> select directory --> designate file name --> save to disk
+        """
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        fname = os.path.join(
+            os.path.expanduser('~'),
+            'Downloads',
+            'odmactor-{}-scheduler-result-detail-{}.json'.format(self.schedulerMode.lower(), timestamp)
+        )
+        with open(fname, 'w') as f:
+            json.dump(self.schedulers[self.schedulerMode].result_detail, f)
         self.labelInstrStatus.setText('Saved in {}'.format(self.schedulers[self.schedulerMode].output_dir))
 
     # ODMR cheduler mode
     def connectScheduler(self, mode: str):
         """
-        Allocate hardware resources to one specific scheduler
+        Allocate hardware resources to one specific scheduler (this function only change `schedulerMode` parameter)
         """
         self.schedulerMode = mode
         if mode not in schedulerModes:
@@ -697,7 +711,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Save data in form of JSON file in default
         """
-        # 暂时只支持一个通道，保存的数据是单个字典 --> 单个 JavaScript object --> JSON file
+        # a dict instance --> a JSON file --> JSON file
         timestamp = datetime.datetime.now()
         if self.useLockin:
             data = {
@@ -717,8 +731,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 'timestamp': str(timestamp),
                 'device': 'Time Tagger'
             }
-        fname = 'odmactor-counts_' + timestamp.strftime('%Y-%m-%d_%H-%M-%S') + '.json'
-        fname = os.path.join(os.path.expanduser('~'), 'Downloads', fname)  # 暂时只考虑 windows 的文件路径
+        fname = os.path.join(  # only consider Windows system default directory
+            os.path.expanduser('~'),
+            'Downloads',
+            'odmactor-counts_' + timestamp.strftime('%Y-%m-%d_%H-%M-%S') + '.json'
+        )
         with open(fname, 'w') as f:
             json.dump(data, f)
         self.labelInstrStatus.setText('File has been saved in {}'.format(fname))

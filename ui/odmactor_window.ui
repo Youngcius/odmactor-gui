@@ -38,7 +38,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
+          <width>517</width>
           <height>1025</height>
          </rect>
         </property>
@@ -969,7 +969,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
+          <width>517</width>
           <height>1025</height>
          </rect>
         </property>
@@ -1331,6 +1331,9 @@
                     <property name="text">
                      <string>Step mode</string>
                     </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -1571,7 +1574,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
+          <width>517</width>
           <height>1025</height>
          </rect>
         </property>
@@ -1582,7 +1585,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabPhotonCount">
         <attribute name="title">
@@ -2201,6 +2204,113 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>doubleSpinBoxMicrowaveFrequency</tabstop>
+  <tabstop>comboBoxMicrowaveFrequencyUnit</tabstop>
+  <tabstop>doubleSpinBoxMicrowavePower</tabstop>
+  <tabstop>comboBoxMicrowavePowerUnit</tabstop>
+  <tabstop>pushButtonMicrowaveOnOff</tabstop>
+  <tabstop>pushButtonMicrowaveConnect</tabstop>
+  <tabstop>pushButtonMicrowaveClose</tabstop>
+  <tabstop>groupBoxMicrowaveTimer</tabstop>
+  <tabstop>doubleSpinBoxMicrowaveTimerTime</tabstop>
+  <tabstop>comboBoxMicrowaveTimerTimeUnit</tabstop>
+  <tabstop>doubleSpinBoxMicrowavePiPulseFrequency</tabstop>
+  <tabstop>comboBoxMicrowavePiPulseFrequencyUnit</tabstop>
+  <tabstop>doubleSpinBoxMicrowavePiPulseDuration</tabstop>
+  <tabstop>comboBoxMicrowavePiPulseDurationUnit</tabstop>
+  <tabstop>doubleSpinBoxMicrowavePiPulsePower</tabstop>
+  <tabstop>comboBoxMicrowavePiPulsePowerUnit</tabstop>
+  <tabstop>radioButtonLaserCW</tabstop>
+  <tabstop>radioButtonLaserPulse</tabstop>
+  <tabstop>pushButtonLaserOnOff</tabstop>
+  <tabstop>doubleSpinBoxLaserPower</tabstop>
+  <tabstop>pushButtonLaserConnect</tabstop>
+  <tabstop>pushButtonLaserClose</tabstop>
+  <tabstop>comboBoxASGLaser</tabstop>
+  <tabstop>comboBoxASGMicrowave</tabstop>
+  <tabstop>comboBoxASGMicrowaveSync</tabstop>
+  <tabstop>comboBoxASGAPD</tabstop>
+  <tabstop>comboBoxASGTagger</tabstop>
+  <tabstop>comboBoxASGLockinSync</tabstop>
+  <tabstop>checkBoxASGLaserTTL</tabstop>
+  <tabstop>checkBoxASGMicrowaveTTL</tabstop>
+  <tabstop>checkBoxASGMicrowaveSync</tabstop>
+  <tabstop>checkBoxASGAPDTTL</tabstop>
+  <tabstop>checkBoxASGTaggerTTL</tabstop>
+  <tabstop>checkBoxASGLockinSyncTTL</tabstop>
+  <tabstop>comboBoxTaggerAPD</tabstop>
+  <tabstop>comboBoxTaggerTrigger</tabstop>
+  <tabstop>radioButtonUseTagger</tabstop>
+  <tabstop>radioButtonUseLockin</tabstop>
+  <tabstop>pushButtonODMRLoadSequences</tabstop>
+  <tabstop>pushButtonODMRStartDetecting</tabstop>
+  <tabstop>pushButtonODMRSaveData</tabstop>
+  <tabstop>groupBoxODMRFrequency</tabstop>
+  <tabstop>radioButtonODMRCW</tabstop>
+  <tabstop>radioButtonODMRPulse</tabstop>
+  <tabstop>checkBoxODMRFrequencyScanning</tabstop>
+  <tabstop>comboBoxODMRFrequencyUnit</tabstop>
+  <tabstop>doubleSpinBoxODMRFrequencyStart</tabstop>
+  <tabstop>doubleSpinBoxODMRFrequencyEnd</tabstop>
+  <tabstop>doubleSpinBoxODMRFrequencyStep</tabstop>
+  <tabstop>groupBoxODMRTime</tabstop>
+  <tabstop>radioButtonODMRRabi</tabstop>
+  <tabstop>radioButtonODMRRamsey</tabstop>
+  <tabstop>radioButtonPulseODMRRelaxation</tabstop>
+  <tabstop>checkBoxODMRTimeScanning</tabstop>
+  <tabstop>comboBoxODMRTimeUnit</tabstop>
+  <tabstop>doubleSpinBoxODMRTimeStart</tabstop>
+  <tabstop>doubleSpinBoxODMRTimeEnd</tabstop>
+  <tabstop>doubleSpinBoxODMRTimeStep</tabstop>
+  <tabstop>spinBoxODMRTimeLength</tabstop>
+  <tabstop>radioButtonODMRTimeUseStep</tabstop>
+  <tabstop>radioButtonODMRTimeUseLength</tabstop>
+  <tabstop>radioButtonODMRTimeUseLengthAndLogarithm</tabstop>
+  <tabstop>spinBoxODMRPeriodNumber</tabstop>
+  <tabstop>checkBoxODMRWithReference</tabstop>
+  <tabstop>checkBoxODMRMicrowaveOnOff</tabstop>
+  <tabstop>spinBoxODMRSyncFrequency</tabstop>
+  <tabstop>spinBoxODMRLaserTime</tabstop>
+  <tabstop>spinBoxODMRLaserMicrowaveInterval</tabstop>
+  <tabstop>spinBoxODMRMicrowaveTime</tabstop>
+  <tabstop>spinBoxODMRMicrowaveReadoutInterval</tabstop>
+  <tabstop>spinBoxODMRPreReadoutInterval</tabstop>
+  <tabstop>spinBoxODMRSignalReadoutTime</tabstop>
+  <tabstop>spinBoxODMRSignalReferenceInterval</tabstop>
+  <tabstop>spinBoxODMRPeriodInterval</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>spinBoxBinwidth</tabstop>
+  <tabstop>comboBoxBinwidthUnit</tabstop>
+  <tabstop>spinBoxCountNumber</tabstop>
+  <tabstop>radioButtonPhotonCountRate</tabstop>
+  <tabstop>pushButtonPhotonCountOnOff</tabstop>
+  <tabstop>pushButtonPhotonCountRefresh</tabstop>
+  <tabstop>pushButtonPhotonCountSaveData</tabstop>
+  <tabstop>pushButtonTaggerConnect</tabstop>
+  <tabstop>pushButtonTaggerClose</tabstop>
+  <tabstop>tableWidgetSequence</tabstop>
+  <tabstop>pushButtonASGOpen</tabstop>
+  <tabstop>pushButtonASGClose</tabstop>
+  <tabstop>pushButtonASGStart</tabstop>
+  <tabstop>pushButtonASGStop</tabstop>
+  <tabstop>pushButtonASGLoad</tabstop>
+  <tabstop>pushButtonASGClear</tabstop>
+  <tabstop>pushButton_3</tabstop>
+  <tabstop>pushButtonASGAdd</tabstop>
+  <tabstop>pushButtonODMRFrequencyInterrupt</tabstop>
+  <tabstop>pushButtonODMRFrequencySave</tabstop>
+  <tabstop>radioButtonODMRFrequencyShowCount</tabstop>
+  <tabstop>pushButtonODMRFrequencyFit</tabstop>
+  <tabstop>pushButton_8</tabstop>
+  <tabstop>radioButtonODMRFrequencyShowContrast</tabstop>
+  <tabstop>pushButtonODMRTimeInterreupt</tabstop>
+  <tabstop>pushButtonODMRTimeSave</tabstop>
+  <tabstop>pushButtonODMRTimeFit</tabstop>
+  <tabstop>pushButton_12</tabstop>
+  <tabstop>radioButtonODMRTimeShowCount</tabstop>
+  <tabstop>radioButtonODMRTimeShowContrast</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
