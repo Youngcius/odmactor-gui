@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1512</width>
-    <height>1042</height>
+    <height>1188</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,7 @@
           <x>0</x>
           <y>0</y>
           <width>484</width>
-          <height>879</height>
+          <height>1025</height>
          </rect>
         </property>
         <attribute name="label">
@@ -969,8 +969,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>463</width>
-          <height>944</height>
+          <width>484</width>
+          <height>1025</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1321,29 +1321,34 @@
                 </layout>
                </item>
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_23">
-                 <item>
-                  <widget class="QRadioButton" name="radioButton">
-                   <property name="text">
-                    <string>RadioButton</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="radioButton_2">
-                   <property name="text">
-                    <string>RadioButton</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="radioButton_3">
-                   <property name="text">
-                    <string>RadioButton</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
+                <widget class="QGroupBox" name="groupBox">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_23">
+                  <item>
+                   <widget class="QRadioButton" name="radioButtonODMRTimeUseStep">
+                    <property name="text">
+                     <string>Step mode</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="radioButtonODMRTimeUseLength">
+                    <property name="text">
+                     <string>Length mode</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="radioButtonODMRTimeUseLengthAndLogarithm">
+                    <property name="text">
+                     <string>Logarithm Length</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -1567,7 +1572,7 @@
           <x>0</x>
           <y>0</y>
           <width>484</width>
-          <height>879</height>
+          <height>1025</height>
          </rect>
         </property>
         <attribute name="label">
