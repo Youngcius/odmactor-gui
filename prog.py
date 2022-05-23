@@ -22,7 +22,7 @@ from utils.sequence import sequences_to_figure
 timeUnitDict = {'s': 1, 'ms': C.milli, 'us': C.micro, 'ns': C.nano, 'ps': C.pico}
 freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
 frequencyDomainModes = ['CW', 'Pulse']
-timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation', 'Hahn', 'DD']
+timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation', 'HahnEcho', 'HighDecoupling']
 schedulerModes = frequencyDomainModes + timeDomainModes
 
 plt.style.use('seaborn-pastel')
@@ -604,9 +604,9 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         """
         Allocate hardware resources to one specific scheduler (this function only change `schedulerMode` parameter)
         """
-        self.schedulerMode = mode
         if mode not in schedulerModes:
             raise ValueError('{} is not a supported scheduler type'.format(mode))
+        self.schedulerMode = mode
         # for k, scheduler in self.schedulers.keys():
         #     if k != mode:
         #         scheduler.close() # no need to release instruments, because instruments are shared variables
@@ -661,7 +661,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_radioButtonODMRHahnEcho_clicked(self, checked):
         if checked:
             try:
-                self.connectScheduler('Hahn')
+                self.connectScheduler('HahnEcho')
                 self.labelInstrStatus.setText('Hahn Echo Scheduler: ready')
             except:
                 self.labelInstrStatus.setText(color_str('Hahn echo Scheduler: not ready'))
@@ -670,7 +670,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     def on_radioButtonODMRHighOrderDD_clicked(self, checked):
         if checked:
             try:
-                self.connectScheduler('DD')
+                self.connectScheduler('HighDecoupling')
                 self.labelInstrStatus.setText('High-order dynamical decoupling Scheduler: ready')
             except:
                 self.labelInstrStatus.setText(color_str('High-order dynamical decoupling Scheduler: not ready'))
