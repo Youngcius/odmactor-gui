@@ -802,7 +802,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 item = QtWidgets.QTableWidgetItem(str(0))
                 item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 self.ui.tableWidgetSequence.setItem(i, j, item)
-                print('===== add columns =====')
         for i, seq in enumerate(self.sequences):
             for j, val in enumerate(seq):
                 self.ui.tableWidgetSequence.item(i, j).setText(str(val))
@@ -986,7 +985,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 self.ui.tableWidgetSequence.item(i, j).setText(str(0))
         self.ui.tableWidgetSequence.setRowCount(self._cache['table_origin_row_count'])
-        self.ui.tableWidgetSequence.setColumnCount(self._cache['table_origin_column_count']) # TODO: 5.23 modified
+        self.ui.tableWidgetSequence.setColumnCount(self._cache['table_origin_column_count'])
         self.sequences = [[0, 0] for _ in range(8)]
         self.updateSequenceChart()
 

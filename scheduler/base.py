@@ -93,7 +93,7 @@ class Scheduler(abc.ABC):
         self.sync_freq = kwargs['sync_freq']
 
         # high-order dynamical decoupling order
-        kwargs.setdefault('order', 4)
+        kwargs.setdefault('order', 1)
         self.order = kwargs['order']
 
         # on/off MW when on/off ASG's MW channel
@@ -830,6 +830,8 @@ class TimeDomainScheduler(Scheduler):
             self.time_total = sum(self._times) * C.nano * N  # estimated total time
             if self.with_ref:
                 self.time_total *= 2
+            if self.order > 0:
+                self.time_total *= self.order
 
     def _scan_times_and_get_data(self):
         """
