@@ -857,7 +857,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 self.axesODMRTime.set_ylabel('Contrast', fontsize=13)
         else:  # plot count
             length = len(sig)
-            self.axesODMRTime.plot(time[:length], sig, 'o-')
+            self.axesODMRTime.plot(times[:length], sig, 'o-')
             self.axesODMRTime.set_ylabel('Count', fontsize=13)
         self.axesODMRTime.figure.canvas.draw()
 
