@@ -92,6 +92,10 @@ class Scheduler(abc.ABC):
         kwargs.setdefault('sync_freq', 50)
         self.sync_freq = kwargs['sync_freq']
 
+        # high-order dynamical decoupling order
+        kwargs.setdefault('order', 4)
+        self.order = kwargs['order']
+
         # on/off MW when on/off ASG's MW channel
         kwargs.setdefault('mw_on_off', False)
         self.mw_on_off = kwargs['mw_on_off']

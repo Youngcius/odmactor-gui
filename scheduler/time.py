@@ -73,7 +73,7 @@ class RamseyScheduler(TimeDomainScheduler):
                            inter_readout=200, pre_read=50, inter_period=200, N: int = 1000, *args, **kwargs):
         """
         Wave form for single period:
-            laser (no asg control sequence):
+            asg laser sequence:
             -------                       ----------
             |     |                       |        |
             |     |-----------------------|        |
@@ -165,7 +165,7 @@ class RabiScheduler(TimeDomainScheduler):
                            pre_read=200, inter_readout=200, inter_period=200, N: int = 1000, *args, **kwargs):
         """
         Wave form for single period:
-            laser (no asg control sequence):
+            asg laser sequence:
             -------                        ----------
             |     |                        |        |
             |     |------------------------|        |
@@ -267,7 +267,7 @@ class RelaxationScheduler(TimeDomainScheduler):
                            pre_read=50, inter_period=200, N: int = 10000, *args, **kwargs):
         """
         Wave form for single period:
-            laser (no asg control sequence):
+            asg laser sequence:
             -------                      ----------
             |     |                      |        |
             |     |----------------------|        |
@@ -383,18 +383,18 @@ class HahnEchoScheduler(TimeDomainScheduler):
                            inter_readout=200, inter_period=200, N: int = 100000, *args, **kwargs):
         """
         Wave form for single period:
-            laser (no asg control sequence):
-            -------                       ----------
-            |     |                       |        |
-            |     |-----------------------|        |
+            asg laser sequence:
+            -------                              ----------
+            |     |                              |        |
+            |     |------------------------------|        |
             asg microwave channel:
-                    ---               ---
-                    | |  (<------->)  | |
-            --------| |---------------| |-----------
+                    ---         ----         ---
+                    | | (<--->) |  | (<--->) | |
+            --------| |---------|  |---------| |-----------
             asg tagger acquisition channel:
-                                          ---  ---
-                                          | |  | |
-            ------------------------------| |--| |--
+                                                 ---  ---
+                                                 | |  | |
+            -------------------------------------| |--| |--
         All units for the parameters is 'ns'
         :param t_init: time for laser initialization
         :param t_read_sig: time span for fluorescence signal readout
@@ -434,9 +434,95 @@ class HighDecouplingScheduler(TimeDomainScheduler):
         self.name = 'High-order Dynamical Decoupling Scheduler'
 
     def gene_detect_seq(self, t_free):
-        pass
+        """
+        Generate high-order dynamic decoupling sequences and download it to ASG
+        :param t_free: free precession time between neighbor the MW pi pulse and pi/2 pulse
+        """
+        t_init, t_mw_half_pi = self._cache['t_init'], self._cache['t_mw_half_pi']
+        inter_init_mw, inter_mw_read = self._cache['inter_init_mw'], self._cache['inter_mw_read']
+        t_read_sig, t_read_ref = self._cache['t_read_sig'], self._cache['t_read_sig']
+        pre_read = self._cache['pre_read']
+        inter_readout, inter_period = self._cache['inter_readout'], self._cache['inter_period']
+        N = self._cache['N']
+        t_mw_pi = t_mw_half_pi * 2
+        n = self.order
 
-    # def configure_odmr_seq(self, t_init, t_read_sig,  inter_init_mw=3e3, inter_mw_read=200, pre_read=50,
-    #                        inter_readout=200, inter_period=200, N: int = 100000):
-    def configure_odmr_seq(self, *args, **kwargs):
-        pass
+        # generate ASG wave forms
+        if self.two_pulse_readout:
+            laser_seq = [t_init,
+                         inter_init_mw + (t_mw_pi + t_free) * (n + 1) + inter_mw_read,
+                         pre_read + t_read_sig + inter_readout + t_read_ref + inter_period, 0]
+            mw_seq = [0, t_init + inter_init_mw, t_mw_half_pi] + [t_free, t_mw_pi] * n + [t_free, t_mw_half_pi, inter_mw_read + pre_read + t_read_sig + inter_readout + t_read_ref + inter_period]
+            tagger_seq = [0,
+                          t_init + inter_init_mw + (t_mw_pi + t_free) * (n + 1) + + inter_mw_read + pre_read,
+                          t_read_sig,
+                          inter_readout,
+                          t_read_ref,
+                          inter_period]
+        else:
+            # single-pulse readout (without reference readout)
+            laser_seq = [t_init,
+                         inter_init_mw + (t_mw_pi + t_free) * (n + 1) + inter_mw_read,
+                         pre_read + t_read_sig + inter_period, 0]
+            mw_seq = [0, t_init + inter_init_mw, t_mw_half_pi] + [t_free, t_mw_pi] * n + [t_free, t_mw_half_pi, inter_mw_read + pre_read + t_read_sig + inter_period]
+            tagger_seq = [0,
+                          t_init + inter_init_mw + (t_mw_pi + t_free) * (n + 1) + + inter_mw_read + pre_read,
+                          t_read_sig,
+                          inter_period]
+
+        sync_seq = [0, 0]
+        if self.use_lockin:
+            half_period = int(1 / self.sync_freq / 2 / C.nano)
+            sync_seq = [half_period, half_period]
+
+        self._conf_time_paras(sum(tagger_seq), N)
+        self.download_asg_sequences(
+            laser_seq=flip_sequence(laser_seq) if self.laser_ttl == 0 else laser_seq,
+            mw_seq=flip_sequence(mw_seq) if self.mw_ttl == 0 else mw_seq,
+            tagger_seq=flip_sequence(tagger_seq) if self.tagger_ttl == 0 else tagger_seq,
+            sync_seq=sync_seq
+        )
+
+    def configure_odmr_seq(self, t_init, t_read_sig, inter_init_mw=3e3, inter_mw_read=200, pre_read=50,
+                           inter_readout=200, inter_period=200, N: int = 100000, *args, **kwargs):
+        """
+        Wave form for single period:
+            asg laser sequence:
+            -------                                                                     ----------
+            |     |                                                                     |        |
+            |     |---------------------------------------------------------------------|        |
+            asg microwave channel:
+                    ---         ----         ----         ----         ----         ---
+                    | | (<--->) |  | (<--->) |  | (<--->) |  | (<--->) |  | (<--->) | |
+            --------| |---------|  |---------|  |---------|  |---------|  |---------| |-----------
+            asg tagger acquisition channel:
+                                                                                        ---  ---
+                                                                                        | |  | |
+            ----------------------------------------------------------------------------| |--| |--
+        All units for the parameters is 'ns'
+        :param t_init: time for laser initialization
+        :param t_read_sig: time span for fluorescence signal readout
+                            while t_read_ref is designed as the same value of t_read_sign if with_ref is True
+        :param inter_init_mw: time interval between laser initialization and MW operation pulses, e.g. 1000
+        :param inter_mw_read: time interval between MW operation and readout laser pulses
+        :param pre_read: previous time interval before Tagger readout and after laser readout pulses
+        :param inter_readout: time span for interval
+        :param inter_period: interval between two neighbor periods, e.g. 200
+        :param N: number of ASG operation periods for each detection point
+        """
+        t_mw_half_pi = self.pi_pulse['time'] / 2 / C.nano  # pi/2 pulse time duration, s --> ns
+        self._cache = {
+            't_init': t_init,
+            't_mw_half_pi': t_mw_half_pi,
+            't_read_sig': t_read_sig,
+            'inter_init_mw': inter_init_mw,
+            'inter_mw_read': inter_mw_read,
+            'pre_read': pre_read,
+            'inter_readout': inter_readout,
+            'inter_period': inter_period,
+            'N': N,
+        }
+        self._asg_conf['N'] = N
+        if self.with_ref:
+            self.two_pulse_readout = True
+        self.two_pulse_readout = False

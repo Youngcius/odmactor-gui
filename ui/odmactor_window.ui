@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1512</width>
-    <height>1188</height>
+    <height>1100</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,8 +38,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>517</width>
-          <height>1025</height>
+          <width>484</width>
+          <height>937</height>
          </rect>
         </property>
         <attribute name="label">
@@ -969,8 +969,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>517</width>
-          <height>1025</height>
+          <width>477</width>
+          <height>996</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1189,9 +1189,37 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QRadioButton" name="radioButtonPulseODMRRelaxation">
+                  <widget class="QRadioButton" name="radioButtonODMRRelaxation">
                    <property name="text">
                     <string>T1 relaxation</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_24">
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonODMRHahnEcho">
+                   <property name="text">
+                    <string>Hahn echo</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioButtonODMRHighOrderDD">
+                   <property name="text">
+                    <string>High-order DD</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="spinBoxODMRDecouplingOrder">
+                   <property name="suffix">
+                    <string>(Order)</string>
+                   </property>
+                   <property name="prefix">
+                    <string/>
                    </property>
                   </widget>
                  </item>
@@ -1206,16 +1234,6 @@
                    </property>
                    <property name="checked">
                     <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_32">
-                   <property name="text">
-                    <string>Unit</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -1244,6 +1262,16 @@
                      <string>ns</string>
                     </property>
                    </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_32">
+                   <property name="text">
+                    <string>Unit</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -1574,8 +1602,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>517</width>
-          <height>1025</height>
+          <width>484</width>
+          <height>937</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2257,9 +2285,7 @@
   <tabstop>groupBoxODMRTime</tabstop>
   <tabstop>radioButtonODMRRabi</tabstop>
   <tabstop>radioButtonODMRRamsey</tabstop>
-  <tabstop>radioButtonPulseODMRRelaxation</tabstop>
-  <tabstop>checkBoxODMRTimeScanning</tabstop>
-  <tabstop>comboBoxODMRTimeUnit</tabstop>
+  <tabstop>radioButtonODMRRelaxation</tabstop>
   <tabstop>doubleSpinBoxODMRTimeStart</tabstop>
   <tabstop>doubleSpinBoxODMRTimeEnd</tabstop>
   <tabstop>doubleSpinBoxODMRTimeStep</tabstop>

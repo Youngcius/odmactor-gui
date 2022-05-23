@@ -22,7 +22,7 @@ from utils.sequence import sequences_to_figure
 timeUnitDict = {'s': 1, 'ms': C.milli, 'us': C.micro, 'ns': C.nano, 'ps': C.pico}
 freqUnitDict = {'Hz': 1, 'KHz': C.kilo, 'MHz': C.mega, 'GHz': C.giga}
 frequencyDomainModes = ['CW', 'Pulse']
-timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation']
+timeDomainModes = ['Ramsey', 'Rabi', 'Relaxation', 'Hahn', 'DD']
 schedulerModes = frequencyDomainModes + timeDomainModes
 
 plt.style.use('seaborn-pastel')
@@ -487,6 +487,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             tagger_ttl=1 if self.ui.checkBoxASGTaggerTTL.isChecked() else 0,
         )
         self.schedulers[self.schedulerMode].use_lockin = self.useLockin
+        self.schedulers[self.schedulerMode].order = self.ui.spinBoxODMRDecouplingOrder.value()  # PI pulse number for DD
 
         if self.schedulerMode == 'CW':
             period = max(self.odmrSeqConfig['laserInit'], self.odmrSeqConfig['microwaveTime'])
@@ -510,8 +511,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.sequences = self.schedulers[self.schedulerMode].sequences
         else:
             self.sequences = self.schedulers[self.schedulerMode].sequences_no_sync  # not plot sync seqs
-        print('==' * 20)
-        print(self.sequences)
         self.feedSequencesToTabkeWidget()
         self.updateSequenceChart()
         self.asg.load_data(self.sequences)
@@ -555,7 +554,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         else:
             self.timerODMRTime.start()
 
-
     def configureFrequencyDomainDetecting(self):
         """
         Start frequency-domain ODMR detecting experiments, i.e., CW or Pulse
@@ -570,7 +568,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     def configureTimeDomainDetecting(self):
         """
-        Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
+        Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation, ect.
         """
         unit_time = timeUnitDict[self.ui.comboBoxODMRTimeUnit.currentText()]
         time_start = self.ui.doubleSpinBoxODMRTimeStart.value() * unit_time / C.nano
@@ -659,13 +657,31 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             except:
                 self.labelInstrStatus.setText(color_str('Relaxation Scheduler: not ready'))
 
+    @pyqtSlot(bool)
+    def on_radioButtonODMRHahnEcho_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('Hahn')
+                self.labelInstrStatus.setText('Hahn Echo Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('Hahn echo Scheduler: not ready'))
+
+    @pyqtSlot(bool)
+    def on_radioButtonODMRHighOrderDD_clicked(self, checked):
+        if checked:
+            try:
+                self.connectScheduler('DD')
+                self.labelInstrStatus.setText('High-order dynamical decoupling Scheduler: ready')
+            except:
+                self.labelInstrStatus.setText(color_str('High-order dynamical decoupling Scheduler: not ready'))
+
     ###########################################
     # Photon count configuration
     ################
     @pyqtSlot(bool)
     def on_pushButtonPhotonCountOnOff_clicked(self, checked):
         """
-        Start to count using Time Tagger of Lockin Amplifier
+        Start to count using Time Tagger of Lock-in Amplifier
         :param checked: if True, reload parameters to start counting; otherwise, stop counting
         """
         if checked:
@@ -994,7 +1010,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.labelInstrStatus.setText(color_str('Data fitting: no data to fit'))
 
     ###########################################
-    # Time-domain measurement panel (Ramsey, Rabi, Relaxation)
+    # Time-domain measurement panel (Ramsey, Rabi, Relaxation, Hahn, DD)
     ################
     @pyqtSlot()
     def on_pushButtonODMRTimeInterrupt_clicked(self):
