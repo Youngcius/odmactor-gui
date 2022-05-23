@@ -45,9 +45,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         self.initInstruments()
         self.checkInstruments()
 
-        # fetch parameters from initial UI
-        self.fetchParameters()
-
         # initialize data variables
         self.schedulers = {
             mode: getattr(scheduler, mode + 'Scheduler')(
@@ -55,6 +52,11 @@ class OdmactorGUI(QtWidgets.QMainWindow):
                 epoch_omit=5, use_lockin=self.useLockin
             ) for mode in schedulerModes
         }
+
+        # fetch parameters from initial UI
+        self.fetchParameters()
+
+
 
         # photon count config (tagger counter measurement class)
         self.updatePhotonCountConfig()
@@ -189,7 +191,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         if self.ui.comboBoxMicrowavePiPulsePowerUnit.currentText() == 'mW':
             self.piPulse['power'] = utils.mW_to_dBm(self.piPulse['power'])
 
-        self.schedulers[self.schedulerMode].pi_pulse['freqs'] = self.piPulse['frequency']
+        self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
         self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
         self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
 
@@ -386,7 +388,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot(float)
     def on_doubleSpinBoxMicrowavePiPulseFrequency_valueChanged(self, freq):
         self.piPulse['frequency'] = freq * freqUnitDict[self.ui.comboBoxMicrowavePiPulseFrequencyUnit.currentText()]
-        self.schedulers[self.schedulerMode].pi_pulse['freqs'] = self.piPulse['frequency']
+        self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
 
     @pyqtSlot(float)
     def on_doubleSpinBoxMicrowavePiPulsePower_valueChanged(self, power):
@@ -545,7 +547,6 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         # conduct ODMR scheduling and update real-time chart
         t = threading.Thread(target=self.schedulers[self.schedulerMode].run_scanning)
         t.start()
-
         if self.ui.groupBoxODMRFrequency.isChecked():
             self.timerODMRFrequency.start()
         else:
@@ -568,7 +569,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         Start time-domain ODMR detecting experiments, i.e., Ramsey, Rabi, Relaxation
         """
         # configure pi pulse
-        self.schedulers[self.schedulerMode].pi_pulse['freqs'] = self.piPulse['frequency']
+        self.schedulers[self.schedulerMode].pi_pulse['freq'] = self.piPulse['frequency']
         self.schedulers[self.schedulerMode].pi_pulse['power'] = self.piPulse['power']
         self.schedulers[self.schedulerMode].pi_pulse['time'] = self.piPulse['duration']
 
