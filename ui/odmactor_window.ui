@@ -38,7 +38,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>533</width>
+          <width>521</width>
           <height>874</height>
          </rect>
         </property>
@@ -232,7 +232,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePiPulseFrequency"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePiPulseFrequency">
+                   <property name="maximum">
+                    <double>999.990000000000009</double>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QComboBox" name="comboBoxMicrowavePiPulseFrequencyUnit">
@@ -273,7 +277,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePiPulseDuration"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePiPulseDuration">
+                   <property name="maximum">
+                    <double>999.990000000000009</double>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QComboBox" name="comboBoxMicrowavePiPulseDurationUnit">
@@ -306,10 +314,20 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePiPulsePower"/>
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxMicrowavePiPulsePower">
+                   <property name="minimum">
+                    <double>-50.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>30.000000000000000</double>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QComboBox" name="comboBoxMicrowavePiPulsePowerUnit">
+                   <property name="currentIndex">
+                    <number>0</number>
+                   </property>
                    <item>
                     <property name="text">
                      <string>dBm</string>
@@ -951,7 +969,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>533</width>
+          <width>521</width>
           <height>996</height>
          </rect>
         </property>
@@ -1505,8 +1523,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>521</width>
+          <height>667</height>
          </rect>
         </property>
         <attribute name="label">
