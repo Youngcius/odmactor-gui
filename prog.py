@@ -234,6 +234,10 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
         # table widget
         # self.ui.tableWidgetSequence.horizontalHeader().setStyleSheet('QHeaderView::section{background:lightblue;}')
+        self._cache = {
+            'table_origin_row_count': self.ui.tableWidgetSequence.rowCount(),
+            'table_origin_column_count': self.ui.tableWidgetSequence.columnCount()
+        }
         for i in range(self.ui.tableWidgetSequence.rowCount()):
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 item = QtWidgets.QTableWidgetItem(str(0))
@@ -789,6 +793,16 @@ class OdmactorGUI(QtWidgets.QMainWindow):
             self.sequences = self.asg.normalize_data(self.sequences)
 
     def feedSequencesToTabkeWidget(self):
+        max_len = max(map(len, self.sequences))
+        if max_len > self.ui.tableWidgetSequence.columnCount():
+            self.ui.tableWidgetSequence.setColumnCount(max_len + max_len % 2)
+            self.ui.tableWidgetSequence.setHorizontalHeaderLabels(['High', 'Low'] * (max_len + max_len%2))
+        for i in range(self.ui.tableWidgetSequence.rowCount()):
+            for j in range(self.ui.tableWidgetSequence.columnCount()):
+                item = QtWidgets.QTableWidgetItem(str(0))
+                item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                self.ui.tableWidgetSequence.setItem(i, j, item)
+                print('===== add columns =====')
         for i, seq in enumerate(self.sequences):
             for j, val in enumerate(seq):
                 self.ui.tableWidgetSequence.item(i, j).setText(str(val))
@@ -965,15 +979,22 @@ class OdmactorGUI(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_pushButtonASGClear_clicked(self):
+        """
+        Clear data of the table widget and corresponding figure, the `sequences` data field; set column to origin number
+        """
         for i in range(self.ui.tableWidgetSequence.rowCount()):
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 self.ui.tableWidgetSequence.item(i, j).setText(str(0))
+        self.ui.tableWidgetSequence.setRowCount(self._cache['table_origin_row_count'])
+        self.ui.tableWidgetSequence.setColumnCount(self._cache['table_origin_column_count']) # TODO: 5.23 modified
         self.sequences = [[0, 0] for _ in range(8)]
         self.updateSequenceChart()
 
     @pyqtSlot()
     def on_pushButtonASGAdd_clicked(self):
-        # self.ui.tableWidgetSequence add 2 columns
+        """
+        Add additional two columns on the table widget
+        """
         rowCount = self.ui.tableWidgetSequence.rowCount()
         originColumnCount = self.ui.tableWidgetSequence.columnCount()
         self.ui.tableWidgetSequence.setColumnCount(originColumnCount + 2)
