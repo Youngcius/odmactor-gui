@@ -571,7 +571,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonODMRSaveData_clicked(self):
         # self.counter.getData()
-        # pass
+        # TODO: implement this
         self.labelInstrStatus.setText('Saved in {}'.format(self.schedulers[self.schedulerMode].output_dir))
 
     # ODMR cheduler mode
