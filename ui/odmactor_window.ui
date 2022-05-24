@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1512</width>
-    <height>1100</height>
+    <height>1081</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,15 +31,15 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageGeneric">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
-          <height>937</height>
+          <width>517</width>
+          <height>918</height>
          </rect>
         </property>
         <attribute name="label">
@@ -285,6 +285,9 @@
                  </item>
                  <item>
                   <widget class="QComboBox" name="comboBoxMicrowavePiPulseDurationUnit">
+                   <property name="currentIndex">
+                    <number>2</number>
+                   </property>
                    <item>
                     <property name="text">
                      <string>ms</string>
@@ -969,7 +972,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>477</width>
+          <width>496</width>
           <height>996</height>
          </rect>
         </property>
@@ -1179,6 +1182,9 @@
                    <property name="text">
                     <string>Rabi</string>
                    </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -1221,6 +1227,9 @@
                    <property name="prefix">
                     <string/>
                    </property>
+                   <property name="value">
+                    <number>1</number>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -1234,6 +1243,16 @@
                    </property>
                    <property name="checked">
                     <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_32">
+                   <property name="text">
+                    <string>Unit</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -1262,16 +1281,6 @@
                      <string>ns</string>
                     </property>
                    </item>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_32">
-                   <property name="text">
-                    <string>Unit</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -1602,8 +1611,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>484</width>
-          <height>937</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1613,7 +1622,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tabPhotonCount">
         <attribute name="title">
@@ -2123,7 +2132,7 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_16">
             <item row="0" column="0">
-             <widget class="QPushButton" name="pushButtonODMRTimeInterreupt">
+             <widget class="QPushButton" name="pushButtonODMRTimeInterrupt">
               <property name="text">
                <string>Interrupt</string>
               </property>
@@ -2330,7 +2339,7 @@
   <tabstop>pushButtonODMRFrequencyFit</tabstop>
   <tabstop>pushButton_8</tabstop>
   <tabstop>radioButtonODMRFrequencyShowContrast</tabstop>
-  <tabstop>pushButtonODMRTimeInterreupt</tabstop>
+  <tabstop>pushButtonODMRTimeInterrupt</tabstop>
   <tabstop>pushButtonODMRTimeSave</tabstop>
   <tabstop>pushButtonODMRTimeFit</tabstop>
   <tabstop>pushButton_12</tabstop>
