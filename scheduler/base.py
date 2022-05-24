@@ -168,6 +168,14 @@ class Scheduler(abc.ABC):
                 self.tagger = tt.createTimeTagger()
 
     def set_asg_sequences_ttl(self, laser_ttl=None, mw_ttl=None, apd_ttl=None, tagger_ttl=None):
+        """
+        Set the ASG sequences TTL high-effective or low-effective
+        1 means high-effective, 0 meas low-effective
+        :param laser_ttl: TTL effectiveness of Laser channel sequence
+        :param mw_ttl:  TTL effectiveness of MW channel sequence
+        :param apd_ttl: TTL effectiveness of APD channel sequence
+        :param tagger_ttl: TTL effectiveness of Tagger sequence
+        """
         if laser_ttl is not None:
             self.laser_ttl = laser_ttl
         if mw_ttl is not None:
@@ -227,7 +235,6 @@ class Scheduler(abc.ABC):
 
     def configure_tagger_counting(self, apd_channel: int = None, asg_channel: int = None, reader: str = 'counter'):
         """
-        需要在 config_odmr_seq 之后调用 (依赖于 N)
         Configure counter building on APD and Time Tagger
         Configure asg-channel and apd-channel for ASG. For Swabian Time Tagger, channel number range: [1, 8].
         :param apd_channel: APD channel number
