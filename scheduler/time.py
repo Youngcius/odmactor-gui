@@ -1,7 +1,7 @@
 """
 Time-domain ODMR detecting classes
 ---
-1. Ramsey detecction
+1. Ramsey detecting
     1) configure pi/2 pulse
     2) scanning free precession time
 2. Rabi oscillation
@@ -11,6 +11,12 @@ Time-domain ODMR detecting classes
 3. T1 Relaxometry
     1) configure pi pulse
     2) scanning free precession time
+4. Hahn ehco
+    1) configure pi/2 & pi pulses
+    2) scanning spin evolution time
+5. High-order dynamic decoupling
+    1) configure pi/2 & pi pulses
+    2) scanning spin evolution time
 """
 
 from .base import TimeDomainScheduler

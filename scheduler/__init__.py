@@ -8,3 +8,4 @@ from .frequency import CWScheduler, PulseScheduler
 from .time import RamseyScheduler, RabiScheduler, RelaxationScheduler
 from .time import HahnEchoScheduler, HighDecouplingScheduler
 from .spin import SpinControlScheduler
+from .customization import CustomizedScheduler

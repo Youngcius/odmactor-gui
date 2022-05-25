@@ -31,13 +31,11 @@ GUI-version desktop application of [Odmactor](https://github.com/Youngcius/odmac
         1) initialize spin to excited state using calibrated MW $\pi$ pulse
         2) wait a time interval $\tau$
         3) readout final spin state (population)
-
-
-3. Dynamical Decoupling<br>
-   *Currently not implemented*
     - Hahn echo
-    - High-order Dynamical Decoupling
-4. Spin manipulation<br>
+      Sequences are similar with those for Ramsey detecting, while there is an additional MW π pulse between the two π/2 pulses.
+    - High-order dynamical decoupling
+      Sequences are similar with those for Ramsey detecting, while there are N additional MW π pulse between the two π/2 pulses.
+3. Spin manipulation<br>
    *Currently not implemented*
 
 The above specific scheduling methods could be abstracted into different detection sequences in experiments. They are
@@ -61,6 +59,8 @@ of them are like the following figure.
 
 ![usage-sequence](./asset/figure/usage-sequence.png)
 
+
+![usage-spectrum](./asset/figure/usage-spectrum.png)
 
 ## Hardware support
 
@@ -115,7 +115,7 @@ NI DAQ device is used when using lock-in detecting mode instead APD with Time Ta
 
 ### ODMR scheduling SDK
 
-For detailed operation guidance please reach to the software [user manual](./asset/doc/manual.md). 
+For detailed operation guidance please reach to the software [user manual](./asset/doc/manual.docx). 
 
 The core scheduling algorithms of this software is based on another open-source SDK project. More details can be found
 on the corresponding [GitHub Page](https://github.com/Youngcius/odmactor).
@@ -136,8 +136,3 @@ more people can use or modify it. If you have more ideas or suggestions, welcome
 ### Copyright and License
 
 Odmactor uses the [MIT license](LICENSE).
-
-
-
-
-
