@@ -39,7 +39,7 @@ class CustomizedScheduler(Scheduler):
             raise ValueError('unsupported mw_control parameter')
 
         self._start_device()
-        time.sleep(0.5)  # 先让激光和微波开几秒
+        time.sleep(0.5)  # let Laser and MW firstly start for several seconds
         time.sleep(self.asg_dwell)
         counts = self.counter.getData().ravel().tolist()
         self.stop()
