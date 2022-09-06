@@ -1,7 +1,7 @@
 """
 Spin manipulation classes
 ---
-
+TODO: implement it if necessary
 """
 
 from .base import Scheduler
