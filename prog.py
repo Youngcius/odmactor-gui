@@ -796,7 +796,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         max_len = max(map(len, self.sequences))
         if max_len > self.ui.tableWidgetSequence.columnCount():
             self.ui.tableWidgetSequence.setColumnCount(max_len + max_len % 2)
-            self.ui.tableWidgetSequence.setHorizontalHeaderLabels(['High', 'Low'] * (max_len + max_len%2))
+            self.ui.tableWidgetSequence.setHorizontalHeaderLabels(['High', 'Low'] * (max_len + max_len % 2))
         for i in range(self.ui.tableWidgetSequence.rowCount()):
             for j in range(self.ui.tableWidgetSequence.columnCount()):
                 item = QtWidgets.QTableWidgetItem(str(0))

@@ -1,5 +1,5 @@
-# odmactor-gui
-GUI-version desktop application of [Odmactor](https://github.com/Youngcius/odmactor), building on PyQt5.
+# Odmactor-GUI
+GUI-version desktop application of [Odmactor](https://github.com/Youngcius/odmactor) (ODMR Actor), building on PyQt5.
 
 
 ## Design Method
@@ -50,17 +50,18 @@ of them are like the following figure.
 
 ![](./asset/figure/odmr-magnet.png)
 
-### Operation example
+### Operation guidance
 
+For detailed operation guidance please reach to the software [user manual](./asset/doc/manual.docx).
 
-![usage-count](./asset/figure/usage-count.png)
+Herein some illustrations are for a glance.
 
+![](./asset/figure/usage-profile.png)
 
+![](./asset/figure/usage-sequence.png)
 
-![usage-sequence](./asset/figure/usage-sequence.png)
+![](./asset/figure/usage-spectrum.png)
 
-
-![usage-spectrum](./asset/figure/usage-spectrum.png)
 
 ## Hardware support
 
@@ -113,9 +114,7 @@ NI DAQ device is used when using lock-in detecting mode instead APD with Time Ta
 
 ## Addition
 
-### ODMR scheduling SDK
-
-For detailed operation guidance please reach to the software [user manual](./asset/doc/manual.docx). 
+### ODMR scheduling SDK 
 
 The core scheduling algorithms of this software is based on another open-source SDK project. More details can be found
 on the corresponding [GitHub Page](https://github.com/Youngcius/odmactor).
