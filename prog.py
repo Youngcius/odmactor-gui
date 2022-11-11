@@ -278,7 +278,7 @@ class OdmactorGUI(QtWidgets.QMainWindow):
         txt = 'Version:\t {}\n'.format('1.0.0')
         txt += 'Date:\t {}\n'.format('March, 2022')
         txt += 'Author:\t {}\n'.format('Zhaohui Yang')
-        txt += 'Email:\t {}\n'.format('zhy@email.arizona.edu')
+        txt += 'Email:\t {}\n'.format('zhy@arizona.edu')
         txt += 'Brief:\t {}\n'.format('A soft-hardware-integrated operation software for ODMR and spin manipulation. '
                                       'Anyone is welcome to contact the author!')
         QtWidgets.QMessageBox.about(self, 'Software Information', txt)
